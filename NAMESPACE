@@ -1,0 +1,7 @@
+useDynLib(shikken)
+
+import(methods)
+
+export(
+  shogunVersion
+)
