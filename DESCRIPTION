@@ -10,8 +10,8 @@ Description: The shikken library provides an idiomatic S4 interface to
   This library does not use SWIG. As a result, there is likely functionality
   missing from this interface that is available in the "full" shogun toolbox.
   The shogun toolbox provides its own R interfaces (r and r_modular) which you
-  can try if there is some functionality in shogun that is missing from this
-  library.
+  can try if there is some functionality in shogun that you require and is
+  missing from this library.
   .
   The shogun toolbox is licensed under the GPLv3 with the exception of
   some files from svmlight, which are copyright Torsten Joachimns and are
