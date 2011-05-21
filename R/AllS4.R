@@ -1,0 +1,1 @@
+setClass("Kernel", representation("function", kpar="list"))
