@@ -84,6 +84,7 @@ CGUIClassifier::CGUIClassifier(CSGInterface* ui_)
 	svm_max_qpsize=1000;
 	mkl_norm=1;
 	ent_lambda=0;
+	mkl_block_norm=4;
 	svm_C1=1;
 	svm_C2=1;
 	C_mkl=0;
@@ -534,6 +535,7 @@ bool CGUIClassifier::train_mkl()
 	mkl->set_mkl_epsilon(svm_weight_epsilon);
 	mkl->set_mkl_norm(mkl_norm); 
 	mkl->set_elasticnet_lambda(ent_lambda);
+	mkl->set_mkl_block_norm(mkl_block_norm);
 	mkl->set_C_mkl(C_mkl);
 	mkl->set_interleaved_optimization_enabled(mkl_use_interleaved);
 
@@ -712,6 +714,11 @@ bool CGUIClassifier::train_krr()
 	if (trainlabels->get_num_labels() != num_vec)
 		SG_ERROR("Number of train labels (%d) and training vectors (%d) differs!\n", trainlabels->get_num_labels(), num_vec);
 
+
+	// Set training labels and kernel
+	krr->set_labels(trainlabels);
+	krr->set_kernel(kernel);
+
 	bool result=krr->train();
 	return result;
 #else
@@ -801,71 +808,6 @@ bool CGUIClassifier::train_wdocas()
 	result=((CWDSVMOcas*) classifier)->train();
 
 	return result;
-}
-
-bool CGUIClassifier::test(char* filename_out, char* filename_roc)
-{
-	FILE* file_out=stdout;
-	FILE* file_roc=NULL;
-
-	if (filename_out)
-	{
-		file_out=fopen(filename_out, "w");
-		if (!file_out)
-			SG_ERROR("Could not open file %s.\n", filename_out);
-
-		if (filename_roc)
-		{
-			file_roc=fopen(filename_roc, "w");
-
-			if (!file_roc)
-				SG_ERROR("Could not open file %s.\n", filename_roc);
-		}
-	}
-
-	CLabels* testlabels=ui->ui_labels->get_test_labels();
-	CFeatures* trainfeatures=ui->ui_features->get_train_features();
-	CFeatures* testfeatures=ui->ui_features->get_test_features();
-	SG_DEBUG("I:training: %ld examples each %ld features\n", ((CSimpleFeatures<float64_t>*) trainfeatures)->get_num_vectors(), ((CSimpleFeatures<float64_t>*) trainfeatures)->get_num_features());
-	SG_DEBUG("I:testing: %ld examples each %ld features\n", ((CSimpleFeatures<float64_t>*) testfeatures)->get_num_vectors(), ((CSimpleFeatures<float64_t>*) testfeatures)->get_num_features());
-
-	if (!classifier)
-		SG_ERROR("No svm available.\n");
-	if (!trainfeatures)
-		SG_ERROR("No training features available.\n");
-	if (!testfeatures)
-		SG_ERROR("No test features available.\n");
-	if (!testlabels)
-		SG_ERROR("No test labels available.\n");
-	if (!ui->ui_kernel->is_initialized())
-		SG_ERROR("Kernel not initialized.\n");
-
-	SG_INFO("Starting svm testing.\n");
-	((CKernelMachine*) classifier)->set_labels(testlabels);
-	((CKernelMachine*) classifier)->set_kernel(ui->ui_kernel->get_kernel());
-	((CKernelMachine*) classifier)->set_batch_computation_enabled(svm_use_batch_computation);
-
-	CLabels* predictions= classifier->classify();
-
-	int32_t len=0;
-	float64_t* output= predictions->get_labels(len);
-	int32_t total=testfeatures->get_num_vectors();
-	int32_t* label=testlabels->get_int_labels(len);
-	ASSERT(label);
-
-	SG_DEBUG("len:%d total:%d\n", len, total);
-	ASSERT(len==total);
-
-	ui->ui_math->evaluate_results(output, label, total, file_out, file_roc);
-
-	if (file_roc)
-		fclose(file_roc);
-	if ((file_out) && (file_out!=stdout))
-		fclose(file_out);
-
-	delete[] output;
-	delete[] label;
-	return true;
 }
 
 bool CGUIClassifier::load(char* filename, char* type)
@@ -1022,12 +964,22 @@ bool CGUIClassifier::set_svm_mkl_parameters(
 
 bool CGUIClassifier::set_elasticnet_lambda(float64_t lambda)
 {
-  if (lambda<0 || lambda>1) {
+  if (lambda<0 || lambda>1)
     SG_ERROR("0 <= ent_lambda <= 1\n");
-  }
+
   ent_lambda = lambda;
   return true;
 }
+
+bool CGUIClassifier::set_mkl_block_norm(float64_t mkl_bnorm)
+{
+  if (mkl_bnorm<1)
+    SG_ERROR("1 <= mkl_block_norm <= inf\n");
+
+  mkl_block_norm=mkl_bnorm;
+  return true;
+}
+
 
 bool CGUIClassifier::set_svm_C(float64_t C1, float64_t C2)
 {
@@ -1567,6 +1519,11 @@ bool CGUIClassifier::set_solver(char* solver)
 	{
 		SG_INFO("Using DIRECT solver\n");
 		s=ST_DIRECT;
+	}
+	else if (strncmp(solver,"BLOCK_NORM", 9)==0)
+	{
+		SG_INFO("Using BLOCK_NORM solver\n");
+		s=ST_BLOCK_NORM;
 	}
 	else if (strncmp(solver,"ELASTICNET", 10)==0)
 	{

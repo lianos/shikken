@@ -30,8 +30,6 @@ class CGUIClassifier : public CSGObject
 		bool new_classifier(char* name, int32_t d=6, int32_t from_d=40);
 		/** set maximum train time */
 		bool set_max_train_time(float64_t max);
-		/** test classifier */
-		bool test(char* filename_out=NULL, char* filename_roc=NULL);
 		/** load classifier from file */
 		bool load(char* filename, char* type);
 		bool save(char* param);
@@ -82,6 +80,7 @@ class CGUIClassifier : public CSGObject
 		bool set_svr_tube_epsilon(float64_t tube_epsilon);
 		bool set_svm_mkl_parameters(
 			float64_t weight_epsilon, float64_t C_mkl, float64_t mkl_norm);
+		bool set_mkl_block_norm(float64_t mkl_bnorm);
 		bool set_elasticnet_lambda(float64_t lambda);
 		bool set_svm_precompute_enabled(int32_t precompute);
 
@@ -128,6 +127,7 @@ class CGUIClassifier : public CSGObject
 		int32_t svm_bufsize;
 		int32_t svm_max_qpsize;
 		float64_t mkl_norm;
+		float64_t mkl_block_norm;
 		float64_t ent_lambda;
 		float64_t svm_weight_epsilon;
 		float64_t svm_epsilon;
