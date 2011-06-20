@@ -33,6 +33,5 @@ createGaussianKernel <- function(x, width=1, ...) {
 createStringKernel <- function(x, ...) {
   if (is.character(x) && length(x) == 1) {
     ## This is a file
-    create
   }
 }

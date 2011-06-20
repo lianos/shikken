@@ -39,22 +39,18 @@ void r_cancel_computations(bool &delayed, bool &immediately)
     R_CheckUserInterrupt();
 }
 
-
-extern "C" {
-    
-SEXP shogun_version() {
+RcppExport SEXP shogun_version() {
     Rcpp::wrap(SHOGUN_VERSION);
 }
 
-SEXP init_shikken() {
+RcppExport SEXP init_shikken() {
     shogun::init_shogun(&r_print_message, &r_print_warning, &r_print_error,
                         &r_cancel_computations);
     
     return R_NilValue;
 }
 
-SEXP exit_shikken() {
+RcppExport SEXP exit_shikken() {
     shogun::exit_shogun();
     return R_NilValue;
-}
 }
