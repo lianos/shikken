@@ -22,8 +22,8 @@ SEXP create_simple_features(SEXP data_, SEXP dims_) {
   CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();
   features->set_feature_matrix(matrix, dims[1], dims[0]);
   
-  // TODO: Return an externalptr to features
-  return R_NilValue;
+  Rcpp::XPtr<CSimpleFeatures> ptr(features);
+  return ptr;
 }
 
 

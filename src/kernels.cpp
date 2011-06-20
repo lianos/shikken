@@ -2,25 +2,20 @@
 
 extern "C" {
 
-SEXP create_gaussian_kernel(SEXP width_, SEXP features_, SEXP cache_size_) {
-  Rcpp::NumericVector width(width_);˝
-  // TODO: Write a wrapper to convert ShogunFeatures SEXP to a C++ thing
-  // ShogunFeatures features(features_);
-  Rcpp::NumericVector features(features_);
-  Rcpp::NumericVector cache_size(cache_size_);
+SEXP create_gaussian_kernel(SEXP features_, SEXP width_, SEXP cache_size_) {
+  // Rcpp::NumericVector features(features_);
+  // Rcpp::NumericVector w(width_);
+  // Rcpp::NumericVector cs(cache_size_);
+  Rcpp::XPtr<CFeatures> fptr(feautres_);
+  double width = Rcpp::as<double>(width_);
+  double cache_size = Rcpp::as<double>(cache_size_);
   
-  // There is definietly an "easy" way to convert NumericVector
-  // to an ordinary double*
-  float64_t* kfeatures = new float64_t[features.size()];
-  for (int32_t i = 0; i < features.size(); i++) {
-    kfeatures[i] = values[i];
-  }
+  // CGaussianKernel* kernel = new CGaussianKernel(cache_size[0], width[0]);
+  CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
+  kernel->init(fptr, fptr); // kernel->init(features, features);
   
-  CGaussianKernel* kernel = new CGaussianKernel(cache_size[0], width[0]);
-  kernel->init(kfeatures, kfeatures); // kernel->init(features, features);
-  
-  // TODO: Return an external ptr to kernel
-  return R_NilValue;
+  Rcpp::XPtr<CGaussianKernel> ptr(kernel);
+  return ptr;
 }
 
 }

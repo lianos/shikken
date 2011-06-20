@@ -27,4 +27,5 @@ on the "C" side of things and return a pointer to this back to R.
         typedef void (*R_CFinalizer_t)(SEXP);
         void R_RegisterCFinalizerEx(SEXP s, R_CFinalizer_t fun, Rboolean onexit);
 
-* Rcpp has an XPtr<T> type you will probably want to use.
+* Rcpp has an XPtr<T> type you will probably want to use. Read through
+  Rcpp-modules vignette.
