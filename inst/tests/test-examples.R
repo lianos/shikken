@@ -1,6 +1,6 @@
 context("Shogun Examples")
 
-test_that("gaussian 'dummy' examples transates", {
+test_that("gaussian 'dummy' examples translates correctly", {
   ## http://www.shogun-toolbox.org/doc/developer_tutorial.html
   set = subset(iris, Species == 'setosa')
   ver = subset(iris, Species == 'versicolor')

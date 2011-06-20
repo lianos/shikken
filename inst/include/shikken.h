@@ -7,6 +7,9 @@
 #include "shogun/lib/common.h"
 #include "shogun/base/init.h"
 
+#include "kernels.h"
+#include "features.h"
+
 #define SHOGUN_VERSION "0.11-dev"
 
 void r_print_message(FILE* target, const char* str);
