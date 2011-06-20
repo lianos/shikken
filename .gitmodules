@@ -1,0 +1,3 @@
+[submodule "inst/include/shogun-toolbox"]
+	path = inst/include/shogun-toolbox
+	url = git@github.com:lianos/shogun.git
