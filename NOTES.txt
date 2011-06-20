@@ -16,9 +16,14 @@ individually and not just call one "monster" function. In order to do so,
 a `createKernel` type of function will need to build a shogun/Kernel object
 on the "C" side of things and return a pointer to this back to R.
 
-* Section 5.13 of the R-exts document introduces ExternalPtr stuff.
+* When creating these "modular" shogun objects, I think we have to call
+  SG_REF(object) so they are not disposed. Similarly, when the object is
+  R-garbage collected, ensure that the method invoked on GC (see below)
+  must call SG_UNREF(object).
 
 * The R class will have to have a slot of "externalptr" type.
+  Section 5.13 of the R-exts document introduces `ExternalPtr`.
+  
     * You can register finalizers to external pointers that is run when
       it is garbage collected. This can be R or C code, and the various 
       interfaces are, respectively:
