@@ -1,6 +1,6 @@
-setClass("Kernel", contains="VIRTUAL",
+setClass("Kernel", contains="ShikkenObject",
          representation=representation(
-           ptr="externalptr",
+           kernel.sg.ptr="externalptr",
            params="list"))
 
 ## I am only mimicking the class hierarchy as it's laid out in the shogun
@@ -24,6 +24,8 @@ createKernel <- function(kernel='linear', params='automatic', scaled=TRUE, ...) 
   if (is.character(kernel)) {
     kernel <- match.arg(kernel, supportedKernels)
   }
+  
+  
 }
 
 createGaussianKernel <- function(x, width=1, ...) {
@@ -34,4 +36,8 @@ createStringKernel <- function(x, ...) {
   if (is.character(x) && length(x) == 1) {
     ## This is a file
   }
+}
+
+kernelFinalizer <- function(object) {
+  .Call("shikken_destroy", )
 }

@@ -20,7 +20,6 @@ BEGIN_RCPP
     for (int32_t i = 0; i < data.size(); i++) {
         matrix[i] = data[i];
     }
-    // float64_t* matrix = NUMERIC_POINTER(data.get_ref());   // ?
     // float64_t* matrix = REAL(data.get_ref());              // ?
     
     CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();

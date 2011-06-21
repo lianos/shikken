@@ -1,6 +1,7 @@
 #ifndef __SHIKKEN_KERNELS_H__
 #define __SHIKKEN_KERNELS_H__
 
+/////////////////////////////////////////////////////////////////////// Imports
 #include <shikken.h>
 
 #include <shogun/kernel/CustomKernel.h>
@@ -10,6 +11,9 @@
 #include <shogun/kernel/StringKernel.h>
 
 #include <shogun/kernel/SparseKernel.h>
+
+
+//////////////////////////////////////////////////////////////// Implementation
 
 // Subclasses of CDotKernel
 //   - GaussianKernel

@@ -11,6 +11,9 @@ For instance, we have to:
  (iv)  Train the SVM
   ...
 
+Overview
+--------
+
 I think to make this as "clean" as possible, we have to build each object
 individually and not just call one "monster" function. In order to do so,
 a `createKernel` type of function will need to build a shogun/Kernel object
@@ -34,3 +37,16 @@ on the "C" side of things and return a pointer to this back to R.
 
 * Rcpp has an XPtr<T> type you will probably want to use. Read through
   Rcpp-modules vignette.
+
+Summary
+-------
+
+Presently, after creating each shikken object, register the `finalize` method
+to destroy all shogun pointers in some automated fashion, eg:
+
+    createKernel <- function(...) {
+      kernel <- .Call("shikken_kernel", ...)
+      ...
+      reg.finalizer(kernel, finalize)
+      kernel
+    }

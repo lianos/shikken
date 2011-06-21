@@ -39,15 +39,26 @@ void r_cancel_computations(bool &delayed, bool &immediately)
     R_CheckUserInterrupt();
 }
 
+RcppExport SEXP dispose_shogun_object(SEXP obj) {
+BEGIN_RCPP
+    Rcpp::XPtr<CSGObject> obj_ptr(obj);
+    SG_UNREF(obj_ptr);
+    return R_NilValue;
+END_RCPP
+}
 RcppExport SEXP shogun_version() {
-    Rcpp::wrap(SHOGUN_VERSION);
+BEGIN_RCPP
+    return Rcpp::wrap(SHOGUN_VERSION);
+END_RCPP
 }
 
 RcppExport SEXP init_shikken() {
+BEGIN_RCPP
     shogun::init_shogun(&r_print_message, &r_print_warning, &r_print_error,
                         &r_cancel_computations);
     
     return R_NilValue;
+END_RCPP
 }
 
 RcppExport SEXP exit_shikken() {

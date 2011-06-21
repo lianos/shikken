@@ -1,0 +1,1 @@
+setClass("Features", contains="ShikkenObject")
