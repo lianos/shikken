@@ -2,9 +2,23 @@ useDynLib(shikken)
 
 import(methods)
 
+importFrom(stats,
+  coef,
+  fitted,
+  na.omit,
+  predict,
+  terms)
+
 exportClasses(
   ShikkenObject,
   
+  ## Machines
+  LearningMachine,
+  KernelMachine,
+  DistanceMachine,
+  SVM,
+  
+  ## Kernels
   Kernel,
   CustomKernel,
   StringKernel,
@@ -14,6 +28,7 @@ exportClasses(
   LinearKernel,
   PolyKernel,
   
+  ## Features
   Features,
   NumericDenseFeatures,
   NumericSparseFeatures,
@@ -23,9 +38,16 @@ exportClasses(
 
 exportMethods(
   SVM,
-  Kernel
+  Kernel,
+  # show,
+  coef, 
+  fitted,
+  # plot, 
+  predict 
 )
 
 export(
-  shogunVersion
+  shogunVersion,
+  createFeatures,
+  createLabels
 )

@@ -1,26 +1,51 @@
 setClass("ShikkenObject", contains="VIRTUAL")
 
-setGeneric("shogunPointers", function(x, ...) standardGeneric("shogunPointers"))
-setMethod("shogunPointers", c(x="ShikkenObject"),
-function(x, ...) {
-  ## Default to returning names of all externptr objects
-  slot.names <- slotNames(x)
-  sg.ptrs <- character()
-  is.ptr <- grep("\\.sg\\.ptr$", slot.names)
-  if (length(is.ptr) > 0) {
-    sg.ptrs <- slot.names[is.ptr]
-  }
-  sg.ptrs
-})
+setClass("Labels", contains="ShikkenObject",
+         representation=representation(
+           sg.ptr='externalptr',
+           labels='character'))
 
-setGeneric("disposeSO", function(x) standardGeneric("disposeSO"))
-setMethod("disposeSO", c(x="ShikkenObject"),
-function(x) {
-  clazz <- class(x)[1]
-  cat("Disposing", clazz, "...\n")
-  for (slot.name in shogunPointers(x)) {
-    ptr <- slot(x, slot.name)
-    cat("  ...", slot.name, "\n")
-    .Call("dispose_shogun_object", ptr)
-  }
-})
+###############################################################################
+## Features
+setClass("Features", contains="ShikkenObject",
+         representation=representation(
+           sg.ptr="externalptr",
+           type='character'))
+setClass("NumericDenseFeatures", contains="Features")
+setClass("NumericSparseFeatures", contains="Features")
+setClass("CombinedFeatures", contains="Features")
+setClass("StringFeatures", contains="Features")
+
+###############################################################################
+## Kernels
+setClass("Kernel", contains="ShikkenObject",
+         representation=representation(
+           sg.ptr="externalptr",
+           params="list",
+           features="Features"))
+
+## I am only mimicking the class hierarchy as it's laid out in the shogun
+## codebase. I'm not sure we need the Kernel vs. DotKernel distinction at
+## the R level.
+setClass("CustomKernel", contains="Kernel")
+setClass("StringKernel", contains="Kernel")
+setClass("CombinedKernel", contains="Kernel")
+
+
+setClass("DotKernel", contains="Kernel")
+setClass("GaussianKernel", contains="DotKernel")
+setClass("LinearKernel", contains="DotKernel")
+setClass("PolyKernel", contains="DotKernel")
+
+###############################################################################
+## Learning Machines
+setClass("LearningMachine", contains="ShikkenObject")
+setClass("KernelMachine", contains="LearningMachine")
+setClass("DistanceMachine", contains="LearningMachine") ## kmeans
+
+setClass("SVM", contains="KernelMachine",
+         representation=representation(
+           sg.ptr="externalptr",
+           kernel="Kernel",
+           labels="Labels",
+           learning.type="character"))

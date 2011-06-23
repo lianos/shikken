@@ -29,8 +29,11 @@ BEGIN_RCPP
     SG_REF(features);
     
     // Rcpp::XPtr<CFeatures> ptr(features, true);
-    rfeatures = R_MakeExternalPtr(features, R_NilValue, R_NilValue);
-    R_RegisterCFinalizer(rfeatures, _dispose_shogun_pointer);
+    // rfeatures = R_MakeExternalPtr(features, R_NilValue, R_NilValue);
+    // R_RegisterCFinalizer(rfeatures, _dispose_shogun_pointer);
+    // return rfeatures;
+    // return wrap_sgobject(features);
+    SK_WRAP(features, rfeatures);
     return rfeatures;
 END_RCPP
 }

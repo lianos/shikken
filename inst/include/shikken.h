@@ -15,9 +15,17 @@ void r_print_warning(FILE* target, const char* str);
 void r_print_error(FILE* target, const char* str);
 void r_cancel_computations(bool &delayed, bool &immediately);
 
-RcppExport void _dispose_shogun_pointer(SEXP ptr);
+/* wrap the (CSGObject *) into a SEXP */
+#define SK_WRAP(o,r) \
+do { \
+    r = R_MakeExternalPtr(o, R_NilValue, R_NilValue); \
+    R_RegisterCFinalizer(r, _dispose_shogun_pointer); \
+} while(0)
+
+void _dispose_shogun_pointer(SEXP ptr);
+RcppExport SEXP shogun_ref_count(SEXP ptr);
 RcppExport SEXP dispose_shogun_pointer(SEXP ptr);
-RcppExport SEXP dispose_shogun_object(SEXP obj);
+
 RcppExport SEXP shogun_version();
 RcppExport SEXP init_shikken();
 RcppExport SEXP exit_shikken();

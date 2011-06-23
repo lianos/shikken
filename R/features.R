@@ -1,29 +1,30 @@
-setClass("Features", contains="ShikkenObject",
-         representation=representation(
-           features.sg.ptr="externalptr",
-           type='character'))
+# setAs("Features", "Features", function(from) from)
+setAs("matrix", "Features", function(from) {
+  ## todo -- check sparsity?
+  as.sparse <- (sum(from == 0) / length(from)) < .6
+  createFeatures(from, spase=as.sparse)
+})
 
-setClass("NumericDenseFeatures", contains="Features")
-setClass("NumericSparseFeatures", contains="Features")
-setClass("CombinedFeatures", contains="Features")
-setClass("StringFeatures", contains="Features")
-
-createFeatures <- function(x, kernel, sparse=FALSE, ...) {
-  stopifnot(is.matrix(x))
-  kernel <- match.arg(kernel, supportedKernels())
+createFeatures <- function(x, sparse=FALSE, ...) {
   if (sparse) {
-    stop("Sparse features not implemented yet")
-    # ext.ptr <- .Call("create_numeric_features_sparse", x, dim(x),
-    #                  PACKAGE="shikken")
-    # obj <- new('NumericSparseFeatures', )
+    density <- 'sparse'
+    class.mod <- 'Sparse'
   } else {
-    ext.ptr <- .Call("create_numeric_features_dense", x, dim(x),
-                     PACKAGE="shikken")
-    obj <- new('NumericDenseFeatures',
-               features.sg.ptr=ext.ptr,
-               type='kernel')
+    density <- 'dense'
+    class.mod <- 'Dense'
   }
   
-  #reg.finalizer(ext.ptr, disposeShogunPointer)
-  obj
+  if (is.numeric(x)) {
+    if (!is.matrix(x)) {
+      stop("matrix is required for numeric features")
+    }
+    fn <- paste('create_numeric_features', density, sep="_")
+    sg.ptr <- .Call(fn, x, dim(x), PACKAGE="shikken")
+    type <- 'numeric'
+    clazz <- paste('Numeric', class.mod, 'Features', sep='')
+  } else {
+    stop("feature creation for nun-numeric features not implemented.")
+  }
+  
+  new(clazz, sg.ptr=sg.ptr, type=type)
 }

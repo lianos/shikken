@@ -18,4 +18,5 @@ test_that("gaussian 'dummy' examples translates correctly", {
 
 test_that("modular pieces work on gaussian example", {
   iris.kernel <- Kernel(iris.x, 'gaussian')
+  svm <- SVM(Species ~ ., iris.2class)
 })

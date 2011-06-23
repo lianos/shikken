@@ -18,8 +18,6 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
   x <- model.matrix(Terms, m)
   y <- model.extract(m, response)
   
-  browser()
-  
   if (length(scaled) == 1) {
     scaled <- rep(scaled, ncol(x))
   }
@@ -47,16 +45,22 @@ function(x, ...) {
 })
 
 setMethod("SVM", c(x="matrix"),
-function(x, y=NULL, kernel="rbf", kparams="automatic", type=NULL, scaled=TRUE,
-         C=1, nu=0.2, epsilon=0.1, class.weights=NULL, cache=40,
-         ..., subset, na.action=na.omit) {
+function(x, y=NULL, kernel="gaussian", kparams="automatic", learning.type=NULL,
+         svm.type='libsvm', scaled=TRUE, C=1, nu=0.2, epsilon=0.1,
+         class.weights=NULL, cache=40, ..., subset, na.action=na.omit) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required.")
   }
-  if (is.null(type)) {
-    type <- guessLearningTypeFromLabels(y)
+  if (nrow(x) != length(y)) {
+    stop("Number of observations does not equal number of labels")
   }
-  kernel <- createKernel(kernel, kparams, scaled=scaled, ...)
-  y <- createLabels(y, type=type, ...)
+  learning.type <- guessLearningTypeFromLabels(y, learning.type)
+  
+  kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
+  labels <- createLabels(y, learning.type)
+  
+  svm <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, svm.type, cache)
+  new("SVM", sg.ptr=svm, kernel=kernel, labels=labels,
+      learning.type=learning.type)
 })
 

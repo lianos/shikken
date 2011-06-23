@@ -34,6 +34,57 @@ void r_cancel_computations(bool &delayed, bool &immediately)
     R_CheckUserInterrupt();
 }
 
+/* ------------------------- Shogun Object Handling ------------------------ */
+
+/**
+ * Decrements reference count to a shogun object and "clears" the R pointer
+ * if count hits zero.
+ * 
+ * This method is called from within the C stack, and typically as the
+ * "finalizer" parameter, eg:
+ * 
+ *   R_RegisterCFinalizer(some_shogun_obj_ptr, _dispose_shogun_pointer); 
+ */
+void _dispose_shogun_pointer(SEXP ptr) {
+    Rprintf("  [C] _dispose_shogun_pointer triggered\n");
+    // Rcpp::XPtr<CSGObject> sptr(ptr); // doesn't work??
+    CSGObject* sptr = reinterpret_cast<CSGObject*>(R_ExternalPtrAddr(ptr));
+    int32_t ref_count = -1;
+    if (sptr) {
+        Rprintf("  [C] ... decrementing ref count\n");
+        ref_count = sptr->unref();
+        if (ref_count == 0) {
+            sptr = NULL;
+            Rprintf("  [C] ... calling R_ClearExternalPtr, too\n");
+            R_ClearExternalPtr(ptr);
+        }
+    }
+}
+
+/**
+ * Entry point from R to decrement Shogun object reference count, eg.
+ * 
+ *   dipose <- function(x) .Call("dispose_shogun_pointer", externalptr)
+ *   ...
+ *   reg.finalizer(some.shogun.ptr, disposeShogunPointer)
+ * 
+ * This shouldn't be used, as we are currently favoring registering 
+ * object finalization from the C-side.
+ */ 
+RcppExport SEXP dispose_shogun_pointer(SEXP ptr) {
+    // get refcount?
+    Rcpp::XPtr<CSGObject> sptr(ptr);
+    int ref_count = sptr->ref_count() - 1;
+    _dispose_shogun_pointer(ptr);
+    return Rcpp::wrap(ref_count);
+}
+
+RcppExport SEXP shogun_ref_count(SEXP ptr) {
+    Rcpp::XPtr<CSGObject> sptr(ptr);
+    return Rcpp::wrap(sptr->ref_count());
+}
+
+/* ------------------------------- Plumbing ---------------------------------*/
 RcppExport SEXP shogun_version() {
 BEGIN_RCPP
     return Rcpp::wrap(SHOGUN_VERSION);
@@ -54,41 +105,3 @@ RcppExport SEXP exit_shikken() {
     return R_NilValue;
 }
 
-/* ------------------------- Shogun Object Disposal ------------------------ */
-/* Some trial and error here */
-RcppExport void _dispose_shogun_pointer(SEXP ptr) {
-    Rprintf("  [C] _dispose_shogun_pointer triggered\n");
-    CSGObject* sptr = reinterpret_cast<CSGObject*>(R_ExternalPtrAddr(ptr));
-    if (sptr) {
-        if (sptr->unref() == 0) {
-            sptr = NULL;
-            Rprintf("  ... calling R_ClearExternalPtr, too\n");
-            R_ClearExternalPtr(ptr);
-        }
-    }
-}
-
-// Call from R? For example:
-// dipose <- function(x) .Call("dispose_shogun_pointer", externalptr)
-// ...
-// reg.finalizer(some.shogun.ptr, disposeShogunPointer)
-RcppExport SEXP dispose_shogun_pointer(SEXP ptr) {
-    _dispose_shogun_pointer(ptr);
-    return R_NilValue;
-}
-
-/* Trying with Rcpp::Xptr, but not working
-RcppExport SEXP dispose_shogun_object(SEXP obj) {
-BEGIN_RCPP
-    Rcpp::XPtr<CSGObject> optr(obj);
-    // SG_UNREF(optr);
-    // grab the inlined macro
-    if (optr) {
-        if (optr->unref() == 0) {
-            //optr = NULL;
-        }
-    }
-    return R_NilValue;
-END_RCPP
-}
-*/

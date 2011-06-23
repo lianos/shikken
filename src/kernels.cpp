@@ -21,8 +21,10 @@ BEGIN_RCPP
     // Rcpp::XPtr<CDotKernel> ptr(kernel, true);
     // return ptr
     
-    rkernel = R_MakeExternalPtr(kernel, R_NilValue, R_NilValue);
-    R_RegisterCFinalizer(rkernel, _dispose_shogun_pointer);
+    // rkernel = R_MakeExternalPtr(kernel, R_NilValue, R_NilValue);
+    // R_RegisterCFinalizer(rkernel, _dispose_shogun_pointer);
+    // return rkernel;
+    SK_WRAP(kernel, rkernel);
     return rkernel;
 END_RCPP
 }

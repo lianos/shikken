@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////// Imports
 #include <shikken.h>
 
+#include <shogun/kernel/Kernel.h>
 #include <shogun/kernel/CustomKernel.h>
 #include <shogun/kernel/GaussianKernel.h>
 #include <shogun/kernel/LinearKernel.h>
