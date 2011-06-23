@@ -2,6 +2,30 @@ useDynLib(shikken)
 
 import(methods)
 
+exportClasses(
+  ShikkenObject,
+  
+  Kernel,
+  CustomKernel,
+  StringKernel,
+  CombinedKernel,
+  DotKernel,
+  GaussianKernel,
+  LinearKernel,
+  PolyKernel,
+  
+  Features,
+  NumericDenseFeatures,
+  NumericSparseFeatures,
+  CombinedFeatures,
+  StringFeatures
+)
+
+exportMethods(
+  SVM,
+  Kernel
+)
+
 export(
   shogunVersion
 )

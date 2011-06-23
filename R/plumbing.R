@@ -58,6 +58,11 @@ exitShikken <- function() {
   shikkenEnv(is.initialized=FALSE)
 }
 
+disposeShogunPointer <- function(x) {
+  cat("... disposing a shogun pointer\n")
+  .Call("dispose_shogun_pointer", x)
+}
+
 .onLoad <- function(libname, pkgname) {
   assign('.SHIKKEN_CONFIG', list(), .GlobalEnv)
   initShikken()

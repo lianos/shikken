@@ -8,10 +8,11 @@ using namespace shogun;
 // 2nd param is the number of features in matrix
 // 3rd param is the number of vectors in matrix
 // in R, typically rows are observations and columns are features
-RcppExport SEXP create_dense_features(SEXP data_, SEXP dims_, SEXP type_) {
+RcppExport SEXP create_numeric_features_dense(SEXP data_, SEXP dims_) {
 BEGIN_RCPP
     Rcpp::NumericVector data(data_);
     Rcpp::NumericVector dims(dims_);
+    SEXP rfeatures;
     
     // NOTE: There msut be an easy way to extract the double* ptr from 
     //       Rcpp::NumericVector without doing the copying below
@@ -27,12 +28,14 @@ BEGIN_RCPP
     
     SG_REF(features);
     
-    Rcpp::XPtr<CFeatures> ptr(features);
-    return ptr;
+    // Rcpp::XPtr<CFeatures> ptr(features, true);
+    rfeatures = R_MakeExternalPtr(features, R_NilValue, R_NilValue);
+    R_RegisterCFinalizer(rfeatures, _dispose_shogun_pointer);
+    return rfeatures;
 END_RCPP
 }
 
-RcppExport SEXP create_sparse_features(SEXP data_, SEXP dims_, SEXP type_) {
+RcppExport SEXP create_numeric_features_sparse(SEXP data_, SEXP dims_) {
 BEGIN_RCPP
     return R_NilValue;
 END_RCPP

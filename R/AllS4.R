@@ -13,11 +13,14 @@ function(x, ...) {
   sg.ptrs
 })
 
-setGeneric("cleanup", function(x) standardGeneric("finalize"))
-setMethod("cleanup", c(x="ShikkenObject"),
+setGeneric("disposeSO", function(x) standardGeneric("disposeSO"))
+setMethod("disposeSO", c(x="ShikkenObject"),
 function(x) {
+  clazz <- class(x)[1]
+  cat("Disposing", clazz, "...\n")
   for (slot.name in shogunPointers(x)) {
     ptr <- slot(x, slot.name)
+    cat("  ...", slot.name, "\n")
     .Call("dispose_shogun_object", ptr)
   }
 })

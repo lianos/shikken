@@ -41,12 +41,32 @@ on the "C" side of things and return a pointer to this back to R.
 Summary
 -------
 
-Presently, after creating each shikken object, register the `finalize` method
-to destroy all shogun pointers in some automated fashion, eg:
+Currently the solution is to handle the finalizer callbacks at the C level, eg,
+for creating some kernel:
+  
+  SEXP rkernel;
+  ...
+  CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
+  kernel->init(fptr, fptr); // kernel->init(features, features);
+  SG_REF(kernel);
+  ...
+  rkernel = R_MakeExternalPtr(kernel, R_NilValue, R_NilValue);
+  R_RegisterCFinalizer(rkernel, _dispose_shogun_pointer);
+  return rkernel;
+  
+~~ IMPORTANT ~~
 
-    createKernel <- function(...) {
-      kernel <- .Call("shikken_kernel", ...)
-      ...
-      reg.finalizer(kernel, finalize)
-      kernel
-    }
+Investigate if accessing "embedded" shogun objects is dangers.
+For instance, do we need to forbid reassignment like so:
+
+  extracted.reatures <- some.kernel@features
+
+The features slot of a Kernel is also a Shogun object, so how does the
+ref counting go -- maybe this is better:
+
+  extracted.features <- features(some.kernel)
+
+so that we can bump up the shogun reference count for the features object
+by invoking SG_REF somehow at the C level?
+
+

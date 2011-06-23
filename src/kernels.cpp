@@ -11,14 +11,19 @@ BEGIN_RCPP
     Rcpp::XPtr<CFeatures> fptr(features_);
     double width = Rcpp::as<double>(width_);
     double cache_size = Rcpp::as<double>(cache_size_);
+    SEXP rkernel;
     
     // CGaussianKernel* kernel = new CGaussianKernel(cache_size[0], width[0]);
     CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
     kernel->init(fptr, fptr); // kernel->init(features, features);
     SG_REF(kernel);
     
-    Rcpp::XPtr<CDotKernel> ptr(kernel);
-    return ptr;
+    // Rcpp::XPtr<CDotKernel> ptr(kernel, true);
+    // return ptr
+    
+    rkernel = R_MakeExternalPtr(kernel, R_NilValue, R_NilValue);
+    R_RegisterCFinalizer(rkernel, _dispose_shogun_pointer);
+    return rkernel;
 END_RCPP
 }
 
