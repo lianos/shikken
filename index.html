@@ -13,11 +13,11 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
   > svm <- SVM(Species ~ ., data=iris.sub)
   > table(predict(svm, type='decision'), iris.sub$Species)
   
-                       setosa versicolor virginica
-            setosa         50          0         0
-            versicolor      0         50         0
-            virginica       0          0         0
+          setosa versicolor virginica
+    -1         0         50         0
+     1        50          0         0
   </pre>
+  (note that the labels are turned to -1/1 internally and are shown as such in the left column)
 </p>
 
 <p>This library is in its early stages of development (started ~ June 20, 2011), and isn't quite ready for public consumption just yet. You can find more information on its <a href="https://github.com/lianos/shikken/wiki">wiki pages</a>.
