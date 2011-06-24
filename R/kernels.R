@@ -1,5 +1,5 @@
 supportedKernels <- function() {
-  c('gaussian', 'normal', 'linear', 'polynomial', 'string', 'custom')
+  c('gaussian', 'linear', 'polynomial', 'sigmoid', 'string', 'custom')
 }
 
 setGeneric("Kernel", function(x, ...) standardGeneric("Kernel"))
@@ -45,13 +45,30 @@ setMethod("Kernel", c(x="matrix"),
 function(x, kernel='linear', params='automatic', scaled=TRUE, subset,
          na.action=na.omit, sparse=FALSE, ...) {
   kernel <- match.arg(kernel, supportedKernels())
-  
+  if (kernel %in% c('string', 'custom')) {
+    stop(kernel, " not supported yet")
+  }
+  clazz <- paste(toupper(substring(kernel, 1, 1)),
+                 tolower(substring(kernel, 2)), "Kernel", sep="")
+  c.fn <- paste('create_kernel', kernel, sep='_')
   features <- createFeatures(x, sparse=sparse, scaled=scaled, ...)
-  kptr <- .Call("create_gaussian_kernel", features@sg.ptr,
-                0.5, 10, PACKAGE="shikken")
-  skernel <- new("GaussianKernel",
-                 sg.ptr=kptr,
-                 params=list(),
-                 features=features)
+  
+  params <- list()
+  
+  if (kernel == 'gaussian') {
+    kptr <- .Call(c.fn, features, width, cache.size, PACKAGE="shikken")
+  } else if (kernel == 'linear') {
+    kptr <- .Call(c.fn, features, PACKAGE="shikken")
+  } else if (kernel == 'polynomial') {
+    kptr <- .Call(c.fn, degree, inhomogeneous, cache.size, PACKAGE="shikken")
+  } else if (kernel == 'sigmoid') {
+    kptr <- .Call(c.fn, gamma, coef0, cache.size, PACKAGE="shikken")
+  } else if (kernel == 'string') {
+    ## TODO
+  } else if (kernel == 'custom') {
+    ## TODO
+  }
+  
+  skernel <- new(clazz, sg.ptr=kptr, params=params, features=features)
   skernel
 })

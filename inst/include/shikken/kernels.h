@@ -5,11 +5,13 @@
 #include <shikken.h>
 
 #include <shogun/kernel/Kernel.h>
-#include <shogun/kernel/CustomKernel.h>
 #include <shogun/kernel/GaussianKernel.h>
 #include <shogun/kernel/LinearKernel.h>
 #include <shogun/kernel/PolyKernel.h>
+#include <shogun/kernel/SigmoidKernel.h>
+
 #include <shogun/kernel/StringKernel.h>
+#include <shogun/kernel/CustomKernel.h>
 
 #include <shogun/kernel/SparseKernel.h>
 
@@ -22,6 +24,7 @@
 //   - LinearKernel
 //   - Chi2Kernel
 //   - WaveletKerneL
+//   - SigmoidKernel
 //
 // Sublcasses of CKernel
 //   - RationalQuadritKernel
@@ -32,9 +35,24 @@
 //   - CauchyKernel
 //   - TStudentKernel
 //   - WaveKernel
+//   - CustomKernel
 // String kernels subclass CKernel
 
-RcppExport SEXP create_gaussian_kernel(SEXP features, SEXP width_,
-                                       SEXP cache_size_);
+RcppExport SEXP
+create_linear_kernel(SEXP rfeatures);
+
+RcppExport SEXP
+create_kernel_gaussian(SEXP rfeatures, SEXP rwidth, SEXP rcache);
+
+RcppExport SEXP
+create_kernel_polynomial(SEXP rfeatures, SEXP degree, SEXP rinhomo,
+                         SEXP rcache);
+
+RcppExport SEXP
+create_sigmoid_kernel(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache);
+
+RccpExport SEXP
+create_custom_kernel(SEXP rkernel, SEXP rcache);
+
 
 #endif

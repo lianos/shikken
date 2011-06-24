@@ -36,6 +36,8 @@ setClass("DotKernel", contains="Kernel")
 setClass("GaussianKernel", contains="DotKernel")
 setClass("LinearKernel", contains="DotKernel")
 setClass("PolyKernel", contains="DotKernel")
+setClass("SigmoidKernel", contains="DotKernel")
+
 
 ###############################################################################
 ## Learning Machines
