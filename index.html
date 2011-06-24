@@ -29,9 +29,12 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
 
 <p>The <a href="">R modular interface</a> is currently at alpha quality and relies on <a href="http://www.swig.org/">SWIG</a>, which still has <a href="http://www.swig.org/Doc2.0/R.html">a few problems working with R</a>.</p>
 
-<p>These things aside, both the static and modular interfaces still lets one use lots of shogun functionality already, which great already, so still ... why?</p>
+<p>These things aside, both the static and modular interfaces still let you use lots of shogun functionality already, which is still great, so ... really ... why?</p>
 
+<h3>Because</h3>
 <p>Being that I do much of my work in R, I thought I could write an interface that felt a bit more natural to the "R native," which is really only possible to if you write the library by hand. Also, I think I can provide a "mostly sensible" way of keeping up with shogun's garbage collection scheme, such that users of this library can largely avoid gradual memory leaks so long as they access the objects exposed herein via their normal R getter/setter type of generic functions.</p>
+
+<p>I also like how the maintainers of the shogun-toolbox foster its open source nature by <a href="http://www.shogun-toolbox.org/#contact">engaging with the user community</a>, and I thought this would be a way to give back and help provide something useful for the community at large.</p>
 
 <h2>Download</h2>
 <p>
