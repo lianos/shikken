@@ -9,9 +9,9 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
   For instance, building 2-class SVM for the iris dataset works like so:
   <pre>
   > library(shikken)
-  > iris.dat <- subset(iris, Species != "virginica")
-  > svm <- SVM(Species ~ ., data=iris)
-  > table(predict(svm, type='decision'), iris.dat$Species)
+  > iris.sub <- subset(iris, Species != "virginica")
+  > svm <- SVM(Species ~ ., data=iris.sub)
+  > table(predict(svm, type='decision'), iris.sub$Species)
   
                        setosa versicolor virginica
             setosa         50          0         0
