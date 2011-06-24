@@ -33,6 +33,8 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
 
 <p>Being that I do much of my work in R, I thought I could write an interface that felt a bit more natural to the "R native," which is really only possible to if you write the library by hand. Also, I think I can provide a "mostly sensible" way of keeping up with shogun's garbage collection scheme, such that users of this library can largely avoid gradual memory leaks so long as they access the objects exposed herein via their normal R getter/setter type of generic functions.</p>
 
+<p>This library talks directly to the <a href="http://www.shogun-toolbox.org/doc/libshogun_examples.html">libshogun C++ interface</a>, so it side steps some of the limitations in both of the already existing shogun static and modular interfaces and will hopefully (eventually) allow the user to mix and match all parts of the shogun-toolbox freely.</p>
+
 <p>I also like how the maintainers of the shogun-toolbox foster its open source nature by <a href="http://www.shogun-toolbox.org/#contact">engaging with the user community</a>, and I thought this would be a way to give back and help provide something useful for the community at large.</p>
 
 <p>But really I needed to do some stuff with string kernels and thought "hey, why don't I try to do this real quick ... it shouldn't be too hard to wrap this all up in a nicer looking library, right?" Riiiiggghht ...</p>
