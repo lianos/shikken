@@ -11,13 +11,13 @@ importFrom(stats,
 
 exportClasses(
   ShikkenObject,
-  
+
   ## Machines
   LearningMachine,
   KernelMachine,
   DistanceMachine,
   SVM,
-  
+
   ## Kernels
   Kernel,
   CustomKernel,
@@ -27,23 +27,27 @@ exportClasses(
   GaussianKernel,
   LinearKernel,
   PolyKernel,
-  
+
   ## Features
   Features,
-  NumericDenseFeatures,
-  NumericSparseFeatures,
+  DotFeatures,
+  SimpleFeatures,
+  PolyFeatures,
+  SparsePolyFeatures,
+  SparseFeatures,
   CombinedFeatures,
-  StringFeatures
+  StringFeautures,
+  StringFileFeatures
 )
 
 exportMethods(
   SVM,
   Kernel,
   # show,
-  coef, 
+  coef,
   fitted,
-  # plot, 
-  predict 
+  # plot,
+  predict
 )
 
 export(

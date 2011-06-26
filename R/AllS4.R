@@ -11,10 +11,19 @@ setClass("Features", contains="ShikkenObject",
          representation=representation(
            sg.ptr="externalptr",
            type='character'))
-setClass("NumericDenseFeatures", contains="Features")
-setClass("NumericSparseFeatures", contains="Features")
+setClass("DotFeatures", contains="Features")
+setClass("SimpleFeatures", contains="DotFeatures")
+
+setClass("PolyFeatures", contains="DotFeatures")
+setClass("SparsePolyFeatures", contains="DotFeatures")
+
+setClass("SparseFeatures", contains="DotFeatures")
+
 setClass("CombinedFeatures", contains="Features")
+
 setClass("StringFeatures", contains="Features")
+setClass("StringFileFeatures", contains="StringFeatures")
+
 
 ###############################################################################
 ## Kernels

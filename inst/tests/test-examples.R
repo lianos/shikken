@@ -11,7 +11,7 @@ iris.y[iris.y == 2] <- -1
 
 test_that("gaussian 'dummy' examples translates correctly", {
   ## http://www.shogun-toolbox.org/doc/developer_tutorial.html
-  pred.y = .Call("gaussian_kernel_example", iris.x, dim(iris.x), iris.y, 
+  pred.y = .Call("gaussian_kernel_example", iris.x, dim(iris.x), iris.y,
                  PACKAGE="shikken")
   table(sign(pred.y), iris.y)
 })
@@ -20,3 +20,4 @@ test_that("modular pieces work on gaussian example", {
   iris.kernel <- Kernel(iris.x, 'gaussian')
   svm <- SVM(Species ~ ., iris.2class)
 })
+

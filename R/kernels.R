@@ -22,9 +22,9 @@ function(x, data=NULL, scaled=TRUE, ...) {
   m <- eval(m, parent.frame())
   Terms <- attr(m, "terms")
   attr(Terms, "intercept") <- 0    ## no intercept
-  
+
   x <- model.matrix(Terms, m)
-  
+
   if (length(scaled) == 1) {
     scaled <- rep(scaled, ncol(x))
   }
@@ -52,9 +52,9 @@ function(x, kernel='linear', params='automatic', scaled=TRUE, subset,
                  tolower(substring(kernel, 2)), "Kernel", sep="")
   c.fn <- paste('create_kernel', kernel, sep='_')
   features <- createFeatures(x, sparse=sparse, scaled=scaled, ...)
-  
+
   params <- list()
-  
+
   if (kernel == 'gaussian') {
     kptr <- .Call(c.fn, features, width, cache.size, PACKAGE="shikken")
   } else if (kernel == 'linear') {
@@ -68,7 +68,32 @@ function(x, kernel='linear', params='automatic', scaled=TRUE, subset,
   } else if (kernel == 'custom') {
     ## TODO
   }
-  
+
   skernel <- new(clazz, sg.ptr=kptr, params=params, features=features)
   skernel
 })
+
+setMethod("Kernel", c(x="Features"),
+function(x, kernel='linear', params='automatic', scaled=TRUE, subset,
+         na.action=na.omit, sparse=FALSE, ...) {
+
+})
+
+kernelClassName <- function(kernel) {
+  kernel <- match.arg(kernel, supportedKernels())
+
+  if (kernel == 'polynomial') {
+    cname <- if (sparse) 'SparsePolyFeatures' else 'PolyFeatures'
+  } else if (kernel == 'combined') {
+    cname <- ''
+  }
+  if (kernel == 'string') {
+
+  } else {
+    cname <- if (sparse) 'SparseFeatures' else 'SimpleFeatures'
+  }
+}
+
+validFeaturesForKernelType <- function(x, kernel) {
+
+}

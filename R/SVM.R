@@ -14,10 +14,10 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
   m <- eval(m, parent.frame())
   Terms <- attr(m, "terms")
   attr(Terms, "intercept") <- 0    ## no intercept
-  
+
   x <- model.matrix(Terms, m)
   y <- model.extract(m, response)
-  
+
   if (length(scaled) == 1) {
     scaled <- rep(scaled, ncol(x))
   }
@@ -26,16 +26,16 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
                        which(!scaled)))
     scaled <- !attr(x, "assign") %in% remove
   }
-  
+
   ret <- SVM(x, y, scaled=scaled, ...)
   # kcall(ret) <- cl
   # attr(Terms,"intercept") <- 0 ## no intercept
   # terms(ret) <- Terms
-  
+
   if (!is.null(attr(m, "na.action"))) {
     n.action(ret) <- attr(m, "na.action")
   }
-  
+
   ret
 })
 
@@ -55,12 +55,22 @@ function(x, y=NULL, kernel="gaussian", kparams="automatic", learning.type=NULL,
     stop("Number of observations does not equal number of labels")
   }
   learning.type <- guessLearningTypeFromLabels(y, learning.type)
-  
+
   kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
   labels <- createLabels(y, learning.type)
-  
+
   svm <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, svm.type, cache)
   new("SVM", sg.ptr=svm, kernel=kernel, labels=labels,
       learning.type=learning.type)
+})
+
+setMethod("SVM", c(x="Features"),
+function(x, ...) {
+
+})
+
+setMethd("SVM", c(x="Kernel"),
+function(x, ...) {
+
 })
 
