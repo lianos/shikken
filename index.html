@@ -12,7 +12,7 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
   > library(shikken)
   > iris.sub <- subset(iris, Species != "virginica")
   > svm <- SVM(Species ~ ., data=iris.sub)
-  > table(predict(svm, type='decision'), iris.sub$Species)
+  > table(predict(svm), iris.sub$Species)
   
           setosa versicolor virginica
     -1         0         50         0
