@@ -6,16 +6,16 @@ setAs("matrix", "Features", function(from) {
   } else {
     as.sparse <- FALSE
   }
-  
+
   createFeatures(from, spase=as.sparse)
 })
 
 
 ##' Factory to create Shogun Feature Objects
-##' 
+##'
 ##' Shogun expects the features to be sent into the C interface in
 ##' column-major format, where each column represents one observation.
-##' 
+##'
 createFeatures <- function(x, kernel='linear', sparse=FALSE, ...) {
   if (sparse) {
     density <- 'sparse'
@@ -25,13 +25,13 @@ createFeatures <- function(x, kernel='linear', sparse=FALSE, ...) {
     density <- 'dense'
     class.mod <- 'Dense'
   }
-  
+
   if (!is.numeric(x) || !is.matrix(x)) {
     stop("only numeric features supported now")
   }
-  
-  kernel <- match.arg(kernel, supportedKernels())
-  
+
+  kernel <- matchKernelType(kernel)
+
   if (kernel == 'polynomial') {
     ## TODO
   } else {
@@ -43,6 +43,6 @@ createFeatures <- function(x, kernel='linear', sparse=FALSE, ...) {
     sg.ptr <- .Call(fn, t(x), nrow(x), ncol(x), PACKAGE="shikken")
     clazz <- if (sparse) 'SparseFeatures' else 'SimpleFeatures'
   }
-  
+
   new(clazz, sg.ptr=sg.ptr)
 }

@@ -1,6 +1,5 @@
-# context("Comparison vs. kernlab")
-require('kernlab')
-library(shikken)
+context("Comparison vs. kernlab")
+
 iris.2class <- local({
   set <- subset(iris, Species == 'setosa')
   ver <- subset(iris, Species == 'versicolor')
@@ -21,15 +20,15 @@ iris.test <- lapply(ho, function(idxs) {
   list(x=iris.x[idxs,], y=iris.y[idxs])
 })
 
-test_that("linear kernel", {  
+test_that("linear kernel", {
   for (i in 1:length(iris.train)) {
     s <- SVM(iris.train[[i]]$x, iris.train[[i]]$y, kernel='linear', C=1,
              svm.engine="libsvm")
     k <- ksvm(iris.train[[i]]$x, iris.train[[i]]$y, scaled=FALSE, C=1,
               kernel='vanilladot', type="C-svc")
-    
+
     ## training error
-    expect_equal(table(predict(s), iris.train[[i]]$y), 
+    expect_equal(table(predict(s), iris.train[[i]]$y),
                  table(predict(k), iris.train[[i]]$y))
     ## test error
     expect_equal(table(predict(s, iris.test[[i]]$x), iris.test[[i]]$y),
