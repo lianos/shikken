@@ -4,15 +4,21 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
 ---
 
 <h2>Overview</h2>
-<p>shikken is a library for the <a href="http://www.r-project.org">R programming language</a> that provides an interface to the <a href="http://www.shogun-toolbox.org/">shogun-toolbox</a>, a C++ library for "large scale" machine learning. While the shogun-toolbox comes with its own R wrappers, this library is written in a manner that's more idiomatic to R.</p>
 
-<p>
-  For instance, building a 2-class SVM for the iris dataset works like so:
+<p>shikken is a library for the <a href="http://www.r-project.org">R programming language</a> that provides an interface to the <a href="http://www.shogun-toolbox.org/">shogun-toolbox</a>, a C++ library for "large scale" machine learning.</p>
+
+<p>Although the shogun-toolbox already provides the (i) <code><a href="http://www.shogun-toolbox.org/doc/r_examples.html">r_static</a></code> interface, and the (ii) <code><a href="http://www.shogun-toolbox.org/doc/r_modular_examples.html">r_module</a></code> interface you can use from R, the API of these libraries are more consistent with "the shogun API" than they are to "idiomatic R". There are other (minor) disadvantages these libraries have, as well. For instance, the <code>r_static</code> interface can only work with one "shogun machine" at a time, and the <code>r_modular</code> library is currently in its alpha stage, and relies on <a href="http://www.swig.org/">SWIG</a>, which still has <a href="http://www.swig.org/Doc2.0/R.html">a few problems working with R</a>.
+  
+<p>The goal of the <a href="https://github.com/lianos/shikken">shikken library</a> is to provide a full featured interface to the shogun-toolbox that fits "more naturally" within R, thereby making the shogun-toolbox more accessible to the R community at large. It is programmed against the core <a href="http://www.shogun-toolbox.org/doc/libshogun_examples.html">libshogun C++ library</a>, so it will (overtime) expose all of shogun's functionality while attempting to sidestep some of the disadvantages the <code>r_static</code> and <code>r_modular</code> interfaces have.</p>
+
+<h2>Examples</h2>
+  
+<p>building a 2-class SVM for the iris dataset works like so:
   <pre>
   > library(shikken)
   > iris.sub <- subset(iris, Species != "virginica")
   > svm <- SVM(Species ~ ., data=iris.sub)
-  > table(predict(svm, type='decision'), iris.sub$Species)
+  > table(predict(svm), iris.sub$Species)
   
           setosa versicolor virginica
     -1         0         50         0
@@ -21,31 +27,15 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
   (note that the labels are turned to -1/1 internally and are shown as such in the left column)
 </p>
 
-<p>This library is in its early stages of development (started ~ June 20, 2011), and isn't quite ready for public consumption just yet. You can find more information on its <a href="https://github.com/lianos/shikken/wiki">wiki pages</a>.</p>
+<h2>Notes</h2>
 
-<h2>Why?</h2>
+<p>This library is in its early stages of development (started ~ June 20, 2011), and isn't quite ready for public consumption just yet. I am currently focussing on exposing more of the "vanilla" SVM functionality, specifically 2-class classification problems and will soon be working on exposing some of the string kernel functionality.</p>
 
-<p>The <a href="http://www.shogun-toolbox.org/doc/staticinterfaces.html">static interface</a> to the shogun-toolbox is (i) <a href="http://www.fml.tuebingen.mpg.de/raetsch/suppl/shogun/RExamples">a bit alien to program against</a>; (ii) doesn't expose all of shogun's functionality; and (iii) only allows you to work with one shogun machine/model/thing in your workspace at a time.</p>
-
-<p>The <a href="">R modular interface</a> is currently at alpha quality and relies on <a href="http://www.swig.org/">SWIG</a>, which still has <a href="http://www.swig.org/Doc2.0/R.html">a few problems working with R</a>.</p>
-
-<p>These things aside, both the static and modular interfaces still let you use lots of shogun functionality already, which is still great, so ... really ... why?</p>
-
-<p>Being that I do much of my work in R, I thought I could write an interface that felt a bit more natural to the "R native," which is really only possible to if you write the library by hand. Also, I think I can provide a "mostly sensible" way of keeping up with shogun's garbage collection scheme, such that users of this library can largely avoid gradual memory leaks so long as they access the objects exposed herein via their normal R getter/setter type of generic functions.</p>
-
-<p>This library talks directly to the <a href="http://www.shogun-toolbox.org/doc/libshogun_examples.html">libshogun C++ interface</a>, so it side steps some of the limitations in both of the already existing shogun static and modular interfaces and will hopefully (eventually) allow the user to mix and match all parts of the shogun-toolbox freely.</p>
-
-<p>I also like how the maintainers of the shogun-toolbox foster its open source nature by <a href="http://www.shogun-toolbox.org/#contact">engaging with the user community</a>, and I thought this would be a way to give back and help provide something useful for the community at large.</p>
-
-<p>But really I needed to do some stuff with string kernels and thought "hey, why don't I try to do this real quick ... it shouldn't be too hard to wrap this all up in a nicer looking library, right?"</p>
-
-<p>Riiiiggghht ... famous last words.</p>
-
-<h2>Random</h2>
+<p>You can find more information on its <a href="https://github.com/lianos/shikken/wiki">wiki pages</a>.</p>
 
 <p>My C++ is rather rusty. I'm using <a href="http://dirk.eddelbuettel.com/code/rcpp.html">Rcpp</a> to help with the R &lt; &mdash; &gt; C bridge code. The quality of that code will evolve (for the better!) as I get my C++ shoes back. If you have any suggestions on how to improve the code, I'm all ears.</p>
 
-<p>The design of this package has been influenced from the <a href="http://cran.r-project.org/web/packages/kernlab/index.html">kernlab</a> package, and I've sampled "rather liberally" from some of the code in that package as well ... thanks Alexandros!</p>
+<p>The design of this package has been influenced from the <a href="http://cran.r-project.org/web/packages/kernlab/index.html">kernlab</a> package, and I've sampled "rather liberally" from some of the code in that package as well. A big thanks goes to the authors of that library.</p>
 
 <h2>Download</h2>
 <p>
