@@ -1,3 +1,1 @@
-Ensure that all labels passed to shogun are:
-  (i)  numeric (not integer)
-  (ii) classification labels must be 1/-1
+Install shogun r_modular library and build some tests against that.
