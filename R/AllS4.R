@@ -82,7 +82,10 @@ setClass("LearningMachine", contains="ShikkenObject",
            sg.ptr="externalptr",
            num.threads="integer"))
 
-setClass("KernelMachine", contains="LearningMachine")
+setClass("KernelMachine", contains="LearningMachine",
+         representation=representation(
+           kernel="Kernel"))
+
 setClass("DistanceMachine", contains="LearningMachine") ## kmeans
 
 setGeneric("threads", function(x, ...) standardGeneric("threads"))
@@ -90,7 +93,6 @@ setGeneric("threads<-", function(x, ..., value) standardGeneric("threads<-"))
 
 setClass("SVM", contains="KernelMachine",
          representation=representation(
-           kernel="Kernel",
            labels="Labels",
            type="character",
            engine="character",
