@@ -8,8 +8,12 @@ title: shikken &mdash; An R library to interface with the shogun-toolbox
 <p>shikken is a library for the <a href="http://www.r-project.org">R programming language</a> that provides an interface to the <a href="http://www.shogun-toolbox.org/">shogun-toolbox</a>, a C++ library for "large scale" machine learning.</p>
 
 <p>Although the shogun-toolbox already provides the (i) <code><a href="http://www.shogun-toolbox.org/doc/r_examples.html">r_static</a></code> interface, and the (ii) <code><a href="http://www.shogun-toolbox.org/doc/r_modular_examples.html">r_module</a></code> interface you can use from R, the API of these libraries are more consistent with "the shogun API" than they are to "idiomatic R". There are other (minor) disadvantages these libraries have, as well. For instance, the <code>r_static</code> interface can only work with one "shogun machine" at a time, and the <code>r_modular</code> library is currently in its alpha stage, and relies on <a href="http://www.swig.org/">SWIG</a>, which still has <a href="http://www.swig.org/Doc2.0/R.html">a few problems working with R</a>.
-  
-<p>The goal of the <a href="https://github.com/lianos/shikken">shikken library</a> is to provide a full featured interface to the shogun-toolbox that fits "more naturally" within R, thereby making the shogun-toolbox more accessible to the R community at large. It is programmed against the core <a href="http://www.shogun-toolbox.org/doc/libshogun_examples.html">libshogun C++ library</a>, so it will (overtime) expose all of shogun's functionality while attempting to sidestep some of the disadvantages the <code>r_static</code> and <code>r_modular</code> interfaces have. In the future, I plan on packaging shogun's <code>src/libshogun</code> code with this package and making it a "self installable unit" easily installable through the "normal R channels", eg. <a href="http://cran.r-project.org/">CRAN</a>.</p>
+
+<h2>Goals</h2>
+
+<p>The goal of the <a href="https://github.com/lianos/shikken">shikken library</a> is to provide a full featured interface to the shogun-toolbox that fits "more naturally" within R, thereby making the shogun-toolbox more accessible to non-SVM experts and  the R community at large.</p>
+
+<p>shikken is programmed against the core <a href="http://www.shogun-toolbox.org/doc/libshogun_examples.html">libshogun C++ library</a>, so it will (overtime) expose a large majority of shogun's functionality while attempting to sidestep some of the disadvantages the <code>r_static</code> and <code>r_modular</code> interfaces have. In the future, I plan on packaging shogun's <code>src/libshogun</code> code with this package and making it a self-installable package, easily installable through the "normal R channels", eg. <a href="http://cran.r-project.org/">CRAN</a>.</p>
 
 <h2>Examples</h2>
   
