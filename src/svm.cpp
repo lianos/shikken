@@ -2,36 +2,70 @@
 
 using namespace shogun;
 
-RcppExport SEXP svm_init(SEXP rkernel, SEXP rlabels, SEXP rsvm_type,
-                         SEXP rcache) {
+RcppExport SEXP
+svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP rsvm_engine) {
     Rcpp::XPtr<CKernel> kernel(rkernel);
     Rcpp::XPtr<CLabels> labels(rlabels);
-    std::string svm_type = Rcpp::as<std::string>(rsvm_type);
-    int cache_size = Rcpp::as<int>(rcache);
+    double C = Rcpp::as<double>(rc);
+    std::string svm_engine = Rcpp::as<std::string>(rsvm_engine);
+    CSVM* svm = NULL;
+    
     SEXP out;
     
-    // TODO: Use an enum type for rsvm_type
-    if (svm_type.compare("libsvm") != 0) {
-        Rprintf("Unknown svm_type %s\n", svm_type.c_str());
+    if (svm_engine.compare("libsvm") == 0) {
+        CLibSVM* csvm = new CLibSVM(C, kernel, labels);
+        // Rprintf("Training libsvm ... \n");
+        csvm->train();
+        // Rprintf("... moving ptr.\n");
+        svm = csvm;
+    } else if (svm_engine.compare("svmlight") == 0) {
+        CSVMLight* csvm = new CSVMLight(C, kernel, labels);
+        // Rprintf("Training svmlight ... \n");
+        csvm->train();
+        // Rprintf("... moving ptr.\n");
+        svm = csvm;
+    } else {
+        // Rprintf("Unsupported svm_engine %s\n", svm_engine.c_str());
         return R_NilValue;
     }
-    
-    Rprintf("Building SVM, cache size: %d\n", cache_size);
-    CLibSVM* svm = new CLibSVM(cache_size, kernel, labels);
+    // Rprintf("... training done\n");
     SG_REF(svm);
-    
-    Rprintf("Training ... \n");
-    svm->train();
-    
     SK_WRAP(svm, out);
     return out;
 }
 
-RcppExport SEXP svm_train(SEXP rsvm) {
+// RcppExport SEXP svm_train(SEXP rsvm) {
+//     Rcpp::XPtr<CSVM> svm(rsvm);
+//     svm->train();
+//     return R_NilValue;
+// }
+
+// returns the indices of the support vectors
+RcppExport SEXP svm_support_vectors(SEXP rsvm) {
     Rcpp::XPtr<CSVM> svm(rsvm);
-    svm->train();
-    return R_NilValue;
+    int nsv = svm->get_num_support_vectors();
+    std::vector<int32_t> sv;
+    
+    for (int i = 0; i < nsv; i++) {
+        sv.push_back(svm->get_support_vector(i));
+    }
+    
+    return Rcpp::wrap(sv);
 }
+
+// returns the alphas
+RcppExport SEXP svm_alphas(SEXP rsvm) {
+    Rcpp::XPtr<CSVM> svm(rsvm);
+    int nsv = svm->get_num_support_vectors();
+    std::vector<float64_t> alpha;
+    
+    for (int i = 0; i < nsv; i++) {
+        alpha.push_back(svm->get_alpha(i));
+    }
+    
+    return Rcpp::wrap(alpha);
+}
+
 
 RcppExport SEXP svm_predict(SEXP rsvm, SEXP rfeatures) {
     Rcpp::XPtr<CSVM> svm(rsvm);
@@ -40,15 +74,15 @@ RcppExport SEXP svm_predict(SEXP rsvm, SEXP rfeatures) {
     int npreds;
     
     if (rfeatures == R_NilValue) {
-        Rprintf("Predicting on training labels\n");
+        // Rprintf("Predicting on training labels\n");
         preds = svm->apply();
     } else {
-        Rprintf("Predicting on new data\n");
+        // Rprintf("Predicting on new data\n");
         Rcpp::XPtr<CFeatures> features(rfeatures);
         preds = svm->apply(features);
     }
     
-    Rprintf("Populating output vector\n");
+    // Rprintf("Populating output vector\n");
     npreds = preds->get_num_labels();
     for (int i = 0; i < npreds; i++) {
         out.push_back(preds->get_label(i));

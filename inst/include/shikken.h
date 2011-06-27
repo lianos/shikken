@@ -19,12 +19,13 @@ void r_cancel_computations(bool &delayed, bool &immediately);
 #define SK_WRAP(o,r) \
 do { \
     r = R_MakeExternalPtr(o, R_NilValue, R_NilValue); \
-    R_RegisterCFinalizer(r, _dispose_shogun_pointer); \
+    R_RegisterCFinalizer(r, _shogun_ref_count_down); \
 } while(0)
 
-void _dispose_shogun_pointer(SEXP ptr);
+void _shogun_ref_count_down(SEXP ptr);
+RcppExport SEXP shogun_ref_count_down(SEXP ptr);
+RcppExport SEXP shogun_ref_count_up(SEXP ptr);
 RcppExport SEXP shogun_ref_count(SEXP ptr);
-RcppExport SEXP dispose_shogun_pointer(SEXP ptr);
 
 RcppExport SEXP shogun_version();
 RcppExport SEXP init_shikken();

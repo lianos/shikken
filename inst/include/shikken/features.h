@@ -28,6 +28,9 @@
 #include <shogun/features/SparsePolyFeatures.h>
 
 ///////////////////////////////////////////////////////////////////// interface
-RcppExport SEXP create_numeric_features_dense(SEXP data_, SEXP dims_);
-RcppExport SEXP create_numeric_features_sparse(SEXP data_, SEXP dims_);
+RcppExport SEXP
+create_simple_features_dense(SEXP rdata, SEXP rnobs, SEXP rdim);
+
+RcppExport SEXP
+create_simple_features_sparse(SEXP rdata, SEXP rnobs, SEXP rdim);
 #endif

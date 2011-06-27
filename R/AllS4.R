@@ -2,15 +2,13 @@ setClass("ShikkenObject", contains="VIRTUAL")
 
 setClass("Labels", contains="ShikkenObject",
          representation=representation(
-           sg.ptr='externalptr',
-           labels='character'))
+           sg.ptr='externalptr'))
 
 ###############################################################################
 ## Features
 setClass("Features", contains="ShikkenObject",
          representation=representation(
-           sg.ptr="externalptr",
-           type='character'))
+           sg.ptr="externalptr"))
 setClass("DotFeatures", contains="Features")
 setClass("SimpleFeatures", contains="DotFeatures")
 
@@ -47,6 +45,20 @@ setClass("LinearKernel", contains="DotKernel")
 setClass("PolyKernel", contains="DotKernel")
 setClass("SigmoidKernel", contains="DotKernel")
 
+setGeneric("normalizer", function(x, normalizer, ...) {
+  standardGeneric("normalizer")
+})
+
+setGeneric("normalizer<-", function(x, ..., value) {
+  standardGeneric("normalizer<-")
+})
+
+setGeneric("weights", function(x, ...) standardGeneric("weights"))
+setGeneric("weights<-", function(x, ..., value) standardGeneric("weights<-"))
+
+###############################################################################
+## Kernel Normalizers
+setClass("Normalizer", contains="ShikkenObject")
 
 ###############################################################################
 ## Learning Machines
@@ -59,4 +71,10 @@ setClass("SVM", contains="KernelMachine",
            sg.ptr="externalptr",
            kernel="Kernel",
            labels="Labels",
-           learning.type="character"))
+           type="character",
+           engine="character",
+           sv="integer",
+           alpha="numeric"))
+
+setGeneric("kernel", function(x, ...) standardGeneric("kernel"))
+setGeneric("kernel<-", function(x, ..., value) standardGeneric("kernel<-"))

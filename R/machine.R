@@ -6,6 +6,23 @@ supportedMachineTypes <- function() {
   c('classification', '2-class', 'regression')
 }
 
+matchLearningType <- function(labels, learning.type) {
+  if (missing(learning.type) || is.null(learning.type)) {
+    if (missing(labels) || is.null(labels)) {
+      stop("Labels required to guess learning type")
+    }
+    learning.type <- guessLearningTypeFromLabels(labels)
+  }
+  
+  learning.type <- match.arg(learning.type, supportedMachineTypes())
+  
+  if (learning.type == 'classification') {
+    learning.type <- '2-class'
+  }
+  
+  learning.type
+}
+
 setMethod("fitted", "KernelMachine", function(object, ...) {
   predict(object, newdata=NULL, type="response")
 })
@@ -25,9 +42,10 @@ function(object, newdata=NULL, type="response", ...) {
     newdata <- as(newdata, 'Features')@sg.ptr
   }
   
+  ## Returns the decision values
   preds <- .Call("svm_predict", object@sg.ptr, newdata, PACKAGE="shikken")
   
-  if (type == "decision") {
+  if (type == "response") {
     preds <- sign(preds)
   }
   

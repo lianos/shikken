@@ -43,10 +43,10 @@ void r_cancel_computations(bool &delayed, bool &immediately)
  * This method is called from within the C stack, and typically as the
  * "finalizer" parameter, eg:
  * 
- *   R_RegisterCFinalizer(some_shogun_obj_ptr, _dispose_shogun_pointer); 
+ *   R_RegisterCFinalizer(some_shogun_obj_ptr, _shogun_ref_count_down); 
  */
-void _dispose_shogun_pointer(SEXP ptr) {
-    Rprintf("  [C] _dispose_shogun_pointer triggered\n");
+void _shogun_ref_count_down(SEXP ptr) {
+    Rprintf("  [C] _shogun_ref_count_down triggered\n");
     // Rcpp::XPtr<CSGObject> sptr(ptr); // doesn't work??
     CSGObject* sptr = reinterpret_cast<CSGObject*>(R_ExternalPtrAddr(ptr));
     int32_t ref_count = -1;
@@ -64,19 +64,27 @@ void _dispose_shogun_pointer(SEXP ptr) {
 /**
  * Entry point from R to decrement Shogun object reference count, eg.
  * 
- *   dipose <- function(x) .Call("dispose_shogun_pointer", externalptr)
- *   ...
+ *   dipose <- function(x) .Call("shogun_ref_count_down", externalptr)
+ *   ...//Rprintf
  *   reg.finalizer(some.shogun.ptr, disposeShogunPointer)
  * 
  * This shouldn't be used, as we are currently favoring registering 
  * object finalization from the C-side.
  */ 
-RcppExport SEXP dispose_shogun_pointer(SEXP ptr) {
+RcppExport SEXP shogun_ref_count_down(SEXP ptr) {
     // get refcount?
     Rcpp::XPtr<CSGObject> sptr(ptr);
     int ref_count = sptr->ref_count() - 1;
-    _dispose_shogun_pointer(ptr);
+    _shogun_ref_count_down(ptr);
     return Rcpp::wrap(ref_count);
+}
+
+RcppExport SEXP shogun_ref_count_up(SEXP ptr) {
+    Rcpp::XPtr<CSGObject> sptr(ptr);
+    if (sptr) {
+        sptr->ref();
+    }
+    return Rcpp::wrap(sptr->ref_count());
 }
 
 RcppExport SEXP shogun_ref_count(SEXP ptr) {

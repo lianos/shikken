@@ -18,8 +18,9 @@ Description: The shikken library provides an idiomatic S4 interface to
   licensed separately. Please see the LICENSE.SVMlight file for further
   information.
 License: GPL (>= 3)
-Depends: Rcpp (>= 0.9.4)
-Suggests: testthat (>= 0.4)
+Depends: Rcpp (>= 0.9.4), caret (>= 4.91)
+Imports: Rcpp, caret
+Suggests: testthat (>= 0.5), kernlab (>= 0.9)
 SystemRequirements: shogun (>= 0.11)
 LinkingTo: Rcpp
 URL: http://www.shogun-toolbox.org/,

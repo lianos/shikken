@@ -45,23 +45,44 @@ function(x, ...) {
 })
 
 setMethod("SVM", c(x="matrix"),
-function(x, y=NULL, kernel="gaussian", kparams="automatic", learning.type=NULL,
-         svm.type='libsvm', scaled=TRUE, C=1, nu=0.2, epsilon=0.1,
-         class.weights=NULL, cache=40, ..., subset, na.action=na.omit) {
+function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
+         svm.engine=c('libsvm', 'svmlight'), scaled=TRUE, C=1, C.neg=C,
+         nu=0.2, epsilon=0.1, class.weights=NULL, cache=40, ..., subset,
+         na.action=na.omit) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required.")
   }
+  
   if (nrow(x) != length(y)) {
     stop("Number of observations does not equal number of labels")
   }
-  learning.type <- guessLearningTypeFromLabels(y, learning.type)
-
+  
+  type <- matchLearningType(y, type)
+  
+  if (type != '2-class') {
+    stop("Only 2-class classification is supported for now")
+  }
+  if (!isSingleNumber(C)) {
+    stop("Illegal value for C")
+  }
+  
+  svm.engine <- match.arg(svm.engine)
   kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
-  labels <- createLabels(y, learning.type)
-
-  svm <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, svm.type, cache)
-  new("SVM", sg.ptr=svm, kernel=kernel, labels=labels,
-      learning.type=learning.type)
+  labels <- createLabels(y, type)
+  
+  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, svm.engine)
+  
+  if (is.null(sg.ptr)) {
+    stop("error occured while initializing svm")
+  }
+  
+  ## get support vectors
+  sv <- .Call("svm_support_vectors", sg.ptr)
+  alpha <- .Call("svm_alphas", sg.ptr)
+  
+  
+  new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels,
+      type=type, engine=svm.engine, sv=sv, alpha=alpha)
 })
 
 setMethod("SVM", c(x="Features"),
@@ -69,8 +90,21 @@ function(x, ...) {
 
 })
 
-setMethd("SVM", c(x="Kernel"),
+setMethod("SVM", c(x="Kernel"),
 function(x, ...) {
 
 })
 
+setMethod("kernel", c(x="SVM"),
+function(x, ...) {
+  ## DEBUG: Increment the shogun object ref for the Kernel object?
+  upRefCount(x@Kernel@sg.ptr)
+  x@Kernel
+})
+
+setReplaceMethod("kernel", "SVM", function(x, value) {
+  stopifnot(inherits(value, 'Kernel'))
+  upRefCount(kernel)
+  x@Kernel <- kernel
+  x
+})

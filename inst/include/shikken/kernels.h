@@ -39,20 +39,19 @@
 // String kernels subclass CKernel
 
 RcppExport SEXP
-create_linear_kernel(SEXP rfeatures);
+create_kernel_linear(SEXP rfeatures);
 
 RcppExport SEXP
 create_kernel_gaussian(SEXP rfeatures, SEXP rwidth, SEXP rcache);
 
 RcppExport SEXP
-create_kernel_polynomial(SEXP rfeatures, SEXP degree, SEXP rinhomo,
+create_kernel_polynomial(SEXP rfeatures, SEXP rdegree, SEXP rinhomo,
                          SEXP rcache);
 
 RcppExport SEXP
-create_sigmoid_kernel(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache);
+create_kernel_sigmoid(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache);
 
-RccpExport SEXP
-create_custom_kernel(SEXP rkernel, SEXP rcache);
-
+RcppExport SEXP
+create_kernel_custom(SEXP rkernel);
 
 #endif

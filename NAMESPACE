@@ -27,7 +27,10 @@ exportClasses(
   GaussianKernel,
   LinearKernel,
   PolyKernel,
-
+  
+  ## Normalizers,
+  Normalizer,
+  
   ## Features
   Features,
   DotFeatures,
@@ -36,13 +39,18 @@ exportClasses(
   SparsePolyFeatures,
   SparseFeatures,
   CombinedFeatures,
-  StringFeautures,
+  StringFeatures,
   StringFileFeatures
 )
 
 exportMethods(
   SVM,
   Kernel,
+  kernel,
+  "kernel<-",
+  normalizer,
+  "normalizer<-",
+  
   # show,
   coef,
   fitted,

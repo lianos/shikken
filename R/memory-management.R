@@ -1,3 +1,12 @@
+refCount <- function(x) {
+  stopifnot(is(x, 'externalptr'))
+  .Call("shogun_ref_count", x, PACKAGE="shikken")
+}
+
+upRefCount <- function(x) {
+  stopifnot(is(x, 'externalptr'))
+  .Call("shogun_ref_count_up", x, PACKAGE="shikken")
+}
 
 ##' Calls the equivalent of SG_UNREF on a pointer to a Shogun object.
 ##' 
@@ -6,14 +15,9 @@
 ##' are created and returned back to R
 ##' 
 ##' @param x An \code{externalptr} to a \code{CSObject}
-disposeShogunPointer <- function(x) {
+downRefCount <- function(x) {
   cat("... disposing a shogun pointer\n")
-  .Call("dispose_shogun_pointer", x)
-}
-
-shogunRefCount <- function(x) {
-  stopifnot(is(x, 'externalptr'))
-  .Call("shogun_ref_count", x, PACKAGE="shikken")
+  .Call("shogun_ref_count_down", x)
 }
 
 ###############################################################################

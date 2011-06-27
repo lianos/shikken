@@ -3,15 +3,16 @@
 using namespace shogun;
 
 // shogun features are stored in column order, where each column denotes
-// a feature vector (just like "normal" R)
+// a feature vector for an example
 // columns are linear in memory
-// 2nd param is the number of features in matrix
-// 3rd param is the number of vectors in matrix
-// in R, typically rows are observations and columns are features
-RcppExport SEXP create_simple_features(SEXP data_, SEXP dims_) {
+//
+// ->set_feature_matrix(matrix, n.dimensions, n.observations)
+RcppExport SEXP
+create_simple_features_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
 BEGIN_RCPP
-    Rcpp::NumericVector data(data_);
-    Rcpp::NumericVector dims(dims_);
+    Rcpp::NumericVector data(rdata);
+    int nobs = Rcpp::as<int>(rnobs);
+    int dim = Rcpp::as<int>(rdim);
     SEXP out;
 
     // NOTE: There msut be an easy way to extract the double* ptr from
@@ -22,9 +23,9 @@ BEGIN_RCPP
     for (int32_t i = 0; i < data.size(); i++) {
         matrix[i] = (float64_t) data[i];
     }
-
+    
     CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();
-    features->set_feature_matrix(matrix, dims[1], dims[0]);
+    features->set_feature_matrix(matrix, dim, nobs);
 
     SG_REF(features);
 
@@ -33,9 +34,9 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP create_numeric_features_sparse(SEXP data_, SEXP dims_) {
+RcppExport SEXP
+create_simple_features_sparse(SEXP rdata, SEXP rnobs, SEXP rdim) {
 BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-

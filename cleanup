@@ -10,3 +10,5 @@
 ## rm -rf autom4te.cache
 
 rm -rf src-*
+rm -rf src/*.o src/*.so
+

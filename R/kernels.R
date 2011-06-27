@@ -1,5 +1,6 @@
 supportedKernels <- function() {
-  c('gaussian', 'linear', 'polynomial', 'sigmoid', 'string', 'custom')
+  # c('gaussian', 'linear', 'polynomial', 'sigmoid', 'string', 'custom')
+  c('gaussian', 'linear', 'sigmoid')
 }
 
 setGeneric("Kernel", function(x, ...) standardGeneric("Kernel"))
@@ -41,28 +42,61 @@ function(x, ...) {
   Kernel(as.matrix(x), ...)
 })
 
+
+.extractParams <- function(kernel, params, ...) {
+  kernel <- match.arg(kernel, supportedKernels())
+  if (kernel == 'gaussian') {
+    if (params == 'automatic') {
+      params <- list(width=0.5)
+    }
+    stopifnot(isSingleNumber(params$width))
+  } else if (kernel == 'linear') {
+    params <- list()
+  } else if (kernel == 'polynomial') {
+    if (params == 'automatic') {
+      params <- list(degree=2, inhomogeneous=TRUE)
+    }
+    stopifnot(isSingleNumber(params$degree))
+    stopifnot(isTRUEorFALSE(params$inhomogeneous))
+  } else if (kernel == 'sigmoid') {
+    if (params == 'automatic') {
+      params <- list(gamma=1, coef0=1)
+    }
+    stopifnot(isSingleNumber(params$gamma))
+    stopifnot(isSingleNumber(params$coef0))
+  }
+  params
+}
+
 setMethod("Kernel", c(x="matrix"),
 function(x, kernel='linear', params='automatic', scaled=TRUE, subset,
-         na.action=na.omit, sparse=FALSE, ...) {
+         na.action=na.omit, sparse=FALSE, cache.size=40, ...) {
   kernel <- match.arg(kernel, supportedKernels())
   if (kernel %in% c('string', 'custom')) {
     stop(kernel, " not supported yet")
   }
+  stopifnot(isSingleNumber(cache.size))
+  
   clazz <- paste(toupper(substring(kernel, 1, 1)),
                  tolower(substring(kernel, 2)), "Kernel", sep="")
+  
+  features <- createFeatures(x, kernel, sparse=sparse, scaled=scaled, ...)
+  
   c.fn <- paste('create_kernel', kernel, sep='_')
-  features <- createFeatures(x, sparse=sparse, scaled=scaled, ...)
-
-  params <- list()
-
+  params <- .extractParams(kernel, params, ...)
+  
   if (kernel == 'gaussian') {
-    kptr <- .Call(c.fn, features, width, cache.size, PACKAGE="shikken")
+    kptr <- .Call(c.fn, features@sg.ptr, params$width, cache.size,
+                  PACKAGE="shikken")
   } else if (kernel == 'linear') {
-    kptr <- .Call(c.fn, features, PACKAGE="shikken")
+    kptr <- .Call(c.fn, features@sg.ptr, PACKAGE="shikken")
   } else if (kernel == 'polynomial') {
-    kptr <- .Call(c.fn, degree, inhomogeneous, cache.size, PACKAGE="shikken")
+    kptr <- .Call(c.fn, features@sg.ptr, params$degree,
+                  params$inhomogeneous, cache.size,
+                  PACKAGE="shikken")
   } else if (kernel == 'sigmoid') {
-    kptr <- .Call(c.fn, gamma, coef0, cache.size, PACKAGE="shikken")
+    kptr <- .Call(c.fn, features@sg.ptr, params$gamma, params$coef0,
+                  cache.size, PACKAGE="shikken")
   } else if (kernel == 'string') {
     ## TODO
   } else if (kernel == 'custom') {
@@ -97,3 +131,4 @@ kernelClassName <- function(kernel) {
 validFeaturesForKernelType <- function(x, kernel) {
 
 }
+
