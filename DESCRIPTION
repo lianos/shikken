@@ -1,6 +1,6 @@
 Package: shikken
 Title: An S4 interface to the shogun toolbox.
-Version: 0.10.0-1
+Version: 0.11.0-1
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
 Description: The shikken library provides an idiomatic S4 interface to
@@ -23,6 +23,6 @@ Imports: Rcpp, caret
 Suggests: testthat (>= 0.5), kernlab (>= 0.9)
 SystemRequirements: shogun (>= 0.11)
 LinkingTo: Rcpp
-URL: http://www.shogun-toolbox.org/,
-     https://github.com/lianos/shikken
+URL: http://lianos.github.com/shikken/,
+     http://www.shogun-toolbox.org/
 Repository: CRAN
