@@ -34,10 +34,10 @@ test_that("classifier_libsvm_modular [Gaussian Kernel]", {
   
   #############################################################################
   ## shikken interface & results
-  shsvm <- SVM(dat.train, y, kernel='gaussian', width=2.1, C=1.017,
-               epsilon=1e-5, threads=num_threads, svm.engine='libsvm')
-  preds.train <- predict(shsvm)
-  preds.test <- predict(shsvm, dat.test)
+  sh <- SVM(dat.train, y, kernel='gaussian', width=2.1, C=1.017,
+            epsilon=1e-5, threads=num_threads, svm.engine='libsvm')
+  preds.train <- predict(sh)
+  preds.test <- predict(sh, dat.test)
   
   #############################################################################
   ## compare
@@ -83,11 +83,11 @@ test_that("classifier_svmlight_modular [StringKernel]" {
   
   #############################################################################
   ## shikken interface & results
-  shsvm <- SVM(fm_train_dna, label_train_dna, kernel='weighted.degree.string',
-               C=C, epsilon=epsilon, threads=threads, degree=degree,
-               alphabet="DNA")
-  preds.train <- predict(shsvm)
-  preds.test <- predict(shsvm, fm_test_dna)
+  sh <- SVM(fm_train_dna, label_train_dna, kernel='weighted.degree.string',
+            C=C, epsilon=epsilon, threads=threads, degree=degree,
+            alphabet="DNA")
+  preds.train <- predict(sh)
+  preds.test <- predict(sh, fm_test_dna)
   
   #############################################################################
   ## compare
