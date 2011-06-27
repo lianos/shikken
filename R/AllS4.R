@@ -77,12 +77,19 @@ setGeneric("weights<-", function(x, ..., value) standardGeneric("weights<-"))
 
 ###############################################################################
 ## Learning Machines
-setClass("LearningMachine", contains="ShikkenObject")
+setClass("LearningMachine", contains="ShikkenObject",
+         representation=representation(
+           sg.ptr="externalptr",
+           num.threads="integer"))
+
 setClass("KernelMachine", contains="LearningMachine")
+setClass("DistanceMachine", contains="LearningMachine") ## kmeans
+
+setGeneric("threads", function(x, ...) standardGeneric("threads"))
+setGeneric("threads<-", function(x, ..., value) standardGeneric("threads<-"))
 
 setClass("SVM", contains="KernelMachine",
          representation=representation(
-           sg.ptr="externalptr",
            kernel="Kernel",
            labels="Labels",
            type="character",
@@ -94,7 +101,6 @@ setGeneric("kernel", function(x, ...) standardGeneric("kernel"))
 setGeneric("kernel<-", function(x, ..., value) standardGeneric("kernel<-"))
 
 
-setClass("DistanceMachine", contains="LearningMachine") ## kmeans
 setClass("KNN", contains="DistanceMachine",
          representation=representation(
            sg.ptr="externalptr",

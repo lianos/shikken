@@ -66,9 +66,20 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
     stop("Illegal value for C")
   }
   
+  args <- list(...)
+  if (is.null(args$threads)) {
+    threads <- 1L
+  } else {
+    threads <- as.integer(args$threads)
+  }
+  
   svm.engine <- match.arg(svm.engine)
   kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
   labels <- createLabels(y, type)
+  
+  old.threads <- threads()
+  n.threads <- threads(threads)
+  on.exit(threads(old.threads))
   
   sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, svm.engine)
   
@@ -80,9 +91,9 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   sv <- .Call("svm_support_vectors", sg.ptr)
   alpha <- .Call("svm_alphas", sg.ptr)
   
-  
   new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels,
-      type=type, engine=svm.engine, sv=sv, alpha=alpha)
+      type=type, engine=svm.engine, sv=sv, alpha=alpha,
+      num.threads=n.threads)
 })
 
 setMethod("SVM", c(x="Features"),

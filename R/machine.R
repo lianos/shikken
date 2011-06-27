@@ -42,8 +42,14 @@ function(object, newdata=NULL, type="response", ...) {
     newdata <- as(newdata, 'Features')@sg.ptr
   }
   
+  ## If shogun threads are > 1, we get following error:
+  ## `Error: C stack usage is too close to the limit`
+  old.threads <- threads()
+  
   ## Returns the decision values
   preds <- .Call("svm_predict", object@sg.ptr, newdata, PACKAGE="shikken")
+  
+  threads(old.threads)
   
   if (type == "response") {
     preds <- sign(preds)
@@ -51,3 +57,4 @@ function(object, newdata=NULL, type="response", ...) {
   
   preds
 })
+

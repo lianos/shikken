@@ -50,6 +50,8 @@ exportMethods(
   "kernel<-",
   normalizer,
   "normalizer<-",
+  threads,
+  "threads<-",
   
   # show,
   coef,

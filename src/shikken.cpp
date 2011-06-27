@@ -92,6 +92,29 @@ RcppExport SEXP shogun_ref_count(SEXP ptr) {
     return Rcpp::wrap(sptr->ref_count());
 }
 
+/* -------------------------------- Threads ---------------------------------*/
+RcppExport SEXP shogun_threads(SEXP n) {
+BEGIN_RCPP
+    Parallel *par = get_global_parallel();
+    int nthreads = -1;
+    
+    if (!par) {
+        Rprintf("ERROR: sg_parallel is not initialized.");
+        return R_NilValue;
+    }
+    
+    if (n == R_NilValue) {
+        nthreads = par->get_num_threads();
+    } else {
+        nthreads = Rcpp::as<int>(n);
+        par->set_num_threads(nthreads);
+    }
+    
+    SG_UNREF(par);
+    return Rcpp::wrap(nthreads);
+END_RCPP
+}
+
 /* ------------------------------- Plumbing ---------------------------------*/
 RcppExport SEXP shogun_version() {
 BEGIN_RCPP

@@ -27,6 +27,8 @@ RcppExport SEXP shogun_ref_count_down(SEXP ptr);
 RcppExport SEXP shogun_ref_count_up(SEXP ptr);
 RcppExport SEXP shogun_ref_count(SEXP ptr);
 
+RcppExport SEXP shogun_threads(SEXP n);
+
 RcppExport SEXP shogun_version();
 RcppExport SEXP init_shikken();
 RcppExport SEXP exit_shikken();
