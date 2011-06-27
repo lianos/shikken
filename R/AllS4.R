@@ -105,7 +105,6 @@ setGeneric("kernel<-", function(x, ..., value) standardGeneric("kernel<-"))
 
 setClass("KNN", contains="DistanceMachine",
          representation=representation(
-           sg.ptr="externalptr",
            features="Features",
            labels="Labels"
            ))
