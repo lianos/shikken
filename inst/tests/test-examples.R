@@ -1,23 +1,13 @@
 context("Shogun Examples")
 
-iris.2class <- local({
-  set <- subset(iris, Species == 'setosa')
-  ver <- subset(iris, Species == 'versicolor')
-  rbind(set, ver)
+test_that("classifier_libsvm_modular", {
+  dat.train <- as.matrix(read.table(shikkenTestData('fm_train_real.dat', 'toy')))
+  dat.test <- as.matrix(read.table(shikkenTestData('fm_test_real.dat', 'toy')))
+  labels <- read.table(shikkenTestData('label_train_twoclass.dat'))[,1]
+  
+  svm <- SVM(dat.train, labels, kernel='gaussian', width=2.1, C=1.017,
+             epsilon=1e-5, threads=2, svm.engine='libsvm')
+  
+  preds.train <- predict(svm)
+  preds.test <- predict(svm, dat.test)
 })
-iris.x <- as.matrix(iris.2class[, 1:4])
-iris.y <- as.numeric(iris.2class[, 5])
-iris.y[iris.y == 2] <- -1
-
-test_that("gaussian 'dummy' examples translates correctly", {
-  ## http://www.shogun-toolbox.org/doc/developer_tutorial.html
-  pred.y = .Call("gaussian_kernel_example", iris.x, dim(iris.x), iris.y,
-                 PACKAGE="shikken")
-  table(sign(pred.y), iris.y)
-})
-
-test_that("modular pieces work on gaussian example", {
-  iris.kernel <- Kernel(iris.x, 'gaussian')
-  svm <- SVM(Species ~ ., iris.2class)
-})
-

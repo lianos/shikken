@@ -11,7 +11,7 @@
 #include <shogun/classifier/svm/SVMLight.h>
 
 RcppExport SEXP
-svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP rsvm_engine);
+svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine);
 
 RcppExport SEXP svm_support_vectors(SEXP rsvm);
 RcppExport SEXP svm_alphas(SEXP rsvm);

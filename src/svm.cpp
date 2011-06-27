@@ -3,10 +3,13 @@
 using namespace shogun;
 
 RcppExport SEXP
-svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP rsvm_engine) {
+svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine) {
+BEGIN_RCPP
     Rcpp::XPtr<CKernel> kernel(rkernel);
     Rcpp::XPtr<CLabels> labels(rlabels);
     double C = Rcpp::as<double>(rc);
+    double epsilon = Rcpp::as<double>(reps);
+    
     std::string svm_engine = Rcpp::as<std::string>(rsvm_engine);
     CSVM* svm = NULL;
     
@@ -14,15 +17,15 @@ svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP rsvm_engine) {
     
     if (svm_engine.compare("libsvm") == 0) {
         CLibSVM* csvm = new CLibSVM(C, kernel, labels);
+        csvm->set_epsilon(epsilon);
         // Rprintf("Training libsvm ... \n");
         csvm->train();
-        // Rprintf("... moving ptr.\n");
         svm = csvm;
     } else if (svm_engine.compare("svmlight") == 0) {
         CSVMLight* csvm = new CSVMLight(C, kernel, labels);
         // Rprintf("Training svmlight ... \n");
+        csvm->set_epsilon(epsilon);
         csvm->train();
-        // Rprintf("... moving ptr.\n");
         svm = csvm;
     } else {
         // Rprintf("Unsupported svm_engine %s\n", svm_engine.c_str());
@@ -32,6 +35,7 @@ svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP rsvm_engine) {
     SG_REF(svm);
     SK_WRAP(svm, out);
     return out;
+END_RCPP
 }
 
 // RcppExport SEXP svm_train(SEXP rsvm) {

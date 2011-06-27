@@ -62,10 +62,14 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   if (type != '2-class') {
     stop("Only 2-class classification is supported for now")
   }
+  C <- as.numeric(C)
   if (!isSingleNumber(C)) {
     stop("Illegal value for C")
   }
-  
+  epsilon <- as.numeric(epsilon)
+  if (!isSingleNumber(epsilon)) {
+    stop("Illegal value for epsilon")
+  }
   args <- list(...)
   if (is.null(args$threads)) {
     threads <- 1L
@@ -81,14 +85,14 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   n.threads <- threads(threads)
   on.exit(threads(old.threads))
   
-  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, svm.engine)
+  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon, svm.engine)
   
   if (is.null(sg.ptr)) {
     stop("error occured while initializing svm")
   }
   
   ## get support vectors
-  sv <- .Call("svm_support_vectors", sg.ptr)
+  sv <- .Call("svm_support_vectors", sg.ptr) + 1L
   alpha <- .Call("svm_alphas", sg.ptr)
   
   new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels,
