@@ -13,7 +13,7 @@
     params=list(degree=2)),
   weighted.degree.string=list(
     class="WeightedDegreeStringKernel",
-    params=list(weights=1, degree=2))
+    params=list(weights=1, degree=2L, alphabet="DNA"))
 )
 
 supportedKernels <- function() {
