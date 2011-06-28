@@ -12,3 +12,5 @@
 rm -rf src-*
 rm -rf src/*.o src/*.so
 
+for o in `find inst/include/libshogun -name "*.o"`; do rm $o; done
+

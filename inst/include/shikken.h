@@ -1,12 +1,12 @@
 #ifndef __SHIKKEN_SHIKKEN_H__
 #define __SHIKKEN_SHIKKEN_H__
 
-#include <Rcpp.h>
+#ifdef __APPLE__
+#define DARWIN 1
+#endif
 
-#include <shogun/base/SGObject.h>
-#include <shogun/lib/Mathematics.h>
-#include <shogun/lib/common.h>
-#include <shogun/base/init.h>
+#include <shikkenForwards.h>
+#include <Rcpp.h>
 
 #define SHOGUN_VERSION "0.11-dev"
 

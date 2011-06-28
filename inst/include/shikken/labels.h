@@ -3,7 +3,7 @@
 
 /////////////////////////////////////////////////////////////////////// Imports
 #include <shikken.h>
-#include <shogun/features/Labels.h>
+#include <features/Labels.h>
 
 RcppExport SEXP create_labels(SEXP rlabels);
 

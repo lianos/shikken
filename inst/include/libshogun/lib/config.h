@@ -1,7 +1,7 @@
 
 #define HAVE_HDF5 1
 
-#define HAVE_XML 1
+// #define HAVE_XML 1
 #define HAVE_LARGEFILE 1
 
 #define HAVE_LAPACK 1
@@ -42,6 +42,6 @@
 #define DARWIN 1
 #define CONFIGURE_OPTIONS "configure options --interfaces=libshogun,libshogunui,r,r_modular"
 #define MACHINE "i386"
-#define COMPFLAGS_C	"-fPIC -g -Wall -Wno-unused-parameter -Wformat -Wformat-security -Wimplicit -Wparentheses -Wshadow -O9 -fexpensive-optimizations -frerun-cse-after-loop -fcse-follow-jumps -finline-functions -fschedule-insns2 -fthread-jumps -fforce-addr -fstrength-reduce -funroll-loops   -pthread -fno-strict-aliasing"
+#define COMPFLAGS_C  "-fPIC -g -Wall -Wno-unused-parameter -Wformat -Wformat-security -Wimplicit -Wparentheses -Wshadow -O9 -fexpensive-optimizations -frerun-cse-after-loop -fcse-follow-jumps -finline-functions -fschedule-insns2 -fthread-jumps -fforce-addr -fstrength-reduce -funroll-loops   -pthread -fno-strict-aliasing"
 #define COMPFLAGS_CPP "-fPIC -g -Wall -Wno-unused-parameter -Wformat -Wformat-security -Wimplicit -Wparentheses -Wshadow -Wno-deprecated -O9 -fexpensive-optimizations -frerun-cse-after-loop -fcse-follow-jumps -finline-functions -fschedule-insns2 -fthread-jumps -fforce-addr -fstrength-reduce -funroll-loops   -pthread -fno-strict-aliasing"
 #define LINKFLAGS ""

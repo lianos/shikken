@@ -131,8 +131,8 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP exit_shikken() {
-    exit_shogun();
-    return R_NilValue;
-}
+// RcppExport SEXP exit_shikken() {
+//     shogun::exit_shogun();
+//     return R_NilValue;
+// }
 

@@ -19,9 +19,8 @@ Description: The shikken library provides an idiomatic S4 interface to
   information.
 License: GPL (>= 3)
 Depends: Rcpp (>= 0.9.4), caret (>= 4.91)
-Imports: Rcpp, caret
+Imports: Rcpp, caret, methods
 Suggests: testthat (>= 0.5), kernlab (>= 0.9), shogun
-SystemRequirements: shogun (>= 0.11)
 LinkingTo: Rcpp
 URL: http://lianos.github.com/shikken/,
      http://www.shogun-toolbox.org/

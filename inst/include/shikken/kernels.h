@@ -4,16 +4,16 @@
 /////////////////////////////////////////////////////////////////////// Imports
 #include <shikken.h>
 
-#include <shogun/kernel/Kernel.h>
-#include <shogun/kernel/GaussianKernel.h>
-#include <shogun/kernel/LinearKernel.h>
-#include <shogun/kernel/PolyKernel.h>
-#include <shogun/kernel/SigmoidKernel.h>
+#include <kernel/Kernel.h>
+#include <kernel/GaussianKernel.h>
+#include <kernel/LinearKernel.h>
+#include <kernel/PolyKernel.h>
+#include <kernel/SigmoidKernel.h>
 
-#include <shogun/kernel/StringKernel.h>
-#include <shogun/kernel/CustomKernel.h>
+#include <kernel/StringKernel.h>
+#include <kernel/CustomKernel.h>
 
-#include <shogun/kernel/SparseKernel.h>
+#include <kernel/SparseKernel.h>
 
 
 //////////////////////////////////////////////////////////////// Implementation

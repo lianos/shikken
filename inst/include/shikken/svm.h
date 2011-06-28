@@ -7,8 +7,8 @@
 #include <shikken/features.h>
 #include <shikken/kernels.h>
 
-#include <shogun/classifier/svm/LibSVM.h>
-#include <shogun/classifier/svm/SVMLight.h>
+#include <classifier/svm/LibSVM.h>
+#include <classifier/svm/SVMLight.h>
 
 RcppExport SEXP
 svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine);
