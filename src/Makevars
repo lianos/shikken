@@ -1,69 +1,42 @@
-## -*- mode: makefile; -*-
+PKG_CXXFLAGS += -I. -I./libshogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
+PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-#all:	$(SHLIB) userLibrary
-all:	$(SHLIB) libshogun
+# %.o: %.cpp
+#   $(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) -c $< -o $@
 
-USERDIR=../inst/lib
-USERLIB=libshogun$(DYLIB_EXT)
-USERLIBST=libshogun.a
-
-###############################################################################
-## Stuff define in shoguns .config file
-PARTS = libshogun
-LIBSHOGUN_DYNAMIC=$(USERLIB)
-LIBSHOGUN_STATIC=$(USERLIBST)
-# LIBSHOGUN_TARGET=libshogun.10.0.dylib
-LIBSHOGUN_SONAME=libshogun.10.dylib
-LIBSHOGUN_TARGET=$(USERLIBST)
-USE_DOXYGEN=no
-EXT_LIB=$(DYLIB_EXT)
-EXT_SRC_C=c
-EXT_SRC_CPP=cpp
-KERNELNAME=Darwin
-MACHINE=i386
 EXT_OBJ_CPP=cpp.o
 EXT_OBJ_C=c.o
 EXT_SRC_CPP=cpp
 EXT_SRC_C=c
-GDB=gdb
-COMP_C=gcc
-COMP_CPP=g++
-DEFINES=-DSHOGUN -DDARWIN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_HDF5 -DHAVE_XML -DUSE_GZIP -DUSE_BZIP2 -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE -DUSE_REFERENCE_COUNTING -DUSE_SVMLIGHT
-INCLUDES=-I.
 
-MAKEDEPEND=gcc -MM
-SRCDIR=../inst/include/libshogun
-INCLUDES=-I../inst/include/libshogun
 
-HEADERFILES	= $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)" )
-SRCFILES 	= $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
-OBJFILES 	= $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
-                     $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
+DEFINES=-DSHOGUN -DDARWIN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_HDF5 -DUSE_GZIP -DUSE_BZIP2 -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE -DUSE_REFERENCE_COUNTING -DUSE_SVMLIGHT
 
-LINK=g++
-PRELINKFLAGS= 
-LINKFLAGS=
-POSTLINKFLAGS=-lm -pthread -lhdf5 -lxml2 -llapack -lcblas -lz -lbz2
-POSTLINKCMD=true
-LIBSYMLINKCMD=ln -s $(LIBSHOGUN_TARGET) $(LIBSHOGUN_SONAME) ; \
-	ln -s $(LIBSHOGUN_TARGET) $(LIBSHOGUN_DYNAMIC) ; \
-	ln -s $(LIBSHOGUN_TARGET) $(LIBSHOGUN_SONAME)
-###############################################################################
-## RCPP stuff
-PKG_CXXFLAGS += -I../inst/include -I../inst/include/libshogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
-PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+%.$(EXT_OBJ_CPP): %.$(EXT_SRC_CPP)
+# $(COMP_CPP) $(COMPFLAGS_CPP) $(DEFINES) -c $(INCLUDES) -o $@ $<
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
 
-#userLibrary: $(USERLIB) $(USERLIBST)
-# userLibrary:
-#   (cd ../inst/include/libshogun; make)
+# %.$(EXT_OBJ_C): %.$(EXT_SRC_C)
+# # $(COMP_C) $(COMPFLAGS_C) $(DEFINES) -c $(INCLUDES) -o $@ $<
+#   g++ $(PKG_CXXFLAGS) $(DEFINES) -c $(INCLUDES) -o $@ $<
 
-#libshogun: $(OBJFILES) $(SRCFILES) $(HEADERFILES)
-libshogun:
-	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
-	-exec $(MAKEDEPEND) -c $(DEFINES) $(INCLUDES) {} -MT {}.o \; >.depend
-	
-	$(LINK) $(PRELINKFLAGS) $(shell find $(SRCDIR) -name "*.$(EXT_OBJ_CPP)" -o \
-		-name "*.$(EXT_OBJ_C)" 2>/dev/null) $(LINKFLAGS) -o $@ $(POSTLINKFLAGS)
-	@$(POSTLINKCMD) $@
-	@$(LIBSYMLINKCMD)
+SRCDIR=.
+
+# HEADERFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)" )
+# SRCFILES  = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
+# OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
+#               $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
+
+PKG_SOURCES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
+# OBJECTS=$(PKG_SOURCES:.cpp=.o)
+OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
+              $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(PKG_SOURCES)))
+
+all: myclean $(SHLIB)
+
+-include .depend
+
+myclean:
+	@echo $(OBJECTS)
+	rm -f $(OBJECTS)
 
