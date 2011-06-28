@@ -32,12 +32,12 @@ PKG_SOURCES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SR
 OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
               $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(PKG_SOURCES)))
 
-all: myclean $(SHLIB)
+all: myclean .depend $(SHLIB)
 
 ## Generetae .depend file
-# .depend:
-#   find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
-#   -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
+.depend:
+	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
+  -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
 
 -include .depend
 
