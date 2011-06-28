@@ -16,84 +16,69 @@ need to be generated:
 This means that if you want to include a new libshogun src tree inside
 shikken, you have to ensure these files are generated.
 
+Once the files above are created in the appropriate place, move shogun's
+`src/libshogun` directory to `shikken/src/shogun`
+
 TODO: Ensure R CMD INSTALL process defined appropriate -DFLAGS by doing
       proper system detection
 TODO: Enable the user to specify that they want to use their own installed
       version of libshogun in the same way RSQLite allows you to specify
       using the system installed libsqlite library
 
-Creating External Shogun Objects
+
+Shogun memory management and R
 ================================
 
-A call to `SVM` requires that we build several objects for the final svm.
-For instance, we have to:
+The shogun-toolbox implements its own reference counting-type garbage
+collection scheme. Each CSGObject keeps its own reference count, and
+when another object references it, its count is incremented (and
+decremented when appropriate).
 
- (i)   Convert the features matrix from the R side, to a CSimpleFeatures
-       object on the C++ side.
- (ii)  Create a kernel/Kernel object from the features in (i)
- (iii) Initialize an SVM with the kernel object (ii) and the features (i)
- (iv)  Train the SVM
-  ...
+When CSGObjects are passed back to R, their SG_REF is incremented so that
+the object isn't lost between the C <--> R interplay. This requires R to
+invoke SG_UNREF when R garbage collects the object.
 
-Overview
---------
+To do this, we are using R's register-finalizer functionality which are
+associated with R's `externalptr` objects that point to CSGObjects. These are
+described in ~ Section 5.13 of the R-exts document. Finalizers to externalptr's
+can be registered using R or C code, and these finalizers are run when the R
+object is garbage collected, eg. on the C side:
 
-I think to make this as "clean" as possible, we have to build each object
-individually and not just call one "monster" function. In order to do so,
-a `createKernel` type of function will need to build a shogun/Kernel object
-on the "C" side of things and return a pointer to this back to R.
+    void R_RegisterFinalizerEx(SEXP s, SEXP fun, Rboolean onexit);
+    typedef void (*R_CFinalizer_t)(SEXP);
+    void R_RegisterCFinalizerEx(SEXP s, R_CFinalizer_t fun, Rboolean onexit);
 
-* When creating these "modular" shogun objects, I think we have to call
-  SG_REF(object) so they are not disposed. Similarly, when the object is
-  R-garbage collected, ensure that the method invoked on GC (see below)
-  must call SG_UNREF(object).
-
-* The R class will have to have a slot of "externalptr" type.
-  Section 5.13 of the R-exts document introduces `ExternalPtr`.
-  
-    * You can register finalizers to external pointers that is run when
-      it is garbage collected. This can be R or C code, and the various 
-      interfaces are, respectively:
-      
-        void R_RegisterFinalizerEx(SEXP s, SEXP fun, Rboolean onexit);
-        typedef void (*R_CFinalizer_t)(SEXP);
-        void R_RegisterCFinalizerEx(SEXP s, R_CFinalizer_t fun, Rboolean onexit);
-
-* Rcpp has an XPtr<T> type you will probably want to use. Read through
-  Rcpp-modules vignette.
-
-Summary
--------
-
-Currently the solution is to handle the finalizer callbacks at the C level by
-invoking the SK_WRAP macro, which accepts:
+shikken currently handles the finalizer callbacks at the C level by
+invoking the SK_WRAP macro on a CSGObject that is being sent back to R. The
+SK_WRAP macro is defined in src/shikken.h. It accepts:
 
  (i) a pointer to CSGObject; and
  (ii) a SEXP object to wrap the CSGObject into.
 
-SK_WRAP wraps the CSGOjbect with the SEXP and registers the appropriate
-finalier, eg:
-  
-  #define SK_WRAP(o,r) \
-  do { \
-      r = R_MakeExternalPtr(o, R_NilValue, R_NilValue); \
-      R_RegisterCFinalizer(r, _shogun_ref_count_down); \
-  } while(0)
+    #define SK_WRAP(o,r) \
+    do { \
+        r = R_MakeExternalPtr(o, R_NilValue, R_NilValue); \
+        R_RegisterCFinalizer(r, _shogun_ref_count_down); \
+    } while(0)
 
-So, to create an arbitrarily kernel:
-  
-  SEXP out;
-  
-  ...
-  CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
-  kernel->init(fptr, fptr); // kernel->init(features, features);
-  
-  SG_REF(kernel);
-  SK_WRAP(kernel, out);
-  
-  return out;
-  
-~~ IMPORTANT ~~
+A "mostly real" example that creates a gaussian kernel would be like so:
+
+    SEXP out;
+    // ...
+    // code to setup appropriate kernel params
+    // ...
+    CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
+    kernel->init(fptr, fptr); // kernel->init(features, features);
+    SG_REF(kernel);          // increments the shogun ref count for the object
+    
+    // we now initialize `out` as an R-externalptr, and register a finalizer
+    // method that is called when R eventually garbage-collects the externalptr
+    SK_WRAP(kernel, out);    
+    
+    return out;
+
+IMPORTANT
+---------
 
 Investigate if accessing "embedded" shogun objects is dangerous.
 For instance, do we need to forbid reassignment like so:

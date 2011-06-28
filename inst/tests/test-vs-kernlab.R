@@ -1,4 +1,5 @@
 context("Comparison vs. kernlab")
+library(kernlab)
 
 iris.2class <- local({
   set <- subset(iris, Species == 'setosa')

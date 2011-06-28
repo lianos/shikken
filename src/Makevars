@@ -1,4 +1,4 @@
-PKG_CXXFLAGS += -I. -I./libshogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
+PKG_CXXFLAGS += -I. -I./shogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
 PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lm -pthread -lhdf5 -lxml2 -lz -lbz2 # -llapack -lcblas
 
 # %.o: %.cpp
