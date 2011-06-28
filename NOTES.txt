@@ -20,14 +20,15 @@ Once the files above are created in the appropriate place, move shogun's
 `src/libshogun` directory to `shikken/src/shogun`
 
 TODO: Ensure R CMD INSTALL process defined appropriate -DFLAGS by doing
-      proper system detection
+      proper system detection.
+
 TODO: Enable the user to specify that they want to use their own installed
       version of libshogun in the same way RSQLite allows you to specify
       using the system installed libsqlite library
 
 
 Shogun memory management and R
-================================
+==============================
 
 The shogun-toolbox implements its own reference counting-type garbage
 collection scheme. Each CSGObject keeps its own reference count, and
