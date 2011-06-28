@@ -1,5 +1,6 @@
 ## -*- mode: makefile; -*-
-
+## Building shared modules on osx:
+## http://www.finkproject.org/doc/porting/shared.php
 #all:	$(SHLIB) userLibrary
 all:	libshogun
 
