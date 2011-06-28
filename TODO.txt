@@ -1,1 +1,10 @@
 Install shogun r_modular library and build some tests against that.
+
+Create correct configure.in, src/Makevars.in stuff.
+Follow RSQLite's lead. The desired method to install custom vs
+"standard" shogun package is already outlined in inst/INSTALL.
+
+Some autoconf links:
+
+  http://www.galassi.org/mark/mydocs/autoconf_tutorial_1.html#SEC1
+  

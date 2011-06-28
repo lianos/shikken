@@ -1,0 +1,40 @@
+If you are reading this file, I'm assuming that you have downloaded the source
+version of this package that you want to customize and install.
+
+If you do not want to customize/tweak the install, simply install this package
+in "the usual way" using R's installation mechanisms (via CRAN). In an R
+workspace:
+
+    R> install.packages('shikken')
+
+Customizing a shikken Install Using a Source Package
+====================================================
+There are two alternatives for installing this package. 
+
+1. Simple installation: Installs the version of the shogun-toolbox that is
+   included in this package under src/shogun.
+   
+     R CMD INSTALL shikken-<version>.tar.gz
+
+2. Installing the package against a previously installed version of libshogun.
+   
+   You will need to have already successfully compiled and installed the
+   `libshogun` interface to the shogun-toolbox, ie:
+   
+     $ cd /path/to/shogun-toolbox/src
+     $ ./configure --interfaces=libshugn
+     $ make -j4 && make install
+   
+   If you installed libshogun without too much fan fare, it would have
+   installed the compiled library to DIR/lib/libshogun.xxx and the
+   header files should be in DIR/include/shogun, where DIR=/usr/local.
+   
+   Note that DIR is assumed to contain a `lib` and `include` directory where
+   the libshogun.xxx and shogun/headers.h reside.
+   
+   Let's assume your value for DIR is /usr/local (its default value), then
+   you can then compile shikken against your own version of libshogun like so:
+   
+     $ R CMD INSTALL --configure-args=--with-shogun-dir=DIR \
+                     shikken-<version>.tar.gz
+
