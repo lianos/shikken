@@ -1,17 +1,16 @@
 Package: shikken
-Title: An S4 interface to the shogun toolbox.
+Title: An S4 interface to the shogun (machine learning) toolbox.
 Version: 0.11.0-1
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
-Description: The shikken library provides an idiomatic S4 interface to
-  version 0.11.0 of the shogun toolbox. The shogun toolbox is a machine
-  learning library with a focus on large scale kernel methods.
+Description: An R (S4) interface to the shogun toolbox -- a machine learning
+  library with a focus on large scale kernel methods.
   .
-  This library does not use SWIG. As a result, there is likely functionality
-  missing from this interface that is available in the "full" shogun toolbox.
-  The shogun toolbox provides its own R interfaces (r and r_modular) which you
-  can try if there is some functionality in shogun that you require and is
-  missing from this library.
+  This library provides an alternative to the r and r_modular interfaces
+  already provided by shogun to access its features in R. This package aims
+  to provide a more (R) idiomatic interface to shogun's methods so that it
+  is more accessible to (i) the R journeyman; and/or (ii) someone who is not
+  well versed in shogun's API already.
   .
   The shogun toolbox is licensed under the GPLv3 with the exception of
   some files from svmlight, which are copyright Torsten Joachimns and are
