@@ -1,3 +1,27 @@
+Packaging up libshogun for use inside shikken
+=============================================
+
+Proper configuration/compilation of libshogun requires some post-processing
+in order to generate some files before make/install. The following files
+need to be generated:
+  
+  * lib/config.h : This can *probably* be rolled into the normal R CMD INSTALL
+    workflow since this is simply a list of #define macros that are generated
+    after system functionality detection
+    
+  * base/class_list.cpp : This probably can't be rolled into the normal
+    R CMD INSTALL mojo since it invokes base/clase_lsit_cpp.py in order
+    to generate it.
+
+This means that if you want to include a new libshogun src tree inside
+shikken, you have to ensure these files are generated.
+
+TODO: Ensure R CMD INSTALL process defined appropriate -DFLAGS by doing
+      proper system detection
+TODO: Enable the user to specify that they want to use their own installed
+      version of libshogun in the same way RSQLite allows you to specify
+      using the system installed libsqlite library
+
 Creating External Shogun Objects
 ================================
 
@@ -41,22 +65,37 @@ on the "C" side of things and return a pointer to this back to R.
 Summary
 -------
 
-Currently the solution is to handle the finalizer callbacks at the C level, eg,
-for creating some kernel:
+Currently the solution is to handle the finalizer callbacks at the C level by
+invoking the SK_WRAP macro, which accepts:
+
+ (i) a pointer to CSGObject; and
+ (ii) a SEXP object to wrap the CSGObject into.
+
+SK_WRAP wraps the CSGOjbect with the SEXP and registers the appropriate
+finalier, eg:
   
-  SEXP rkernel;
+  #define SK_WRAP(o,r) \
+  do { \
+      r = R_MakeExternalPtr(o, R_NilValue, R_NilValue); \
+      R_RegisterCFinalizer(r, _shogun_ref_count_down); \
+  } while(0)
+
+So, to create an arbitrarily kernel:
+  
+  SEXP out;
+  
   ...
   CGaussianKernel* kernel = new CGaussianKernel(cache_size, width);
   kernel->init(fptr, fptr); // kernel->init(features, features);
+  
   SG_REF(kernel);
-  ...
-  rkernel = R_MakeExternalPtr(kernel, R_NilValue, R_NilValue);
-  R_RegisterCFinalizer(rkernel, _dispose_shogun_pointer);
-  return rkernel;
+  SK_WRAP(kernel, out);
+  
+  return out;
   
 ~~ IMPORTANT ~~
 
-Investigate if accessing "embedded" shogun objects is dangers.
+Investigate if accessing "embedded" shogun objects is dangerous.
 For instance, do we need to forbid reassignment like so:
 
   extracted.reatures <- some.kernel@features
