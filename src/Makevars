@@ -6,6 +6,9 @@
 ## Makevars so that the library you are trying to wrap in R compiles correctly
 ## this probably isn't the best place to start learning from since there's a
 ## good chance I'm doing something that's not exactly "bright".
+##
+## See here for a handy Makefile reference:
+##   http://www.jfranken.de/homepages/johannes/vortraege/make_inhalt.en.html
 
 ## For Rcpp
 PKG_CXXFLAGS += -I. -I./shogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
