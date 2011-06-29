@@ -1,11 +1,17 @@
-## This Makevars was pretty was made using "agressive" trial and error by
-## combining things I've found in other package Makevars files along with
+## This Makevars was was made througn an "agressive" trial and error approach
+## by combining things I've found in other package Makevars files along with
 ## parts of the shogun-toolbox's configure files.
 ## 
-## If you are a "casual" user trying to figure out how to make a proper
-## Makevars so that the library you are trying to wrap in R compiles correctly
-## this probably isn't the best place to start learning from since there's a
-## good chance I'm doing something that's not exactly "bright".
+## It would likely have been better handled by judicious use of autoconf
+## support in the R CMD INSTALL processes, but I haven't invested the time
+## to get cozy with autoconf yet. Users who want to tweak the compilation
+## process of this library (along with its internal shogun library) are
+## currently required to set/export environment variables before they run
+## R CMD INSTALL, instead of autoconf magically figuring out the correct
+## variables -- which would (ultimately) be the better approach..
+## 
+## If you are reading this Makevars file with the hope of learning how to use
+## it correctly with R CMD INSTALL, you might be looking at the wrong place.
 ##
 ## See here for a handy Makefile reference:
 ##   http://www.jfranken.de/homepages/johannes/vortraege/make_inhalt.en.html
