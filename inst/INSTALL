@@ -33,19 +33,34 @@ the shogun-toolbox distribution.
    the package if you want to set some custom flags.
    
    For instance, to install shikken/shogun without including the SVM-Light
-   functionality, you can do that by exporting a NO_SVMLIGHT environment
-   variable (its value is irrelevant):
+   functionality (for licensing purposes), you can do that by exporting a
+   NO_SVMLIGHT environment variable (its value is irrelevant):
    
      $ export NO_SVMLIGHT=1
      $ R CMD INSTALL shikken-<version>.tar.gz
-  
-2. Installing the package against a previously installed version of libshogun.
+    
+   If you want to enable HDF5 support, you need to ensure you have hdf5
+   installed already, and:
    
-   You will need to have already successfully compiled and installed the
-   `libshogun` interface to the shogun-toolbox, ie:
+     $ export HAVE_HDF5=1
+     $ R CMD INSTALL shikken-<version>.tar.gz
    
-     $ cd /path/to/shogun-toolbox/src
-     $ ./configure --interfaces=libshugn
+2. Installing shikken against a previously installed version of libshogun.
+   
+   The shogun-toolbox build process is a bit complex and quite flexible,
+   tweaking its functionality based on your systems (detected) abilities,
+   ie. enabling hdf5 support, enabling xml support, and support for other
+   things. It is possible that building the shogun-toolbox from the sources
+   (and build process) available with shikken alone might not be possible
+   (or easy).
+   
+   If this is the case, you can build shikken against and already installed
+   shogun-toolbox that exists on your system. In order to do so, you will
+   need to have already successfully compiled and installed the `libshogun`
+   interface to the shogun-toolbox, ie:
+   
+     $ cd /path/to/your/shogun-toolbox/src
+     $ ./configure --interfaces=libshogun
      $ make -j4 && make install
    
    If you installed libshogun without too much fan fare, it would have

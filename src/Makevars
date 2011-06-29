@@ -58,15 +58,17 @@ SRCDIR=.
 PKG_LIBS += -lm -pthread # -llapack -lcblas
 
 ###############################################################################
-## Assuming presence of certain "things" for the most popular platforms
-## in order for shogun to comple
+## Assuming presence of certain "things" for the most popular (non-windows)
+## platforms in order for the internal shogun library to compile correctly.
+## If this is being compiled on a "recent" linux or OS X machine, these should
+## be pretty standard.
 DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 \
   -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
   -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
-  -DUSE_REFERENCE_COUNTING
+  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2
 
 ifeq (darwin, $(findstring darwin,$(R_PLATFORM)))
-DEFINES += -DDARWIN -DUSE_GZIP -DUSE_BZIP2
+DEFINES += -DDARWIN
 endif
 
 ## TODO test linux?
