@@ -9,10 +9,9 @@
 ##        */*~ *~
 ## rm -rf autom4te.cache
 
-rm -rf src-*
-
-#for o in `find inst/include/libshogun -name "*.o"`; do rm $o; done
+## Remove compiled C/C++ stuffs
 for o in `find src -name "*.o"`; do rm $o; done
-
+rm -rf src-*
 rm src/*.so
 
+rm src/.depend

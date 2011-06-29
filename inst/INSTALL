@@ -7,15 +7,38 @@ workspace:
 
     R> install.packages('shikken')
 
+
 Customizing a shikken Install Using a Source Package
 ====================================================
-There are two alternatives for installing this package. 
 
-1. Simple installation: Installs the version of the shogun-toolbox that is
-   included in this package under src/shogun.
+The compilation of shikken/shogun is handled through some "creative" use
+of the respective src/Makevars[.win]. Using autoconf would have resulted
+in a more robust configuration system/strategy, but I don't have time to
+invest in figuring the ins/outs of that now.
+
+If you really require a "highly configured" version of shogun to link
+against that you can not rig up by exporting environment variables before
+installing the package, you should jump to installation option 2, which
+allows you to compile shikken against shogun library you can compile from
+the shogun-toolbox distribution.
+
+1. Tweaking the shogun library included in this package before installation.
+
+   This simple installation: Installs the version of the shogun-toolbox 
+   that is included in this package under src/shogun.
    
-     R CMD INSTALL shikken-<version>.tar.gz
-
+     $ R CMD INSTALL shikken-<version>.tar.gz
+   
+   You might want to do this instead of doing a "normal" installation of
+   the package if you want to set some custom flags.
+   
+   For instance, to install shikken/shogun without including the SVM-Light
+   functionality, you can do that by exporting a NO_SVMLIGHT environment
+   variable (its value is irrelevant):
+   
+     $ export NO_SVMLIGHT=1
+     $ R CMD INSTALL shikken-<version>.tar.gz
+  
 2. Installing the package against a previously installed version of libshogun.
    
    You will need to have already successfully compiled and installed the
@@ -37,4 +60,78 @@ There are two alternatives for installing this package.
    
      $ R CMD INSTALL --configure-args=--with-shogun-dir=DIR \
                      shikken-<version>.tar.gz
+
+All possible DEFINE(s)
+----------------------
+
+The most important of these will incorporated into the Makevars installation
+approach over time.
+
+$ grep -r "#ifdef" *.cpp . | cut -f 2 -d' '| sort | uniq
+  ARRAY_STATISTICS
+  CYGWIN
+  DARWIN
+  DEBUG
+  DEBUG_COMMSCORING
+  DEBUG_DOTFEATURES
+  DEBUG_HASHEDWD
+  DEBUG_HIERARCHICAL
+  DEBUG_HWSK_COMPUTATION
+  DEBUG_LDA
+  DEBUG_SUBGRADIENTLPM
+  DEBUG_SUBGRADIENTSVM
+  DEBUG_WDFEATURES
+  DYNPROG_DEBUG
+  DYNPROG_TIMING
+  DYNPROG_TIMING_DETAIL
+  FIX_POS
+  HAVE_ACML
+  HAVE_ATLAS
+  HAVE_HDF5
+  HAVE_JSON
+  HAVE_LAPACK
+  HAVE_LOG2
+  HAVE_MKL
+  HAVE_POWL
+  HAVE_SQRTL
+  HAVE_XML
+  HMM_DEBUG
+  LOG_SUMARRAY
+  LOG_SUM_ARRAY
+  LPM_DEBUG
+  MCSVM_DEBUG
+  MUSRECALC
+  PLIFARRAY_DEBUG
+  PLIF_DEBUG
+  SUNOS
+  SVMLIGHT
+  TEST
+  TRACE_MEMORY_ALLOCS
+  TRIE_CHECK_EVERYTHING
+  USE_BIGSTATES
+  USE_BZIP2
+  USE_CPLEX
+  USE_GLPK
+  USE_GZIP
+  USE_HMMCACHE
+  USE_HMMDEBUG
+  USE_HMMPARALLEL
+  USE_HMMPARALLEL_STRUCTURES
+  USE_LOGCACHE
+  USE_LOGCACHE	
+  USE_LOGSUMARRAY
+  USE_LOGSUMARRAY//AAA
+  USE_LZMA
+  USE_LZO
+  USE_PATHDEBUG
+  USE_REFERENCE_COUNTING
+  USE_SHORTREAL_KERNELCACHE
+  USE_SNAPPY
+  USE_SVMLIGHT
+  USE_TMP_ARRAYCLASS
+  VARIABLES_ON_STACK
+  VPM_ADA
+  WIN32
+  _GLIBCXX_CMATH
+  _WIN32
 

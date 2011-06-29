@@ -5,9 +5,6 @@
 #define DARWIN 1
 #endif
 
-// #include <shikkenForwards.h>
-// #include <Rcpp.h>
-
 #include <Rcpp.h>
 
 #include <shogun/base/SGObject.h>

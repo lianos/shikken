@@ -1,7 +1,83 @@
 ## This assumes that we can call Rscript to ask Rcpp about its locations
 ## Use the R_HOME indirection to support installations of multiple R version
 PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()")
-
 PKG_CPPFLAGS = -I. -I./shogun
 PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
+###############################################################################
+## shikken/shogun specific
+.PHONY : .depend clean
+
+## To define other targets to compile, the first target has to be `all`
+## Having `all` depend on $(SHLIB) directs it to compile the libraries
+## when all is said and done
+all: .depend $(SHLIB)
+
+###############################################################################
+## Variables and targets taken/inspired from shogun's configure stuff
+EXT_OBJ_CPP=cpp.o
+EXT_OBJ_C=c.o
+EXT_SRC_CPP=cpp
+EXT_SRC_C=c
+EXT_SRC_HEADER=h
+SRCDIR=.
+
+## TODO: check if -pthread is appropriate for windows?
+PKG_LIBS += -lm -pthread # -llapack -lcblas
+
+###############################################################################
+## Assuming presence of certain "things" for the most popular platforms
+## in order for shogun to comple
+DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 \
+  -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
+  -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
+  -DUSE_REFERENCE_COUNTING
+
+DEFINES += -DWIN32 -D_WIN32
+
+ifndef NO_SVMLIGHT
+DEFINES += -DUSE_SVMLIGHT
+endif
+
+ifdef HAVE_HDF5
+DEFINES += -DHAVE_HDF5
+PKG_LIBS += -lhdf5
+endif
+
+ifdef HAVE_XML
+DEFINS += -DHAVE_XML
+PKG_LIBS += -lxml2
+endif
+
+## $(findstring find,in) : searches `in` for `find` and returns `find`
+## if it is found
+ifneq (,$(findstring DUSE_GZIP,$(DEFINES)))
+PKG_LIBS += -lz
+endif
+
+ifneq (,$(findstring DUSE_BZIP2,$(DEFINES)))
+PKG_LIBS += -lbz2
+endif
+
+%.$(EXT_OBJ_CPP): %.$(EXT_SRC_CPP)
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
+
+## The shogun-toolbox has make rules that target and compile "normal" .c files,
+## but there are none of these files here yet.
+# %.$(EXT_OBJ_C): %.$(EXT_SRC_C)
+#   $(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
+
+HEADERFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)" )
+SRCFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
+OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
+              $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
+
+## Generetae .depend file. This file generates targets
+.depend:
+	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
+  -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
+
+-include .depend
+
+clean:
+	rm -f $(OBJECTS)
