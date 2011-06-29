@@ -1,5 +1,5 @@
 Package: shikken
-Title: An S4 interface to the shogun (machine learning) toolbox.
+Title: An S4 interface to the shogun-toolbox, a large-scale machine learning library.
 Version: 0.11.0-1
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
