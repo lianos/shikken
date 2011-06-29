@@ -1,17 +1,12 @@
-This is an R library for the [shogun toolbox][shogun] that provides
-a more R-idiomatic interface to the toolbox than the `sg` and `shogun`
-(`r` and `r_modular`) libraries that come with the toolbox itself.
+shikken is a library for the [R programming language][rlang] that provides
+an interface to the [shogun toolbox][shogun], a C++ library for "large scale"
+machine learning.
 
-I'm hoping this will sidestep the problem the `r_modular` interface has
-which is a result of a non-fully functional [R-swig][Rswig].
+Please refer to the [shikken project site][shikken] for more information.
 
-The layout of this package is inspired by [RcppArmadillo][armadillo], and
-the library design is inspired by [kernlab][kernlab].
+DISCLAIMER: This is a work in progress and is not yet "release ready".
+Still, feel free to download, install, and provide feedback.
 
-DISCLAIMER: This is work in progress, so it's probably not a good idea
-for *you* to use it just yet.
-
-[shogun]: http://www.shogun-toolbox.org/ "shogun toolbox"
-[Rswig]: http://www.swig.org/Doc2.0/R.html#R_nn2
-[armadillo]: http://dirk.eddelbuettel.com/code/rcpp.armadillo.html
-[kernlab]: http://cran.r-project.org/web/packages/kernlab/
+[rlang]: http://www.r-project.org/
+[shogun]: http://www.shogun-toolbox.org/
+[shikken]: http://lianos.github.com/shikken/
