@@ -10,9 +10,16 @@ Description: An R (S4) interface to the shogun toolbox -- a machine learning
   already provided by shogun to access its features in R. This package aims
   to provide a more (R) idiomatic interface to shogun's methods so that it
   is more accessible to (i) the R journeyman; and/or (ii) someone who is not
-  well versed in shogun's API already.
+  well versed in the particulars of shogun's API already.
   .
-  The shogun toolbox is licensed under the GPLv3 with the exception of
+  Note that if there is no precompiled version of this library available for
+  your platform, it is likely because the automated build system is not
+  able to build the version of the shogun-toolbox that is included with this
+  package. If you download the source package, there are detailed instructions
+  on how to build shikken and the shogun-toolbox on your system located in
+  the inst/INSTALL file.
+  .
+  These libraries are licensed under the GPLv3 with the exception of
   some files from svmlight, which are copyright Torsten Joachimns and are
   licensed separately. Please see the LICENSE.SVMlight file for further
   information.
