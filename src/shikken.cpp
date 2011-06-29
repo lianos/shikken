@@ -92,7 +92,13 @@ RcppExport SEXP shogun_ref_count(SEXP ptr) {
     return Rcpp::wrap(sptr->ref_count());
 }
 
-/* -------------------------------- Threads ---------------------------------*/
+/* -------------------------------- Threads -------------------------------- */
+
+/**
+ * Sets or queries for the number of threads shogun will use
+ * 
+ * If setting a new number, this function returns the old value.
+ */
 RcppExport SEXP shogun_threads(SEXP n) {
 BEGIN_RCPP
     Parallel *par = get_global_parallel();
@@ -115,7 +121,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
-/* ------------------------------- Plumbing ---------------------------------*/
+/* ------------------------------- Plumbing -------------------------------- */
 RcppExport SEXP shogun_version() {
 BEGIN_RCPP
     return Rcpp::wrap(SHOGUN_VERSION);

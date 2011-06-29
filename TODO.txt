@@ -1,4 +1,14 @@
-Install shogun r_modular library and build some tests against that.
+* Install shogun r_modular library and build some tests against that.
+
+* To enable use of system install of shogun, ensure that the include path (-I)
+  finds those header files when compiling the shikken C++ code.
+  
+  This may require moving src/shogun back to inst/include/shogun. Then add
+  -I../inst/include and -I../inst/include/shogun to PKG_CXXFLAGS when compiling
+  our bundled shogun-toolbox (ie. WITH_SHOGUN is not defined), otherwise add
+  -I$(WITH_SHOGUN)/include to PKG_CXXFLAGS and add -L$(WITH_SHOGUN)/lib and
+  -lshogun in the right places.
+
 
 Some autoconf links:
 

@@ -72,9 +72,9 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   }
   args <- list(...)
   if (is.null(args$threads)) {
-    threads <- 1L
+    n.threads <- 1L
   } else {
-    threads <- as.integer(args$threads)
+    n.threads <- as.integer(args$threads)
   }
   
   svm.engine <- match.arg(svm.engine)
@@ -82,7 +82,7 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   labels <- createLabels(y, type)
   
   old.threads <- threads()
-  n.threads <- threads(threads)
+  n.threads <- threads(n.threads)
   on.exit(threads(old.threads))
   
   sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon, svm.engine)
@@ -92,12 +92,13 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   }
   
   ## get support vectors
-  sv <- .Call("svm_support_vectors", sg.ptr) + 1L
-  alpha <- .Call("svm_alphas", sg.ptr)
+  sv <- .Call("svm_support_vectors", sg.ptr, PACKAGE="shikken") + 1L
+  obj <- .Call("svm_objective", sg.ptr, PACKAGE="shikken")
+  alpha <- .Call("svm_alphas", sg.ptr, PACKAGE="shikken")
   
-  new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels,
-      type=type, engine=svm.engine, sv=sv, alpha=alpha,
-      num.threads=n.threads)
+  new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
+      engine=svm.engine, sv.index=sv, objective=obj, alpha=alpha,
+      num.threads=n.threads, is.trained=TRUE)
 })
 
 setMethod("SVM", c(x="Features"),
@@ -108,18 +109,4 @@ function(x, ...) {
 setMethod("SVM", c(x="Kernel"),
 function(x, ...) {
 
-})
-
-setMethod("kernel", c(x="SVM"),
-function(x, ...) {
-  ## DEBUG: Increment the shogun object ref for the Kernel object?
-  upRefCount(x@Kernel@sg.ptr)
-  x@Kernel
-})
-
-setReplaceMethod("kernel", "SVM", function(x, value) {
-  stopifnot(inherits(value, 'Kernel'))
-  upRefCount(kernel)
-  x@Kernel <- kernel
-  x
 })

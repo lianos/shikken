@@ -11,7 +11,7 @@
 ##   http://www.jfranken.de/homepages/johannes/vortraege/make_inhalt.en.html
 
 ## For Rcpp
-PKG_CXXFLAGS += -I. -I./shogun -I. -DHAVE_MVEC -DHAVE_LAPACK #
+PKG_CXXFLAGS += -I. -DHAVE_MVEC -DHAVE_LAPACK #
 PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) \
   $(BLAS_LIBS) $(FLIBS)
 
@@ -30,11 +30,14 @@ all: .depend $(SHLIB)
 ifdef WITH_SHOGUN
 
 ## do the headers exits?
-ifeq (exists, $(shell [ -d $(WITH_SHOGUN)/include/shogun ]) && echo exists)
-$(warning system shogun headers found ...)
-else
-$(error system shogun install was not found)
+ifneq (exists, $(shell [ -d $(WITH_SHOGUN)/include/shogun ]) && echo exists)
+$(error SYSTEM SHOGUN HEADERS WERE NOT FOUND)
 endif
+
+## TODO: check if the library exists?
+##ifneq (exists, $(shell [ -f $(WITH_SHOGUN)/lib/shogun* ]) && echo exists)
+##$(error SYSTEM SHOGUN LIBRARY WAS NOT FOUND)
+#endif
 
 endif
 
@@ -97,7 +100,7 @@ endif
 # %.$(EXT_OBJ_C): %.$(EXT_SRC_C)
 #   $(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
 
-HEADERFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)" )
+HEADERFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)")
 SRCFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
 OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
               $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
@@ -106,14 +109,19 @@ OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
 ## Do we link against an installed libshogun or compile our own?
 ifdef WITH_SHOGUN
 
-PKG_CXXFLAGS += $(WITH_SHOGUN)/include
-PKG_LIBS += -lshobugn
+PKG_CXXFLAGS += -I$(WITH_SHOGUN)/include
+PKG_LIBS += -L$(WITH_SHOGUN)/lib -lshobugn
 .depend:
 	echo "Compiling against shogun library $(WITH_SHOGUN)"
 
 else
-
+##
 ## Compile shikken against the version of shogun that it comes wwth
+##
+## The #include directives in the shogun files do not prefix the files to
+## include with shogun/, so add the shogun dir to include search path.
+PKG_CXXFLAGS += -I./shogun
+
 .depend:
 	## Generetae .depend file. This file generates targets
 	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \

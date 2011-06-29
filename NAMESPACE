@@ -63,5 +63,8 @@ exportMethods(
 export(
   shogunVersion,
   createFeatures,
-  createLabels
+  createLabels,
+  
+  isClassificationMachine,
+  isRegressionMachine
 )
