@@ -21,6 +21,20 @@ all: .depend $(SHLIB)
 
 ###############################################################################
 ## Variables and targets taken/inspired from shogun's configure stuff
+
+## Check to see if we are compiling against a system-install of shogun
+## and check that it is kosher
+ifdef WITH_SHOGUN
+
+## do the headers exits?
+ifeq (exists, $(shell [ -d $(WITH_SHOGUN)/include/shogun ]) && echo exists)
+$(warning system shogun headers found ...)
+else
+$(error system shogun install was not found)
+endif
+
+endif
+
 EXT_OBJ_CPP=cpp.o
 EXT_OBJ_C=c.o
 EXT_SRC_CPP=cpp
@@ -85,13 +99,24 @@ SRCFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_C
 OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
               $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
 
-## Generetae .depend file. This file generates targets
+
+## Do we link against an installed libshogun or compile our own?
+ifdef WITH_SHOGUN
+
+PKG_CXXFLAGS += $(WITH_SHOGUN)/include
+PKG_LIBS += -lshobugn
 .depend:
+	echo "Compiling against shogun library $(WITH_SHOGUN)"
+
+else
+
+## Compile shikken against the version of shogun that it comes wwth
+.depend:
+	## Generetae .depend file. This file generates targets
 	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
   -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
-
 -include .depend
+endif
 
 clean:
 	rm -f $(OBJECTS)
-

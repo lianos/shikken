@@ -57,9 +57,9 @@ the shogun-toolbox distribution.
    
    Let's assume your value for DIR is /usr/local (its default value), then
    you can then compile shikken against your own version of libshogun like so:
-   
-     $ R CMD INSTALL --configure-args=--with-shogun-dir=DIR \
-                     shikken-<version>.tar.gz
+     
+     $ export WITH_SHOGUN=/usr/local
+     $ R CMD INSTALL shikken-<version>.tar.gz
 
 All possible DEFINE(s)
 ----------------------
