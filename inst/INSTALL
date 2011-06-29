@@ -27,7 +27,7 @@ the shogun-toolbox distribution.
    This simple installation: Installs the version of the shogun-toolbox 
    that is included in this package under src/shogun.
    
-     $ R CMD INSTALL shikken-<version>.tar.gz
+       $ R CMD INSTALL shikken-<version>.tar.gz
    
    You might want to do this instead of doing a "normal" installation of
    the package if you want to set some custom flags.
@@ -36,14 +36,14 @@ the shogun-toolbox distribution.
    functionality (for licensing purposes), you can do that by exporting a
    NO_SVMLIGHT environment variable (its value is irrelevant):
    
-     $ export NO_SVMLIGHT=1
-     $ R CMD INSTALL shikken-<version>.tar.gz
+       $ export NO_SVMLIGHT=1
+       $ R CMD INSTALL shikken-<version>.tar.gz
     
    If you want to enable HDF5 support, you need to ensure you have hdf5
    installed already, and:
    
-     $ export HAVE_HDF5=1
-     $ R CMD INSTALL shikken-<version>.tar.gz
+       $ export HAVE_HDF5=1
+       $ R CMD INSTALL shikken-<version>.tar.gz
    
 2. Installing shikken against a previously installed version of libshogun.
    
@@ -59,9 +59,9 @@ the shogun-toolbox distribution.
    need to have already successfully compiled and installed the `libshogun`
    interface to the shogun-toolbox, ie:
    
-     $ cd /path/to/your/shogun-toolbox/src
-     $ ./configure --interfaces=libshogun
-     $ make -j4 && make install
+       $ cd /path/to/your/shogun-toolbox/src
+       $ ./configure --interfaces=libshogun
+       $ make -j4 && make install
    
    If you installed libshogun without too much fan fare, it would have
    installed the compiled library to DIR/lib/libshogun.xxx and the
