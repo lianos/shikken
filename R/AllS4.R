@@ -1,8 +1,10 @@
 setClass("ShikkenObject", contains="VIRTUAL")
+setGeneric("threads", function(x, ...) standardGeneric("threads"))
 
 setClass("Labels", contains="ShikkenObject",
          representation=representation(
            sg.ptr='externalptr',
+           n='integer',
            factor.map='numeric'))
 
 ################################################################################
@@ -16,7 +18,8 @@ setClass("Preprocessor", contains="ShikkenObject",
 ## Features
 setClass("Features", contains="ShikkenObject",
          representation=representation(
-           sg.ptr="externalptr"#, preprocessor="Preprocessor"))
+           sg.ptr="externalptr",
+           n="integer"#, preprocessor="Preprocessor"))
            ))
 
 setClass("DotFeatures", contains="Features")
@@ -32,6 +35,14 @@ setClass("CombinedFeatures", contains="Features")
 setClass("StringFeatures", contains="Features")
 setClass("StringFileFeatures", contains="StringFeatures")
 
+## -- methods
+setGeneric("preprocessor", function(x, ...) standardGeneric("preprocessor"))
+setGeneric("preprocessor<-", function(x, ..., value) {
+  standardGeneric("preprocessor<-")
+})
+
+setGeneric("weights", function(x, ...) standardGeneric("weights"))
+setGeneric("weights<-", function(x, ..., value) standardGeneric("weights<-"))
 
 ###############################################################################
 ## Kernel Normalizers
@@ -62,6 +73,7 @@ setClass("SigmoidKernel", contains="DotKernel")
 setClass("StringKernel", contains="Kernel")
 setClass("WeightedDegreeStringKernel", contains="StringKernel")
 
+## -- methods
 
 setGeneric("normalizer", function(x, normalizer, ...) {
   standardGeneric("normalizer")
@@ -71,8 +83,6 @@ setGeneric("normalizer<-", function(x, ..., value) {
   standardGeneric("normalizer<-")
 })
 
-setGeneric("weights", function(x, ...) standardGeneric("weights"))
-setGeneric("weights<-", function(x, ..., value) standardGeneric("weights<-"))
 
 
 ###############################################################################
@@ -97,7 +107,8 @@ setClass("KernelMachine", contains="LearningMachine",
 
 setClass("DistanceMachine", contains="LearningMachine") ## kmeans
 
-setGeneric("threads", function(x, ...) standardGeneric("threads"))
+## -- methods
+
 setGeneric("threads<-", function(x, ..., value) standardGeneric("threads<-"))
 
 setClass("SVM", contains="KernelMachine",

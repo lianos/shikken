@@ -2,13 +2,18 @@
 
 using namespace shogun;
 
+RcppExport SEXP features_length(SEXP rfeatures) {
+    Rcpp::XPtr<CLabels> features(rfeatures);
+    
+}
+
 // shogun features are stored in column order, where each column denotes
 // a feature vector for an example
 // columns are linear in memory
 //
 // ->set_feature_matrix(matrix, n.dimensions, n.observations)
 RcppExport SEXP
-create_simple_features_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
+features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
 BEGIN_RCPP
     Rcpp::NumericVector data(rdata);
     int nobs = Rcpp::as<int>(rnobs);
@@ -35,7 +40,7 @@ END_RCPP
 }
 
 RcppExport SEXP
-create_simple_features_sparse(SEXP rdata, SEXP rnobs, SEXP rdim) {
+features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim) {
 BEGIN_RCPP
     return R_NilValue;
 END_RCPP

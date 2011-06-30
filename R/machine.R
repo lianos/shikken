@@ -33,6 +33,26 @@ isRegressionMachine <- function(x, ...) {
   length(grep('regress', x@type) > 0L)
 }
 
+setMethod("threads", c(x="LearningMachine"),
+function(x, ...) {
+  x@num.threads
+})
+
+setReplaceMethod("threads", "LearningMachine", function(x, value) {
+  value <- as.integer(value)
+  stopifnot(isSingleInteger(x))
+  
+  n.cores <- detectCores()
+  if (n.cores < value) {
+    warning("Number of cores is less than the number of threads desired, ",
+            "setting number of threads to max cores")
+    value <- n.cores
+  }
+  
+  x@num.threads <- value
+  x
+})
+
 setMethod("fitted", "KernelMachine", function(object, ...) {
   predict(object, newdata=NULL, type="response")
 })

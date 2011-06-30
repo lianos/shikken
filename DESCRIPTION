@@ -7,10 +7,10 @@ Description: An R (S4) interface to the shogun toolbox -- a machine learning
   library with a focus on large scale kernel methods.
   .
   This library provides an alternative to the r and r_modular interfaces
-  already provided by shogun to access its features in R. This package aims
-  to provide a more (R) idiomatic interface to shogun's methods so that it
-  is more accessible to (i) the R journeyman; and/or (ii) someone who is not
-  well versed in the particulars of shogun's API already.
+  already provided by shogun to access its features in R. This package provides
+  a more (R) idiomatic interface to the shogun-toolbox functionality that makes
+  its use more accessible to (i) the R journeyman; and/or (ii) someone who
+  is not well versed in the particulars of shogun's API already.
   .
   Note that if there is no precompiled version of this library available for
   your platform, it is likely because the automated build system is not

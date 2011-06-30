@@ -29,8 +29,11 @@
 
 ///////////////////////////////////////////////////////////////////// interface
 RcppExport SEXP
-create_simple_features_dense(SEXP rdata, SEXP rnobs, SEXP rdim);
+features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim);
 
 RcppExport SEXP
-create_simple_features_sparse(SEXP rdata, SEXP rnobs, SEXP rdim);
+features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim);
+
+RcppExport SEXP features_length(SEXP rfeatures);
+
 #endif

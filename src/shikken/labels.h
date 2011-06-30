@@ -5,6 +5,8 @@
 #include <shikken.h>
 #include <features/Labels.h>
 
-RcppExport SEXP create_labels(SEXP rlabels);
+RcppExport SEXP labels_create(SEXP rlabels);
+RcppExport SEXP labels_length(SEXP rlabels);
+RcppExport SEXP labels_get(SEXP rlabels);
 
 #endif

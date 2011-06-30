@@ -50,21 +50,3 @@ function(x, ...) {
   invisible(x)
 })
 
-setMethod("threads", c(x="LearningMachine"),
-function(x, ...) {
-  ## .Call("get_num_threads", x@sg.ptr, PACKAGE="shikken")
-  x@num.threads
-})
-
-setReplaceMethod("threads", "LearningMachine", function(x, value) {
-  value <- as.integer(value)
-  stopifnot(isSingleInteger(x))
-  x@num.threads <- value
-  x
-})
-
-setThreads <- function(n) {
-  if (missing(n)) {
-    
-  }
-}

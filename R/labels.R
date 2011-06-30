@@ -1,3 +1,20 @@
+setMethod("length", "Labels", function(x) {
+  .Call("label_length", x@sg.ptr, PACKAGE="shikken")
+})
+
+setAs("Labels", "numeric", function(from) {
+  .Call("get_labels", from@sg.ptr, PACKAGE="shikken")
+})
+
+setAs("Labels", "vector", function(from) {
+  out <- as(from, "numeric")
+  if (length(from@factor.map) > 0) {
+    chars <- names(from@factor.map)[match(from, from@factor.map)]
+    out <- as.factor(chars)
+  }
+  out
+})
+
 guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
   if (is.null(nlevels)) {
     nlevels <- length(unique(labels))
@@ -65,6 +82,6 @@ createLabels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
   stopifnot(is.numeric(y))
   stopifnot(is.numeric(factor.map))
 
-  ptr <- .Call("create_labels", y, PACKAGE="shikken")
-  new('Labels', sg.ptr=ptr, factor.map=factor.map)
+  ptr <- .Call("labels_create", y, PACKAGE="shikken")
+  new('Labels', sg.ptr=ptr, factor.map=factor.map, n=length(y))
 }
