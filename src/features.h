@@ -4,28 +4,28 @@
 /////////////////////////////////////////////////////////////////////// Imports
 #include "shikken.h"
 
-#include <features/Labels.h>
+#include <shogun/features/Labels.h>
 
 // dense feature matrices
 //  SimpleFeatures extends DotFeatures extends Features
-#include <features/SimpleFeatures.h>
+#include <shogun/features/SimpleFeatures.h>
 
 // StringFeatures extend Features
-#include <features/StringFeatures.h>
+#include <shogun/features/StringFeatures.h>
 // StringFeatures that are file based through Memory-mapped files.
-#include <features/StringFileFeatures.h>
+#include <shogun/features/StringFileFeatures.h>
 
 // dotfeatures for polyhnomial kernel
-#include <features/PolyFeatures.h>
+#include <shogun/features/PolyFeatures.h>
 
 // CombinedFeatures extend Features
-#include <features/CombinedFeatures.h>
+#include <shogun/features/CombinedFeatures.h>
 // extend DotFeatures
-#include <features/CombinedDotFeatures.h>
+#include <shogun/features/CombinedDotFeatures.h>
 
 // SparseFeatures extends DotFeatures extends Features
-#include <features/SparseFeatures.h>
-#include <features/SparsePolyFeatures.h>
+#include <shogun/features/SparseFeatures.h>
+#include <shogun/features/SparsePolyFeatures.h>
 
 ///////////////////////////////////////////////////////////////////// interface
 RcppExport SEXP

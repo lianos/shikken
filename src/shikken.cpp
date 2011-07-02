@@ -1,4 +1,4 @@
-#include <shikken.h>
+#include "shikken.h"
 
 using namespace shogun;
 

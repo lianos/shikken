@@ -1,4 +1,4 @@
-#include <shikken/labels.h>
+#include "labels.h"
 
 using namespace shogun;
 

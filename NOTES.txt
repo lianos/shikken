@@ -1,23 +1,48 @@
 Packaging up libshogun for use inside shikken
 =============================================
 
-Proper configuration/compilation of libshogun requires some post-processing
-in order to generate some files before make/install. The following files
-need to be generated:
+To create a proper inst/include/shogun directory for this package, you must
+first go through the paces to compile/install the libshogun interface from
+a shogun-toolbox distro, eg:
   
-  * lib/config.h : This can *probably* be rolled into the normal R CMD INSTALL
-    workflow since this is simply a list of #define macros that are generated
-    after system functionality detection
-    
-  * base/class_list.cpp : This probably can't be rolled into the normal
-    R CMD INSTALL mojo since it invokes base/clase_lsit_cpp.py in order
-    to generate it.
+  1. Remove previously installed shogun-toolbox headers from the system
+     and this package:
+     
+         $ rm -rf /usr/local/include/shogun
+         $ rm -rf SHIKKEN/inst/include/shogun/*
+  
+  2. Get newest shogun-toolbox:
+     
+         $ curl -O ...
+     
+     Unpack the distro somewhere (which is referenced as SHOGUN now)
+  
+  3. Compile/install it:
+  
+         $ cd SHOGUN/src
+         $ ./configure --interfaces=libshogun
+         $ make && make install
+  
+     We will need to copy the new header files this generates into this
+     package, as well as the SHOGUN/src/libshogun/base/class_list.cpp
+     file.
+     
+  4. Copy the new /usr/local/include/shogun directory to SHIKKEN/inst/include.
+         
+         $ cp -rf /usr/local/include/shogun/* SHIKKEN/inst/include/shogun/
+     
+     YOU PROBABLY HAVE TO COMMENT OUT LOTS OF THE config.h file now in
+     SHIKKEN/inst/include/shogun/lib/config.h, as these defines will be set
+     during an R CMD INSTALL of the package.
+  
+  5. Copy the shogun-toolbox *.cpp files to the appropriate places in the
+     new inst/include/shogun directory tree. You will have to cd into the
+     SHOGUN/src/libshogun directory first to make the paths feng-shui:
+         
+         $ cd SHOGUN/src/libshogun
+         $ find . -name *.cpp -print0 | xargs -0 -I fn -n 1 cp fn SHIKKEN/inst/include/shogun/fn
 
-This means that if you want to include a new libshogun src tree inside
-shikken, you have to ensure these files are generated.
-
-Once the files above are created in the appropriate place, move shogun's
-`src/libshogun` directory to `shikken/src/shogun`
+  6. Celebrate
 
 TODO: Ensure R CMD INSTALL process defined appropriate -DFLAGS by doing
       proper system detection.
@@ -25,7 +50,6 @@ TODO: Ensure R CMD INSTALL process defined appropriate -DFLAGS by doing
 TODO: Enable the user to specify that they want to use their own installed
       version of libshogun in the same way RSQLite allows you to specify
       using the system installed libsqlite library
-
 
 Shogun memory management and R
 ==============================

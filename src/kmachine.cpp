@@ -1,4 +1,4 @@
-#include <shikken/kmachine.h>
+#include "kmachine.h"
 
 using namespace shogun;
 

@@ -1,4 +1,4 @@
-#include <shikken/kernels.h>
+#include "kernels.h"
 
 using namespace shogun;
 

@@ -2,15 +2,15 @@
 #define __SHIKKEN_SVM_H__
 
 /////////////////////////////////////////////////////////////////////// Imports
-#include <shikken.h>
+#include "shikken.h"
 
-#include <shikken/kmachine.h>
-#include <shikken/labels.h>
-#include <shikken/features.h>
-#include <shikken/kernels.h>
+#include "kmachine.h"
+#include "labels.h"
+#include "features.h"
+#include "kernels.h"
 
-#include <classifier/svm/LibSVM.h>
-#include <classifier/svm/SVMLight.h>
+#include <shogun/classifier/svm/LibSVM.h>
+#include <shogun/classifier/svm/SVMLight.h>
 
 RcppExport SEXP
 svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine);

@@ -2,8 +2,8 @@
 #define __SHIKKEN_LABELS_H__
 
 /////////////////////////////////////////////////////////////////////// Imports
-#include <shikken.h>
-#include <features/Labels.h>
+#include "shikken.h"
+#include <shogun/features/Labels.h>
 
 RcppExport SEXP labels_create(SEXP rlabels);
 RcppExport SEXP labels_length(SEXP rlabels);

@@ -1,4 +1,4 @@
-#include <shikken/features.h>
+#include "features.h"
 
 using namespace shogun;
 

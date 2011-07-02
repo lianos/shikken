@@ -24,7 +24,7 @@ Description: An R (S4) interface to the shogun toolbox -- a machine learning
   licensed separately. Please see the LICENSE.SVMlight file for further
   information.
 License: GPL (>= 3)
-Depends: R (>= 2.14.0), Rcpp (>= 0.9.4), caret (>= 4.91)
+Depends: R (>= 2.13.0), Rcpp (>= 0.9.4), caret (>= 4.91)
 Imports: Rcpp, caret, methods
 Suggests: testthat (>= 0.5), kernlab (>= 0.9), shogun
 LinkingTo: Rcpp

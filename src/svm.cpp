@@ -1,4 +1,4 @@
-#include <shikken/svm.h>
+#include "svm.h"
 
 using namespace shogun;
 

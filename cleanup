@@ -11,6 +11,7 @@
 
 ## Remove compiled C/C++ stuffs
 for o in `find src -name "*.o"`; do rm $o; done
+for o in `find inst/include -name "*.o"`; do rm $o; done
 rm -rf src-*
 rm src/*.so
 
