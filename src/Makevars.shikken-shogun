@@ -16,7 +16,8 @@ ifeq (darwin, $(findstring darwin,$(R_PLATFORM)))
 DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_XML\
   -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
   -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
-  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2 -DDARWIN
+  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2 -DDARWIN \
+  -DHAVE_MVEC -DHAVE_LAPACK
 
 ## add paths for xml headers and lib
 PKG_LIBS += -lxml2
@@ -28,6 +29,8 @@ DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 \
   -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
   -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
   -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2
+
+XARGS="xargs -
 endif
 
 ifndef NO_SVMLIGHT
@@ -55,5 +58,6 @@ PKG_LIBS += -lbz2
 endif
 
 .depend:
-	@echo $(SRCFILES) | xargs -I filename -n 1 $(CXX) -MM $(DEFINES) \
-                       $(PKG_CXXFLAGS) filename -MT filename.o > .depend
+	find ../inst/include/shogun -name "*.c" -o -name "*.cpp" -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
+	find . -name "*.c" -o -name "*.cpp" -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >>.depend
+

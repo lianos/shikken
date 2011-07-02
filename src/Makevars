@@ -17,7 +17,7 @@
 ##   http://www.jfranken.de/homepages/johannes/vortraege/make_inhalt.en.html
 
 ## For Rcpp
-PKG_CXXFLAGS += -DHAVE_MVEC -DHAVE_LAPACK #
+#PKG_CXXFLAGS += -DHAVE_MVEC -DHAVE_LAPACK #
 PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) \
   $(BLAS_LIBS) $(FLIBS)
 
