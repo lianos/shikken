@@ -1,0 +1,22 @@
+## This is part of shikken -- do not customize
+$(warning Using system shogun ...)
+SHOGUN_HEADERS  =
+SHOGUN_SRCFILES =
+
+## do the headers exits?
+ifneq (exists, $(shell [ -d $(SYS_SHOGUN_HEADERS)/shogun ]) && echo exists)
+$(error System shogun headers not found in $(SYS_SHOGUN_HEADERS))
+endif
+
+# does the library exist?
+ifneq (exists, $(shell [ -f $(SYS_SHOGUN_LIB) ]) && echo exists)
+$(error Systym shogun library not found at $(SYS_SHOGUN_LIB))
+endif
+
+## Add the paths/lib to appropriate places
+PKG_CXXFLAGS += -I$(shell dirname $(SYS_SHOGUN_HEADERS))
+PKG_LIBS += -L$(shell dirname $(SYS_SHOGUN_LIB)) -lshobugn
+
+.depend:
+	echo "Compiling against shogun library $(SYS_SHOGUN_LIB)"
+

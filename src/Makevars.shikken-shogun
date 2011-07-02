@@ -1,0 +1,59 @@
+$(warning Compiling shikken shogun ...)
+PKG_CXXFLAGS += -I../inst/include -I../inst/include/shogun
+PGK_LIBS += -lm -pthread
+
+SHOGUN_HEADERS  = $(shell find ../inst/include -name "*.h")
+SHOGUN_SRCFILES = $(shell find ../inst/include -name "*.c" -o -name "*.cpp" )
+
+SRCFILES := $(SHOGUN_SRCFILES) $(SRCFILES)
+###############################################################################
+## Assuming presence of certain "things" for the most popular (non-windows)
+## platforms in order for the internal shogun library to compile correctly.
+## If this is being compiled on a "recent" linux or OS X machine, these should
+## be pretty standard.
+
+ifeq (darwin, $(findstring darwin,$(R_PLATFORM)))
+DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_XML\
+  -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
+  -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
+  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2 -DDARWIN
+
+## add paths for xml headers and lib
+PKG_LIBS += -lxml2
+PKG_CXXFLAGS += -I/usr/include/libxml2
+endif
+
+ifeq (linux, $(findstring linux,$(R_PLATFORM)))
+DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 \
+  -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
+  -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
+  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2
+endif
+
+ifndef NO_SVMLIGHT
+DEFINES += -DUSE_SVMLIGHT
+endif
+
+ifdef HAVE_HDF5
+DEFINES += -DHAVE_HDF5
+PKG_LIBS += -lhdf5
+endif
+
+ifdef HAVE_XML
+DEFINS += -DHAVE_XML
+PKG_LIBS += -lxml2
+endif
+
+## $(findstring find,in) : searches `in` for `find` and returns `find`
+## if it is found
+ifneq (,$(findstring DUSE_GZIP,$(DEFINES)))
+PKG_LIBS += -lz
+endif
+
+ifneq (,$(findstring DUSE_BZIP2,$(DEFINES)))
+PKG_LIBS += -lbz2
+endif
+
+.depend:
+	@echo $(SRCFILES) | xargs -I filename -n 1 $(CXX) -MM $(DEFINES) \
+                       $(PKG_CXXFLAGS) filename -MT filename.o > .depend

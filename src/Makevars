@@ -17,7 +17,7 @@
 ##   http://www.jfranken.de/homepages/johannes/vortraege/make_inhalt.en.html
 
 ## For Rcpp
-PKG_CXXFLAGS += -I. -DHAVE_MVEC -DHAVE_LAPACK #
+PKG_CXXFLAGS += -DHAVE_MVEC -DHAVE_LAPACK #
 PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) \
   $(BLAS_LIBS) $(FLIBS)
 
@@ -31,111 +31,31 @@ all: .depend $(SHLIB)
 ###############################################################################
 ## Variables and targets taken/inspired from shogun's configure stuff
 
+SHIKKEN_HEADERS  = $(shell find . -name "*.h")
+SHIKKEN_SRCFILES = $(shell find . -name "*.c" -o -name "*.cpp")
+SRCFILES = $(SHIKKEN_SRCFILES)
+
 ## Check to see if we are compiling against a system-install of shogun
 ## and check that it is kosher
-ifdef WITH_SHOGUN
-
-## do the headers exits?
-ifneq (exists, $(shell [ -d $(WITH_SHOGUN)/include/shogun ]) && echo exists)
-$(error SYSTEM SHOGUN HEADERS WERE NOT FOUND)
+ifdef WITH_SYS_SHOGUN
+  include Makevars.system-shogun
+else
+  include Makevars.shikken-shogun
 endif
 
-## TODO: check if the library exists?
-##ifneq (exists, $(shell [ -f $(WITH_SHOGUN)/lib/shogun* ]) && echo exists)
-##$(error SYSTEM SHOGUN LIBRARY WAS NOT FOUND)
-#endif
-
-endif
-
-EXT_OBJ_CPP=cpp.o
-EXT_OBJ_C=c.o
-EXT_SRC_CPP=cpp
-EXT_SRC_C=c
-EXT_SRC_HEADER=h
-SRCDIR=.
+OBJECTS   = $(patsubst %.cpp,%.cpp.o, $(patsubst %.c,%.c.o, $(SRCFILES)))
 
 ## TODO: check if -pthread is appropriate for windows?
 PKG_LIBS += -lm -pthread # -llapack -lcblas
 
-###############################################################################
-## Assuming presence of certain "things" for the most popular (non-windows)
-## platforms in order for the internal shogun library to compile correctly.
-## If this is being compiled on a "recent" linux or OS X machine, these should
-## be pretty standard.
-DEFINES = -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 \
-  -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
-  -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
-  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2
-
-ifeq (darwin, $(findstring darwin,$(R_PLATFORM)))
-DEFINES += -DDARWIN
-endif
-
-## TODO test linux?
-ifeq (linux, $(findstring linux,$(R_PLATFORM)))
-DEFINES += -DUSE_GZIP -DUSE_BZIP2
-endif
-
-ifndef NO_SVMLIGHT
-DEFINES += -DUSE_SVMLIGHT
-endif
-
-ifdef HAVE_HDF5
-DEFINES += -DHAVE_HDF5
-PKG_LIBS += -lhdf5
-endif
-
-ifdef HAVE_XML
-DEFINS += -DHAVE_XML
-PKG_LIBS += -lxml2
-endif
-
-## $(findstring find,in) : searches `in` for `find` and returns `find`
-## if it is found
-ifneq (,$(findstring DUSE_GZIP,$(DEFINES)))
-PKG_LIBS += -lz
-endif
-
-ifneq (,$(findstring DUSE_BZIP2,$(DEFINES)))
-PKG_LIBS += -lbz2
-endif
-
-%.$(EXT_OBJ_CPP): %.$(EXT_SRC_CPP)
+%.cpp.o: %.cpp
 	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
 
 ## The shogun-toolbox has make rules that target and compile "normal" .c files,
 ## but there are none of these files here yet.
-# %.$(EXT_OBJ_C): %.$(EXT_SRC_C)
-#   $(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
-
-HEADERFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_HEADER)")
-SRCFILES = $(shell find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)")
-OBJECTS   = $(patsubst %.$(EXT_SRC_CPP),%.$(EXT_OBJ_CPP), \
-              $(patsubst %.$(EXT_SRC_C),%.$(EXT_OBJ_C), $(SRCFILES)))
-
-
-## Do we link against an installed libshogun or compile our own?
-ifdef WITH_SHOGUN
-
-PKG_CXXFLAGS += -I$(WITH_SHOGUN)/include
-PKG_LIBS += -L$(WITH_SHOGUN)/lib -lshobugn
-.depend:
-	echo "Compiling against shogun library $(WITH_SHOGUN)"
-
-else
-##
-## Compile shikken against the version of shogun that it comes wwth
-##
-## The #include directives in the shogun files do not prefix the files to
-## include with shogun/, so add the shogun dir to include search path.
-PKG_CXXFLAGS += -I./shogun
-
-.depend:
-	## Generetae .depend file. This file generates targets
-	find $(SRCDIR) -name "*.$(EXT_SRC_C)" -o -name "*.$(EXT_SRC_CPP)" \
-  -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
--include .depend
-endif
+%.c.o: %.c
+	$(CXX) $(ALL_CPPFLAGS) $(ALL_CXXFLAGS) $(PKG_CXXFLAGS) $(DEFINES) -c $< -o $@
 
 clean:
 	rm -f $(OBJECTS)
+	rm *.so
