@@ -17,10 +17,8 @@
 ## the file by uncommenting the VAR=DEFAULT lines and seting DEFAULT
 ## accordingly for your system.
  
-## USER_CONFIG=1
-
-
-## WITH_EXT_SHOGUN=1
+## WITH_SYS_SHOGUN=1
+## SYS_SHOGUN_PREFIX=/usr/local
 
 ## EXT_SHOGUN_HEADERS should be the absolute path on your system where the
 ## shogun headers were installed.

@@ -1,5 +1,13 @@
-If you are reading this file, I'm assuming that you have downloaded the source
-version of this package that you want to customize and install.
+This point is important, so I just want to start off with this. It's not
+that I'm yelling at you, I just think it will save you lots of frustration:
+
+      IF YOU ARE HAVING PROBLEMS INSTALLING SHIKKEN USING THE VERSION OF
+      SHOGUN THAT IS BUNDLED WITH THIS PACKAGE, THEN FOLLOW THE STEPS
+      OUTLINED IN SECTION (1) BELOW.
+
+By following section (1), you will end up using shogun's build process to
+compile and install a version of the shogun-toolbox configured for your system,
+which you can then have shikken link to.
 
 If you do not want to customize/tweak the install, simply install this package
 in "the usual way" using R's installation mechanisms (via CRAN). In an R
@@ -7,146 +15,73 @@ workspace:
 
     R> install.packages('shikken')
 
-
-Customizing a shikken Install Using a Source Package
-====================================================
-
 The compilation of shikken/shogun is handled through some "creative" use
-of the respective src/Makevars[.win]. Using autoconf would have resulted
-in a more robust configuration system/strategy, but I don't have time to
-invest in figuring the ins/outs of that now.
+of the respective src/Makevars[.*] files along with the src/config.site file.
 
-If you really require a "highly configured" version of shogun to link
-against that you can not rig up by exporting environment variables before
-installing the package, you should jump to installation option 2, which
-allows you to compile shikken against shogun library you can compile from
-the shogun-toolbox distribution.
+Installation of the shogun-toolbox is a bit complex and it involves:
 
-1. Tweaking the shogun library included in this package before installation.
+  (i) detection of system capabilities; and
+  (ii) serializing two files based on this detection:
+    (a) shogun/lib/config.h;  and
+    (b) shogun/base/class_list.cpp
 
-   This simple installation: Installs the version of the shogun-toolbox 
-   that is included in this package under src/shogun.
+shikken does not use autoconf to detect your system's capabilities, but rather
+chooses some sensible defaults for your platform. It also includes a
+pre-serialized version of (a) and (b) above which attempts to work properly
+given your configuration which are 'sliced and diced' during compile time given
+the different things defined in the `DEFINED` variable that is weaved together
+through the various src/Makevars[.*] files during the R CMD INSTALL process.
+
+
+-------------------------------------------------------------------------------
+1. Installing shikken against a previously installed version of libshogun.
+-------------------------------------------------------------------------------
+
+   This is likely the easiest way for you to customize your shogun-toolbox
+   library so that shikken can work with it. This should automatically detect
+   capabilities your system supplies, like xml support, hdf5 support,
+   LAPACK support, etc.
    
-       $ R CMD INSTALL shikken-<version>.tar.gz
+   You will be downloading a *release* version of the shogun-toolbox and
+   installing the `libshogun` interface into your system separately. Once
+   that finishes successfully, you can install shikken by linking against
+   the installed library and headers.
    
-   You might want to do this instead of doing a "normal" installation of
-   the package if you want to set some custom flags.
-   
-   For instance, to install shikken/shogun without including the SVM-Light
-   functionality (for licensing purposes), you can do that by exporting a
-   NO_SVMLIGHT environment variable (its value is irrelevant):
-   
-       $ export NO_SVMLIGHT=1
-       $ R CMD INSTALL shikken-<version>.tar.gz
-    
-   If you want to enable HDF5 support, you need to ensure you have hdf5
-   installed already, and:
-   
-       $ export HAVE_HDF5=1
-       $ R CMD INSTALL shikken-<version>.tar.gz
-   
-2. Installing shikken against a previously installed version of libshogun.
-   
-   The shogun-toolbox build process is a bit complex and quite flexible,
-   tweaking its functionality based on your systems (detected) abilities,
-   ie. enabling hdf5 support, enabling xml support, and support for other
-   things. It is possible that building the shogun-toolbox from the sources
-   (and build process) available with shikken alone might not be possible
-   (or easy).
-   
-   If this is the case, you can build shikken against and already installed
-   shogun-toolbox that exists on your system. In order to do so, you will
-   need to have already successfully compiled and installed the `libshogun`
-   interface to the shogun-toolbox, ie:
+   So, download and uncompress the shogun-toolbox, then:
    
        $ cd /path/to/your/shogun-toolbox/src
        $ ./configure --interfaces=libshogun
        $ make -j4 && make install
    
-   If you installed libshogun without too much fan fare, it would have
-   installed the compiled library to DIR/lib/libshogun.xxx and the
-   header files should be in DIR/include/shogun, where DIR=/usr/local.
+   If you didn't set a --prefix directive during your ./configure step,
+   it will install by default into DIR=/usr/local. Two things are necessary
+   to exist on your system before continuing:
    
-   Note that DIR is assumed to contain a `lib` and `include` directory where
-   the libshogun.xxx and shogun/headers.h reside.
+     (i)  DIR/include/shogun : This directory has the header files.
+     (ii) DIR/lib/libshogun* : This is the shogun library we link against.
    
-   Let's assume your value for DIR is /usr/local (its default value), then
-   you can then compile shikken against your own version of libshogun like so:
-     
-       $ export WITH_SHOGUN=/usr/local
-       $ R CMD INSTALL shikken-<version>.tar.gz
+   To compile shikken against this library, simply uncomment the
+   WITH_SYS_SHOGUN and SYS_SHOGUN_PREFIX lines in src/config.site.
+   Make sure that SYS_SHOGUN_PREFIX is set to the value for DIR previously
+   described.
+   
+   Now install shikken "as usual" from the command line:
+   
+       $ R CMD INSTALL shikken-<version>
 
-All possible DEFINE(s)
-----------------------
+-------------------------------------------------------------------------------
+2. Tweaking the shogun library included in this package before installation.
+-------------------------------------------------------------------------------
 
-The most important of these will incorporated into the Makevars installation
-approach over time.
-
-$ grep -r "#ifdef" *.cpp . | cut -f 2 -d' '| sort | uniq
-  ARRAY_STATISTICS
-  CYGWIN
-  DARWIN
-  DEBUG
-  DEBUG_COMMSCORING
-  DEBUG_DOTFEATURES
-  DEBUG_HASHEDWD
-  DEBUG_HIERARCHICAL
-  DEBUG_HWSK_COMPUTATION
-  DEBUG_LDA
-  DEBUG_SUBGRADIENTLPM
-  DEBUG_SUBGRADIENTSVM
-  DEBUG_WDFEATURES
-  DYNPROG_DEBUG
-  DYNPROG_TIMING
-  DYNPROG_TIMING_DETAIL
-  FIX_POS
-  HAVE_ACML
-  HAVE_ATLAS
-  HAVE_HDF5
-  HAVE_JSON
-  HAVE_LAPACK
-  HAVE_LOG2
-  HAVE_MKL
-  HAVE_POWL
-  HAVE_SQRTL
-  HAVE_XML
-  HMM_DEBUG
-  LOG_SUMARRAY
-  LOG_SUM_ARRAY
-  LPM_DEBUG
-  MCSVM_DEBUG
-  MUSRECALC
-  PLIFARRAY_DEBUG
-  PLIF_DEBUG
-  SUNOS
-  SVMLIGHT
-  TEST
-  TRACE_MEMORY_ALLOCS
-  TRIE_CHECK_EVERYTHING
-  USE_BIGSTATES
-  USE_BZIP2
-  USE_CPLEX
-  USE_GLPK
-  USE_GZIP
-  USE_HMMCACHE
-  USE_HMMDEBUG
-  USE_HMMPARALLEL
-  USE_HMMPARALLEL_STRUCTURES
-  USE_LOGCACHE
-  USE_LOGCACHE	
-  USE_LOGSUMARRAY
-  USE_LOGSUMARRAY//AAA
-  USE_LZMA
-  USE_LZO
-  USE_PATHDEBUG
-  USE_REFERENCE_COUNTING
-  USE_SHORTREAL_KERNELCACHE
-  USE_SNAPPY
-  USE_SVMLIGHT
-  USE_TMP_ARRAYCLASS
-  VARIABLES_ON_STACK
-  VPM_ADA
-  WIN32
-  _GLIBCXX_CMATH
-  _WIN32
-
+   This installs the version of the shogun-toolbox that is included in this
+   package under the inst/include/shogun directory.
+   
+   To try to enable/disable some functionality, you will be modifying the
+   src/config.site file. See the instructions there on how to do so. Once you
+   have turned on/off the options you like, then you can install shikken from
+   the command line as usual, eg:
+   
+       $ R CMD INSTALL shikken
+   
+   Where `shikken` is the parent directory that this file resides in, ie.
+   the ROOT directory for this package.
