@@ -15,7 +15,7 @@ setMethod("length", "Features", function(x) {
 })
 
 setGeneric("createFeaturesFor", signature=c("x", "y"),
-function(x, y, sparse=FALSE...) {
+function(x, y, sparse=FALSE, ...) {
   standardGeneric("createFeaturesFor")
 })
 
@@ -31,9 +31,9 @@ function(x, y, sparse, ...) {
   
 })
 
-createFeaturesFor <- function(x, y) {
-  
-}
+# createFeaturesFor <- function(x, y) {
+#   
+# }
 
 ##' Factory to create Shogun Feature Objects
 ##'
