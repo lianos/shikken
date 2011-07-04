@@ -1,3 +1,14 @@
+matchSvmEngine <- function(engine, as.int=FALSE) {
+  ## These 'engines' strings should match match 1-for-1/exact (case and all)
+  ## with the engines-mathcing code in svm.cpp::match_svm_engine
+  engines <- c('libsvm', 'svmlight')
+  engine <- match.arg(engine, engines)
+  if (as.int) {
+    engine <- match(engine, engines)
+  }
+  engine
+}
+
 setGeneric("SVM", function(x, ...) standardGeneric("SVM"))
 setMethod("SVM", c(x="formula"),
 function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
@@ -57,6 +68,7 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
     stop("Number of observations does not equal number of labels")
   }
   
+  svm.engine <- matchSvmEngine(svm.engine)
   type <- matchLearningType(y, type)
   
   if (type != '2-class') {
@@ -77,7 +89,6 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
     n.threads <- as.integer(args$threads)
   }
   
-  svm.engine <- match.arg(svm.engine)
   kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
   labels <- Labels(y, type)
   
@@ -85,7 +96,8 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   n.threads <- threads(n.threads)
   on.exit(threads(old.threads))
   
-  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon, svm.engine)
+  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon,
+                  svm.engine)
   
   if (is.null(sg.ptr)) {
     stop("error occured while initializing svm")
@@ -119,7 +131,7 @@ function(x, ...) {
 setMethod("train", c(x="SVM"),
 function(x, ...) {
   if (!trained(x)) {
-    .Call(train.fn(x), x@sg.ptr, x@engine, PACKAGE="shikken")    
+    .Call(train.fn(x), x@sg.ptr, matchSvmEngine(x@engine), PACKAGE="shikken")
   }
   x@var.cache[['trained']] <- TRUE
   invisible(x)
@@ -132,7 +144,7 @@ function(x, ...) {
 
 ###############################################################################
 ## Delegating to C
-setMethod("train.fn", c(x="SVM", ...),
+setMethod("train.fn", c(x="SVM"),
 function(x, ...) {
   "svm_train"
 })

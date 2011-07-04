@@ -2,6 +2,24 @@
 
 using namespace shogun;
 
+/**
+ * Casts the `engine` string to svm_engine_t type
+ *
+ * It is important that the (with cases) are the same ones that
+ * are defined in SVM.R/matchSvmEngine function
+ */
+svm_engine_t match_svm_engine(std::string engine) {
+    svm_engine_t type;
+    if (engine.compare("libsvm") == 0) {
+        type = LIBSVM;
+    } else if (engine.compare("svmlight") == 0) {
+        type = SVMLIGHT;
+    } else {
+        throw std::runtime_error("unknown svm engine");
+    }
+    return type;
+}
+
 RcppExport SEXP
 svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine) {
 BEGIN_RCPP
@@ -9,37 +27,21 @@ BEGIN_RCPP
     Rcpp::XPtr<CLabels> labels(rlabels);
     double C = Rcpp::as<double>(rc);
     double epsilon = Rcpp::as<double>(reps);
+    svm_engine_t engine = match_svm_engine(Rcpp::as<std::string>(rsvm_engine));
     
-    std::string svm_engine = Rcpp::as<std::string>(rsvm_engine);
     CSVM* svm = NULL;
     
-    // SEXP out;
-    SEXP sg_ptr;
-    
-    if (svm_engine.compare("libsvm") == 0) {
-        CLibSVM* csvm = new CLibSVM(C, kernel, labels);
-        //// Rprintf("Training libsvm ... \n");
-        //csvm->train();
-        svm = csvm;
-    } else if (svm_engine.compare("svmlight") == 0) {
-        CSVMLight* csvm = new CSVMLight(C, kernel, labels);
-        // Rprintf("Training svmlight ... \n");
-        // csvm->set_epsilon(epsilon);
-        // csvm->train();
-        svm = csvm;
+    if (engine == LIBSVM) {
+        svm = new CLibSVM(C, kernel, labels);
+    } else if (engine == SVMLIGHT) {
+        svm = new CSVMLight(C, kernel, labels);
     } else {
-        // Rprintf("Unsupported svm_engine %s\n", svm_engine.c_str());
-        std::runtime_error("unknown svm_engine");
+        throw std::runtime_error("unknown svm_engine");
         return R_NilValue;
     }
-    // Rprintf("... training done\n");
+    
     svm->set_epsilon(epsilon);
     SG_REF(svm);
-    // return Rcpp::wrap(svm);
-    // out = Rcpp::List::create(Rcpp::Named("sg.ptr", sg_ptr),
-    //                          Rcpp::Named("alpha", ))
-    
-    // SK_WRAP(svm, sg_ptr);
     return SG2SEXP(svm);
 END_RCPP
 }
@@ -52,11 +54,11 @@ END_RCPP
 RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine) {
 BEGIN_RCPP
     CSVM *svm = static_cast<CSVM*>(R_ExternalPtrAddr(rsvm));
-    std::string svm_engine = Rcpp::as<std::string>(rsvm_engine);
+    svm_engine_t engine = match_svm_engine(Rcpp::as<std::string>(rsvm_engine));
     
-    if (svm_engine.compare("libsvm") == 0) {
+    if (engine == LIBSVM) {
         DCAST((svm), CLibSVM, train);
-    } else if (svm_engine.compare("svmlight") == 0) {
+    } else if (engine == SVMLIGHT) {
         DCAST((svm), CSVMLight, train);
     } else {
         std::runtime_error("unknown svm_engine");
