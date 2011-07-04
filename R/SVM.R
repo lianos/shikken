@@ -107,7 +107,8 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
 
 setMethod("SVM", c(x="Features"),
 function(x, ...) {
-
+  kernel <- Features(x, ...)
+  SVM(kernel, ...)
 })
 
 setMethod("SVM", c(x="Kernel"),

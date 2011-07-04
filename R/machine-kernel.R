@@ -36,3 +36,18 @@ setMethod("bias", c(x="KernelMachine"),
 function(x, ...) {
   .Call("kmachine_bias", x@sg.ptr, PACKAGE="shikken")
 })
+
+##' Decision = trcrossprod(wVector(x, data), [new]data) + bias(x)
+wVector <- function(x, data) {
+  stopifnot(inherits(x, 'KernelMachine'))
+  if (missing(data)) stop("Data used in training is required to calculate W")
+  if (!trained(x)) stop("Train machine prior to retrieve wVector")
+  
+  ## asv <- mapply(function(sv.idx, a) {
+  ##   data[sv.idx,] * a
+  ## }, supportVectors(x), alphas(x))
+  ## ## mapply returns a transposed matrix (columns are the examples)
+  ## w <- rowSums(asv)
+  
+  alphas(x) %*% data[supportVectors(x), , drop=FALSE]
+}
