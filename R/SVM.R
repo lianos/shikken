@@ -117,12 +117,9 @@ function(x, ...) {
 
 setMethod("train", c(x="SVM"),
 function(x, ...) {
-  .Call("svm_train", x@sg.ptr, x@engine, PACKAGE="shikken")
-  
-  # sv <- .Call("svm_support_vectors", sg.ptr, PACKAGE="shikken") + 1L
-  # obj <- .Call("svm_objective", sg.ptr, PACKAGE="shikken")
-  # alpha <- .Call("svm_alphas", sg.ptr, PACKAGE="shikken")
-  
+  if (!trained(x)) {
+    .Call(train.fn(x), x@sg.ptr, x@engine, PACKAGE="shikken")    
+  }
   x@var.cache[['trained']] <- TRUE
   invisible(x)
 })
@@ -134,6 +131,11 @@ function(x, ...) {
 
 ###############################################################################
 ## Delegating to C
+setMethod("train.fn", c(x="SVM", ...),
+function(x, ...) {
+  "svm_train"
+})
+
 setMethod("predict.fn", c(x="SVM"),
 function(x, ...) {
   ## by and large, we use the predict (apply) method from KernelMachine,

@@ -18,6 +18,8 @@ function(x, as.index, ...) {
   if (!trained(x)) {
     stop("Machine needs to be trained before SVs are set")
   }
+  
+  ## Returns C-based indices of the support vectors
   .Call("kmachine_support_vectors", x@sg.ptr, PACKAGE="shikken") + 1L
 })
 

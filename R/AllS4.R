@@ -161,5 +161,6 @@ setClass("KNN", contains="DistanceMachine",
 ## Private
 
 ## Delegating to C
-##' Returns the name of the C++ function to use to `predict`
+##' Returns the name of the C++ functions to use for different tasks
+setGeneric("train.fn", function(x, ...) standardGeneric("train.fn"))
 setGeneric("predict.fn", function(x, ...) standardGeneric("predict.fn"))

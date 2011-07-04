@@ -45,6 +45,10 @@ END_RCPP
 }
 
 
+// TODO: Switch this function to accept the S4 object as rsvm, so we
+//       can: (i) get its `engine` label automatically, and (ii) let
+//       all *_train function just take 1 argument (the machine), so
+//       to enable use of `train.fn` function dispatch from R.
 RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine) {
 BEGIN_RCPP
     CSVM *svm = static_cast<CSVM*>(R_ExternalPtrAddr(rsvm));
@@ -52,7 +56,7 @@ BEGIN_RCPP
     
     if (svm_engine.compare("libsvm") == 0) {
         DCAST((svm), CLibSVM, train);
-    } else if (svm_engine.compare("svmlight" == 0)) {
+    } else if (svm_engine.compare("svmlight") == 0) {
         DCAST((svm), CSVMLight, train);
     } else {
         std::runtime_error("unknown svm_engine");
