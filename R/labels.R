@@ -1,9 +1,17 @@
+## TODO: Test memory allocation using Labels -- they're simple
+# y <- lapply(1:10000, function(i) {
+#   Labels(sample(c(-1,1), 2000, replace=TRUE))
+# })
+## rm()
+## TODO: Add support for num_classes -- in this scenario, labels are
+##       0 based, eg. 0, 1, 2, ..., C
+
 setMethod("length", "Labels", function(x) {
-  .Call("label_length", x@sg.ptr, PACKAGE="shikken")
+  .Call("labels_length", x@sg.ptr, PACKAGE="shikken")
 })
 
 setAs("Labels", "numeric", function(from) {
-  .Call("get_labels", from@sg.ptr, PACKAGE="shikken")
+  .Call("labels_get", from@sg.ptr, PACKAGE="shikken")
 })
 
 setAs("Labels", "vector", function(from) {
@@ -13,6 +21,12 @@ setAs("Labels", "vector", function(from) {
     out <- as.factor(chars)
   }
   out
+})
+
+setMethod("as.numeric", c(x="Labels"), function(x) as(x, 'numeric'))
+setMethod("as.vector", c(x="Labels"), function(x) as(x, 'vector'))
+setMethod("as.integer", c(x="Labels"), function(x) {
+  as.integer(as(x, 'numeric'))
 })
 
 guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
@@ -83,5 +97,10 @@ createLabels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
   stopifnot(is.numeric(factor.map))
 
   ptr <- .Call("labels_create", y, PACKAGE="shikken")
-  new('Labels', sg.ptr=ptr, factor.map=factor.map, n=length(y))
+  new('Labels', sg.ptr=ptr, factor.map=factor.map)
 }
+
+Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
+  createLabels(y, learning.type=learning.type, factor.map=factor.map, ...)
+}
+

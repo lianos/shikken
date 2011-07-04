@@ -48,7 +48,7 @@ setMethod("SVM", c(x="matrix"),
 function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
          svm.engine=c('libsvm', 'svmlight'), scaled=TRUE, C=1, C.neg=C,
          nu=0.2, epsilon=0.1, class.weights=NULL, cache=40, ..., subset,
-         na.action=na.omit) {
+         na.action=na.omit, do.train=TRUE) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required.")
   }
@@ -72,7 +72,7 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   }
   args <- list(...)
   if (is.null(args$threads)) {
-    n.threads <- 1L
+    n.threads <- threads()
   } else {
     n.threads <- as.integer(args$threads)
   }
@@ -91,14 +91,18 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
     stop("error occured while initializing svm")
   }
   
-  ## get support vectors
-  sv <- .Call("svm_support_vectors", sg.ptr, PACKAGE="shikken") + 1L
-  obj <- .Call("svm_objective", sg.ptr, PACKAGE="shikken")
-  alpha <- .Call("svm_alphas", sg.ptr, PACKAGE="shikken")
+  svm <- new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
+             engine=svm.engine, num.threads=n.threads)
+             
+  svm@var.cache[['trained']] <- FALSE
+  svm@var.cache[['epsilon']] <- epsilon
+  svm@var.cache[['C']] <- C
   
-  new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
-      engine=svm.engine, sv.index=sv, objective=obj, alpha=alpha,
-      num.threads=n.threads, is.trained=TRUE)
+  if (do.train) {
+    train(svm)
+  }
+  
+  svm
 })
 
 setMethod("SVM", c(x="Features"),
@@ -109,4 +113,21 @@ function(x, ...) {
 setMethod("SVM", c(x="Kernel"),
 function(x, ...) {
 
+})
+
+setMethod("train", c(x="SVM"),
+function(x, ...) {
+  .Call("svm_train", x@sg.ptr, x@engine, PACKAGE="shikken")
+  
+  # sv <- .Call("svm_support_vectors", sg.ptr, PACKAGE="shikken") + 1L
+  # obj <- .Call("svm_objective", sg.ptr, PACKAGE="shikken")
+  # alpha <- .Call("svm_alphas", sg.ptr, PACKAGE="shikken")
+  
+  x@var.cache[['trained']] <- TRUE
+  invisible(x)
+})
+
+setMethod("objective", c(x="SVM"),
+function(x, ...) {
+  .Call("svm_objective", x@sg.ptr, PACKAGE="shikken")
 })

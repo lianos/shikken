@@ -29,13 +29,13 @@ BEGIN_RCPP
         matrix[i] = (float64_t) data[i];
     }
     
+    // Rcpp::XPtr< CSimpleFeatures<float64_t> > \
+    //     features(new CSimpleFeatures<float64_t>(), true);
+    // feaatures->ref();
     CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();
     features->set_feature_matrix(matrix, dim, nobs);
-
     SG_REF(features);
-
-    SK_WRAP(features, out);
-    return out;
+    return SG2SEXP(features);
 END_RCPP
 }
 

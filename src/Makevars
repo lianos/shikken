@@ -34,6 +34,9 @@ all: .depend $(SHLIB)
 SHIKKEN_HEADERS  = $(shell find . -name "*.h")
 SHIKKEN_SRCFILES = $(shell find . -name "*.c" -o -name "*.cpp")
 SRCFILES = $(SHIKKEN_SRCFILES)
+DEFINES =
+
+-include config.site
 
 ## Check to see if we are compiling against a system-install of shogun
 ## and check that it is kosher

@@ -1,6 +1,3 @@
-## setClass("SupervisedLearningMachine", contains="LearningMachine")
-## setClass("UnsupervisedLearningMachine", contains="LearningMachine")
-
 supportedMachineTypes <- function() {
   # c('classification', '2-class', '1-class', 'multi-class', 'regression')
   c('classification', '2-class', 'regression')
@@ -24,21 +21,36 @@ matchLearningType <- function(labels, learning.type) {
 }
 
 isClassificationMachine <- function(x, ...) {
-  stopifnot(inherits(x, 'LearningMachine'))
+  stopifnot(inherits(x, 'Machine'))
   length(grep('class', x@type) > 0L)
 }
 
 isRegressionMachine <- function(x, ...) {
-  stopifnot(inherits(x, 'LearningMachine'))
+  stopifnot(inherits(x, 'Machine'))
   length(grep('regress', x@type) > 0L)
 }
 
-setMethod("threads", c(x="LearningMachine"),
+setMethod("trained", c(x="Machine"),
+function(x, ...) {
+  x@var.cache[['trained']]
+})
+
+setReplaceMethod("trained", "Machine", function(x, value) {
+  stopifnot(isTRUEorFALSE(value))
+  if (value) {
+    stop("You cannot declare a machine as being `trained`, ",
+         "run `train(x, ...)")
+  }
+  x@var.cache[['trained']] <- FALSE
+  x
+})
+
+setMethod("threads", c(x="Machine"),
 function(x, ...) {
   x@num.threads
 })
 
-setReplaceMethod("threads", "LearningMachine", function(x, value) {
+setReplaceMethod("threads", "Machine", function(x, value) {
   value <- as.integer(value)
   stopifnot(isSingleInteger(x))
   
@@ -64,7 +76,7 @@ setMethod("coef", "KernelMachine", function(object, ...) {
 setMethod("predict", "KernelMachine",
 function(object, newdata=NULL, type="response", ...) {
   type <- match.arg(type, c("response", "decision", "probabilities"))
-  if (!object@is.trained) {
+  if (!trained(object)) {
     stop("You've found yourself with an untrained machine, ",
          "build a new one and try again.")
   }

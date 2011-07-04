@@ -24,7 +24,7 @@ function(x, y, sparse, ...) {
   createFeatures(x, y, sparse=sparse, ...)
 })
 
-setMethod("createFeaturesFor", c(x="ANY", y="LearningMachine"),
+setMethod("createFeaturesFor", c(x="ANY", y="Machine"),
 function(x, y, sparse, ...) {
   ## 1. Figure out what type of features to kreate for hte kernel
   ## 2. Create them

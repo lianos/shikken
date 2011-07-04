@@ -1,22 +1,38 @@
 ## This is part of shikken -- do not customize
-$(warning Using system shogun ...)
 SHOGUN_HEADERS  =
 SHOGUN_SRCFILES =
 
+SHOGUN_HEADER_DIR=$(SYS_SHOGUN_PREFIX)/include/shogun
 ## do the headers exits?
-ifneq (exists, $(shell [ -d $(SYS_SHOGUN_HEADERS)/shogun ]) && echo exists)
-$(error System shogun headers not found in $(SYS_SHOGUN_HEADERS))
+ifneq (exists, $(shell [ -d $(SHOGUN_HEADER_DIR) ] && echo exists))
+$(error System shogun headers not found in $(SHOGUN_HEADER_DIR) )
 endif
 
 # does the library exist?
-ifneq (exists, $(shell [ -f $(SYS_SHOGUN_LIB) ]) && echo exists)
-$(error Systym shogun library not found at $(SYS_SHOGUN_LIB))
+# ifneq (exists, $(shell [ -f $(SYS_SHOGUN_LIB) ]) && echo existsa)
+# $(error Systym shogun library not found at $(SYS_SHOGUN_LIB))
+# endif
+
+## TODO: Read through $(SHOGUN_HEADER_DIR)/lib/config.h and parse the
+##       #define lines into the `DEFINES` variable
+ifeq (darwin, $(findstring darwin,$(R_PLATFORM)))
+DEFINES := -DSHOGUN -DHAVE_POWL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_XML\
+  -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE \
+  -DUSE_HMMPARALLELSTRUCTURES -DUSE_HMMPARALLEL -DUSE_BIGSTATES -DUSE_HMMCACHE \
+  -DUSE_REFERENCE_COUNTING -DUSE_GZIP -DUSE_BZIP2 -DDARWIN \
+  -DHAVE_MVEC -DHAVE_LAPACK $(DEFINES)
+
+## add paths for xml headers and lib
+PKG_LIBS += -lxml2
+PKG_CXXFLAGS += -I/usr/include/libxml2
 endif
 
 ## Add the paths/lib to appropriate places
-PKG_CXXFLAGS += -I$(shell dirname $(SYS_SHOGUN_HEADERS))
-PKG_LIBS += -L$(shell dirname $(SYS_SHOGUN_LIB)) -lshobugn
+PKG_CXXFLAGS += -I$(SYS_SHOGUN_PREFIX)/include
+PKG_LIBS += -L$(SYS_SHOGUN_PREFIX) -lshogun
 
 .depend:
-	echo "Compiling against shogun library $(SYS_SHOGUN_LIB)"
+	@echo "===================================================================="
+	@echo "Compiling against shogun library in $(SYS_SHOGUN_PREFIX)/lib"
+	@echo "===================================================================="
 

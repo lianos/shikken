@@ -1,5 +1,5 @@
-#ifndef __SHIKKEN_KMACHINE_H__
-#define __SHIKKEN_KMACHINE_H__
+#ifndef __SHIKKEN_MACHINE_H__
+#define __SHIKKEN_MACHINE_H__
 
 #include "shikken.h"
 

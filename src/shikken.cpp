@@ -37,31 +37,6 @@ void r_cancel_computations(bool &delayed, bool &immediately)
 /* ------------------------- Shogun Object Handling ------------------------ */
 
 /**
- * Decrements reference count to a shogun object and "clears" the R pointer
- * if count hits zero.
- * 
- * This method is called from within the C stack, and typically as the
- * "finalizer" parameter, eg:
- * 
- *   R_RegisterCFinalizer(some_shogun_obj_ptr, _shogun_ref_count_down); 
- */
-void _shogun_ref_count_down(SEXP ptr) {
-    Rprintf("  [C] _shogun_ref_count_down triggered\n");
-    // Rcpp::XPtr<CSGObject> sptr(ptr); // doesn't work??
-    CSGObject* sptr = reinterpret_cast<CSGObject*>(R_ExternalPtrAddr(ptr));
-    int32_t ref_count = -1;
-    if (sptr) {
-        Rprintf("  [C] ... decrementing ref count\n");
-        ref_count = sptr->unref();
-        if (ref_count == 0) {
-            sptr = NULL;
-            Rprintf("  [C] ... calling R_ClearExternalPtr, too\n");
-            R_ClearExternalPtr(ptr);
-        }
-    }
-}
-
-/**
  * Entry point from R to decrement Shogun object reference count, eg.
  * 
  *   dipose <- function(x) .Call("shogun_ref_count_down", externalptr)

@@ -60,10 +60,10 @@ through the various src/Makevars[.*] files during the R CMD INSTALL process.
      (i)  DIR/include/shogun : This directory has the header files.
      (ii) DIR/lib/libshogun* : This is the shogun library we link against.
    
-   To compile shikken against this library, simply uncomment the
-   WITH_SYS_SHOGUN and SYS_SHOGUN_PREFIX lines in src/config.site.
-   Make sure that SYS_SHOGUN_PREFIX is set to the value for DIR previously
-   described.
+   To compile shikken against this library, copy SHIKKEN/src/config.site.dist
+   to SHIKKEN/src/config.site and uncomment the WITH_SYS_SHOGUN and
+   SYS_SHOGUN_PREFIX lines in src/config.site. Ensure that SYS_SHOGUN_PREFIX
+   is set to the value for DIR previously described.
    
    Now install shikken "as usual" from the command line:
    
@@ -77,9 +77,12 @@ through the various src/Makevars[.*] files during the R CMD INSTALL process.
    package under the inst/include/shogun directory.
    
    To try to enable/disable some functionality, you will be modifying the
-   src/config.site file. See the instructions there on how to do so. Once you
-   have turned on/off the options you like, then you can install shikken from
-   the command line as usual, eg:
+   src/config.site file. First copy SHIKKEN/src/config.site.dist to
+   SHIKKEN/src/config.site. Modify the parameters in SHIKKEN/src/config.site
+   as described in that file.
+   
+   Once you have turned on/off the options you like, then you can install
+   shikken from the command line as usual, eg:
    
        $ R CMD INSTALL shikken
    

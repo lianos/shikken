@@ -1,4 +1,5 @@
 src/.depend
+src/config.site
 *.o
 *.so
 

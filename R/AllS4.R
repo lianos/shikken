@@ -1,11 +1,11 @@
 setClass("ShikkenObject", contains="VIRTUAL")
-setGeneric("threads", function(x, ...) standardGeneric("threads"))
 
 setClass("Labels", contains="ShikkenObject",
          representation=representation(
            sg.ptr='externalptr',
-           n='integer',
            factor.map='numeric'))
+
+setGeneric("threads", function(x, ...) standardGeneric("threads"))
 
 ################################################################################
 ## Preprocessors
@@ -87,35 +87,61 @@ setGeneric("normalizer<-", function(x, ..., value) {
 
 ###############################################################################
 ## Learning Machines
-setClass("LearningMachine", contains="ShikkenObject",
+setClass("Machine", contains="ShikkenObject",
          representation=representation(
            sg.ptr="externalptr",
            num.threads="integer",
            type='character',
-           is.trained='logical'))
+           var.cache='environment'))
 
-setClass("LinearMachine", contains="LearningMachine",
+setMethod("initialize", "Machine",
+function(.Object, ..., num.threads=integer(), type=character(),
+         var.cache=new.env()) {
+  callNextMethod(.Object, num.threads=num.threads, type=type,
+                 var.cache=var.cache, ...)
+})
+
+setClass("LinearMachine", contains="Machine",
          representation=representation(
            bias="numeric",
            coef="numeric"))
 
-setClass("KernelMachine", contains="LearningMachine",
-         representation=representation(
-           kernel="Kernel",
-           alpha="numeric",
-           sv.index="integer"))
+setGeneric("bias", function(x, ...) standardGeneric("bias"))
 
-setClass("DistanceMachine", contains="LearningMachine") ## kmeans
+setClass("KernelMachine", contains="Machine",
+         representation=representation(
+           kernel="Kernel"))#
+# setMethod("initialize", "KernelMachine",
+# function(.Object, ..., alpha=numeric(), sv.index=integer()) {
+#   callNextMethod(.Object, alpha=alpha, sv.index=sv.index, ...)
+# })
+
+setGeneric("alphas", function(x, ...) standardGeneric("alphas"))
+setGeneric("supportVectors", function(x, as.index=FALSE, ...) {
+  standardGeneric("supportVectors")
+})
+
+
+setClass("DistanceMachine", contains="Machine") ## kmeans
 
 ## -- methods
+setGeneric("train", function(x, ...) standardGeneric("train"))
+setGeneric("trained", function(x, ...) standardGeneric("trained"))
+setGeneric("trained<-", function(x, ...) standardGeneric("trained<-"))
 
 setGeneric("threads<-", function(x, ..., value) standardGeneric("threads<-"))
 
 setClass("SVM", contains="KernelMachine",
          representation=representation(
            labels="Labels",
-           engine="character",
-           objective="numeric"))
+           engine="character"))
+setMethod("initialize", "SVM",
+function(.Object, ..., engine=character()) {
+  callNextMethod(.Object, engine=engine, ...)
+})
+
+setGeneric("objective", function(x, ...) standardGeneric("objective"))
+
 
 setGeneric("kernel", function(x, ...) standardGeneric("kernel"))
 setGeneric("kernel<-", function(x, ..., value) standardGeneric("kernel<-"))

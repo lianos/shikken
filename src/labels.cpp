@@ -13,8 +13,7 @@ RcppExport SEXP labels_create(SEXP rlabels) {
     }
     
     SG_REF(clabels);
-    SK_WRAP(clabels, out);
-    return out;
+    return SG2SEXP(clabels);
 }
 
 RcppExport SEXP labels_length(SEXP rlabels) {

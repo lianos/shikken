@@ -25,8 +25,8 @@
 ##    (i) SYS_SHOGUN_PREFIX/include/shogun;
 ##    (ii) SYS_SHOGUN_PREIFX/lib/libshogun*
 ##
-WITH_SYS_SHOGUN=1
-SYS_SHOGUN_PREFIX=/usr/local
+## WITH_SYS_SHOGUN=1
+## SYS_SHOGUN_PREFIX=/usr/local
 
 ## ============================================================================
 ## If you want to tweak the shogun-toolbox library that comes with shikken,
