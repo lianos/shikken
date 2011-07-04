@@ -44,27 +44,34 @@ exportClasses(
 )
 
 exportMethods(
-  SVM,
+  Features,
+  
   Kernel,
   kernel,
   "kernel<-",
-  supportVectors,
-  alphas,
-  bias,
-  objective,
+  
   normalizer,
   "normalizer<-",
-  threads,
-  "threads<-",
+  
   train,
   trained,
   "trained<-",
   
-  # show,
+  bias,
   coef,
   fitted,
-  # plot,
   predict,
+  
+  SVM,
+  supportVectors,
+  alphas,
+  objective,
+  
+  threads,
+  "threads<-",
+  
+  # show,
+  # plot,
   
   ##
   # as.factor,
@@ -75,8 +82,6 @@ exportMethods(
 
 export(
   shogunVersion,
-  createFeatures,
-  createLabels,
   
   Labels,
   

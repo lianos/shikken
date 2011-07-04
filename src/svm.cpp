@@ -69,39 +69,6 @@ RcppExport SEXP svm_objective(SEXP rsvm) {
     return Rcpp::wrap(svm->get_objective());
 }
 
-RcppExport SEXP svm_predict(SEXP rsvm, SEXP rfeatures) {
-BEGIN_RCPP
-    Rcpp::XPtr<CSVM> svm(rsvm);
-    CLabels* preds;
-    std::vector<float64_t> out;
-    int npreds;
-    float64_t *slabels;
-    int32_t slen;
-    
-    if (rfeatures == R_NilValue) {
-        // Rprintf("Predicting on training labels\n");
-        preds = svm->apply();
-    } else {
-        // Rprintf("Predicting on new data\n");
-        Rcpp::XPtr<CFeatures> features(rfeatures);
-        preds = svm->apply(features);
-    }
-    
-    ///////////////////////////////////////////////
-    // This version does not suport subsets
-    // slabels = preds->get_labels(slen);
-    // for (int i = 0; i < slen; i++) {
-    //     out.push_back(slabels[i]);
-    // }
-    
-    npreds = preds->get_num_labels();
-    for (int i = 0; i < npreds; i++) {
-        out.push_back(preds->get_label(i));
-    }
-    
-    return Rcpp::wrap(out);
-END_RCPP
-}
 
 /**
  * Returns the C-indices of the support vectors

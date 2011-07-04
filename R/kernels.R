@@ -123,7 +123,7 @@ setMethod("Kernel", c(x="matrix"),
 function(x, kernel='linear', scaled=TRUE, subset,
          na.action=na.omit, sparse=FALSE, cache.size=40, ...) {
   kernel <- matchKernelType(kernel)
-  features <- createFeatures(x, kernel, sparse=sparse, scaled=scaled, ...)
+  features <- Features(x, kernel, sparse=sparse, scaled=scaled, ...)
   Kernel(features, kernel, scaled=scaled, subset=subset, na.action=na.action,
          cache.size=cache.size, sparse=sparse...)
 })

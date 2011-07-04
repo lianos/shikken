@@ -11,6 +11,7 @@
 
 
 RcppExport SEXP kmachine_set_kernel(SEXP rkmachine, SEXP rkernel);
+RcppExport SEXP kmachine_predict(SEXP rkmachine, SEXP rfeatures);
 RcppExport SEXP kmachine_support_vectors(SEXP rkmachine);
 RcppExport SEXP kmachine_alphas(SEXP rkmachine);
 RcppExport SEXP kmachine_bias(SEXP rkmachine);

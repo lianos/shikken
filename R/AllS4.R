@@ -36,6 +36,10 @@ setClass("StringFeatures", contains="Features")
 setClass("StringFileFeatures", contains="StringFeatures")
 
 ## -- methods
+
+##' Features constructor
+setGeneric("Features", function(x, type, ...) standardGeneric("Features"),
+           signature=c("x", "type"))
 setGeneric("preprocessor", function(x, ...) standardGeneric("preprocessor"))
 setGeneric("preprocessor<-", function(x, ..., value) {
   standardGeneric("preprocessor<-")
@@ -152,3 +156,10 @@ setClass("KNN", contains="DistanceMachine",
            features="Features",
            labels="Labels"
            ))
+
+###############################################################################
+## Private
+
+## Delegating to C
+##' Returns the name of the C++ function to use to `predict`
+setGeneric("predict.fn", function(x, ...) standardGeneric("predict.fn"))

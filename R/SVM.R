@@ -79,7 +79,7 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   
   svm.engine <- match.arg(svm.engine)
   kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
-  labels <- createLabels(y, type)
+  labels <- Labels(y, type)
   
   old.threads <- threads()
   n.threads <- threads(n.threads)
@@ -130,4 +130,15 @@ function(x, ...) {
 setMethod("objective", c(x="SVM"),
 function(x, ...) {
   .Call("svm_objective", x@sg.ptr, PACKAGE="shikken")
+})
+
+###############################################################################
+## Delegating to C
+setMethod("predict.fn", c(x="SVM"),
+function(x, ...) {
+  ## by and large, we use the predict (apply) method from KernelMachine,
+  ## but let's check for special cases
+  fn <- switch(x@engine, scattersvm='scattersvm_predict',
+               'kmachine_predict')
+  fn
 })

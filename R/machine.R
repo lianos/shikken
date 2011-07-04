@@ -73,7 +73,7 @@ setMethod("coef", "KernelMachine", function(object, ...) {
   stop("Implement coef,KernelMachine")
 })
 
-setMethod("predict", "KernelMachine",
+setMethod("predict", "Machine",
 function(object, newdata=NULL, type="response", ...) {
   type <- match.arg(type, c("response", "decision", "probabilities"))
   if (!trained(object)) {
@@ -85,7 +85,10 @@ function(object, newdata=NULL, type="response", ...) {
   }
   
   if (!is.null(newdata)) {
-    newdata <- as(newdata, 'Features')@sg.ptr
+    if (!inherits(newdata, 'Features')) {
+      features <- Feautures(newdata, object@features)
+    }
+    newdata <- features@sg.ptr
   }
   
   ## If shogun threads are > 1, we get following error:
@@ -95,7 +98,7 @@ function(object, newdata=NULL, type="response", ...) {
   on.exit(threads(old.threads))
   
   ## Returns the decision values
-  preds <- .Call("svm_predict", object@sg.ptr, newdata, PACKAGE="shikken")
+  preds <- .Call(predict.fn(object), object@sg.ptr, newdata, PACKAGE="shikken")
   
   if (type == "response" && isClassificationMachine(object)) {
     preds <- sign(preds)

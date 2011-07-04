@@ -22,6 +22,4 @@ RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine);
 // RcppExport SEXP svm_alphas(SEXP rsvm);
 RcppExport SEXP svm_objective(SEXP rsvm);
 
-RcppExport SEXP svm_predict(SEXP rsvm, SEXP rfeatures);
-
 #endif

@@ -1,46 +1,30 @@
-# setAs("Features", "Features", function(from) from)
-setAs("matrix", "Features", function(from) {
-  ## todo -- check sparsity?
-  if (is.numeric(from)) {
-    as.sparse <- (sum(from == 0) / length(from)) < .6
-  } else {
-    as.sparse <- FALSE
+##' Creates a Features object from \code{x} that's like \code{type}
+setMethod("Features", c(x="ANY", type="Features"),
+function(x, type, sparse=FALSE, ...) {
+  clazz <- class(type)[1]
+  if (missing(sparse)) {
+    sparse <- grep('sparse', clazz, ignore.case=TRUE)
   }
-
-  createFeatures(from, spase=as.sparse)
+  cclass <- gsub('sparse', '', clazz, ignore.case=TRUE)
+  type <- switch(cclass, PolyFeatures='polynomial', 
+                 SimpleFeatures='linear', Features='linear',
+                 stop("Unknown features type: ", cclass))
+  Features(x, type, sparse=sparse, ...)
 })
 
-setMethod("length", "Features", function(x) {
-  .Call("features_length", x@sg.ptr, PACKAGE="shikken")
-})
-
-setGeneric("createFeaturesFor", signature=c("x", "y"),
-function(x, y, sparse=FALSE, ...) {
-  standardGeneric("createFeaturesFor")
-})
-
-setMethod("createFeaturesFor", c(x="ANY", y="character"),
-function(x, y, sparse, ...) {
-  createFeatures(x, y, sparse=sparse, ...)
-})
-
-setMethod("createFeaturesFor", c(x="ANY", y="Machine"),
-function(x, y, sparse, ...) {
-  ## 1. Figure out what type of features to kreate for hte kernel
-  ## 2. Create them
+setMethod("Features", c(x="matrix", type="character"),
+function(x, type='linear', sparse=FALSE, ...) {
+  if (!is.numeric(x)) {
+    stop("only numeric features supported now")
+  }
   
-})
-
-# createFeaturesFor <- function(x, y) {
-#   
-# }
-
-##' Factory to create Shogun Feature Objects
-##'
-##' Shogun expects the features to be sent into the C interface in
-##' column-major format, where each column represents one observation.
-##'
-createFeatures <- function(x, kernel='linear', sparse=FALSE, ...) {
+  ## Shogun uses the transpose of what we expect in R
+  n.obs <- nrow(x)
+  n.dims <- ncol(x)
+  x <- t(x)
+  
+  type <- matchKernelType(type)
+  
   if (sparse) {
     density <- 'sparse'
     class.mod <- 'Sparse'
@@ -49,26 +33,39 @@ createFeatures <- function(x, kernel='linear', sparse=FALSE, ...) {
     density <- 'dense'
     class.mod <- 'Dense'
   }
-
-  if (!is.numeric(x) || !is.matrix(x)) {
-    stop("only numeric features supported now")
-  }
-
-  kernel <- matchKernelType(kernel)
-
-  if (kernel == 'polynomial') {
-    ## TODO
-    n <- nrow(x)
+  
+  if (type == 'polynomial') {
+    fn <- 'features_create_polynomial'
+    clazz <- if (sparse) 'SparsePolyFeatures' else 'PolyFeatures'
   } else {
-    ## libshogun expects to get the feature matrix with columns
-    ## linear in memory, where each column is the feature vector for
-    ## an example. This is the opposite of what "normal R" feature
-    ## matrices usually are.
-    fn <- paste('features_create_simple', density, sep="_")
-    sg.ptr <- .Call(fn, t(x), nrow(x), ncol(x), PACKAGE="shikken")
+    fn <- 'features_create_simple'
     clazz <- if (sparse) 'SparseFeatures' else 'SimpleFeatures'
-    n <- nrow(x)
   }
+  
+  if (length(density) == 1) {
+    fn <- paste(fn, density, sep="_")
+  }
+  
+  sg.ptr <- .Call(fn, x, n.obs, n.dims, PACKAGE="shikken")
+  
+  new(clazz, sg.ptr=sg.ptr, n=n.obs)
+})
 
-  new(clazz, sg.ptr=sg.ptr, n=n)
-}
+###############################################################################
+## Don't use these
+# setAs("Features", "Features", function(from) from)
+# setAs("matrix", "Features", function(from) {
+#   ## todo -- check sparsity?
+#   if (is.numeric(from)) {
+#     as.sparse <- (sum(from == 0) / length(from)) < .6
+#   } else {
+#     as.sparse <- FALSE
+#   }
+# 
+#   createFeatures(from, sparse=as.sparse)
+# })
+
+setMethod("length", "Features", function(x) {
+  ## .Call("features_length", x@sg.ptr, PACKAGE="shikken")
+  x@n
+})
