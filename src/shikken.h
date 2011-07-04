@@ -26,10 +26,11 @@ void r_print_error(FILE* target, const char* str);
 void r_cancel_computations(bool &delayed, bool &immediately);
 
 
-/* Call a method by downcasting SVMPTR to more specifc type CLAZZ */
-#define DCAST(SVMPTR, CLAZZ, METHOD, ...) \
+/* Call a method by downcasting a (shogun) pointer SGPTR to more specifc 
+* type CLAZZ */
+#define DCAST(SGPTR, CLAZZ, METHOD, ...) \
 do { \
-    CLAZZ * CPTR = dynamic_cast<CLAZZ*>(SVMPTR); \
+    CLAZZ * CPTR = dynamic_cast<CLAZZ*>(SGPTR); \
     CPTR->METHOD(## __VA_ARGS__); \
 } while(0)
 
