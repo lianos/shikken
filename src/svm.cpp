@@ -47,9 +47,7 @@ END_RCPP
 
 RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine) {
 BEGIN_RCPP
-    CSVM * svm = (CSVM *) R_ExternalPtrAddr(rsvm);
-    // Rcpp::XPtr<CSVM> xx(rsvm);
-    // CSVM * svm = xx&;
+    CSVM *svm = static_cast<CSVM*>(R_ExternalPtrAddr(rsvm));
     std::string svm_engine = Rcpp::as<std::string>(rsvm_engine);
     
     if (svm_engine.compare("libsvm") == 0) {
@@ -69,39 +67,3 @@ RcppExport SEXP svm_objective(SEXP rsvm) {
     return Rcpp::wrap(svm->get_objective());
 }
 
-
-/**
- * Returns the C-indices of the support vectors
- */
-// RcppExport SEXP svm_support_vectors(SEXP rsvm) {
-//     Rcpp::XPtr<CSVM> svm(rsvm);
-//     int nsv = svm->get_num_support_vectors();
-//     std::vector<int32_t> sv;
-//     
-//     for (int i = 0; i < nsv; i++) {
-//         sv.push_back(svm->get_support_vector(i));
-//     }
-//     
-//     return Rcpp::wrap(sv);
-// }
-
-/**
- * Returns the alphas
- */
-// RcppExport SEXP svm_alphas(SEXP rsvm) {
-//     Rcpp::XPtr<CSVM> svm(rsvm);
-//     int nsv = svm->get_num_support_vectors();
-//     std::vector<float64_t> alpha;
-//     
-//     for (int i = 0; i < nsv; i++) {
-//         alpha.push_back(svm->get_alpha(i));
-//     }
-//     
-//     return Rcpp::wrap(alpha);
-// }
-
-/** Returns the bias */
-// RcppExport SEXP svm_bias(SEXP rsvm) {
-//     Rcpp::XPtr<CSVM> svm(rsvm);
-//     return Rcpp::wrap(svm->get_bias());
-// }

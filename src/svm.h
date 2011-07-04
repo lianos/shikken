@@ -15,11 +15,8 @@
 RcppExport SEXP
 svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine);
 
-/* This function takes the actual S4 SVM object */
 RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine);
 
-// RcppExport SEXP svm_support_vectors(SEXP rsvm);
-// RcppExport SEXP svm_alphas(SEXP rsvm);
 RcppExport SEXP svm_objective(SEXP rsvm);
 
 #endif
