@@ -91,7 +91,7 @@ createLabels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
   if (is.classification) {
     if (learning.type == '2-class') {
       is.illegal <- setdiff(c(-1, 1), unique(y)) > 0
-      if (is.illegal) {}
+      if (is.illegal) {
         stop("2-class labels can only be -1 and 1")
       }
     } else {
