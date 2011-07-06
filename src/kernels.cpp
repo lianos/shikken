@@ -44,14 +44,6 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExprt SEXP poly_kernel_degree(SEXP rkernel) {
-    
-}
-RcppExprt SEXP poly_kernel_inhomogeneous(SEXP rkernel) {
-    
-}
-
-
 RcppExport SEXP
 create_kernel_sigmoid(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache) {
 BEGIN_RCPP

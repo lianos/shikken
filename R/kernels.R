@@ -124,10 +124,10 @@ function(x, ...) {
 
 setMethod("degree", c(x="PolyKernel"),
 function(x, ...) {
-  
+  x@params$degree
 })
 
 setMethod("inhomogeneous", c(x="PolyKernel"),
 function(x, ...) {
-  
+  x@params$inhomogeneous
 })

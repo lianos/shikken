@@ -25,8 +25,21 @@ setClass("Features", contains="ShikkenObject",
 setClass("DotFeatures", contains="Features")
 setClass("SimpleFeatures", contains="DotFeatures")
 
-setClass("PolyFeatures", contains="DotFeatures")
-setClass("SparsePolyFeatures", contains="DotFeatures")
+setClass("PolyFeatures", contains="DotFeatures",
+         representation=representation(
+           degree='integer',
+           normalize='logical'),
+         prototype=prototype(
+           degree=2L,
+           normalize=TRUE))
+
+setClass("SparsePolyFeatures", contains="DotFeatures",
+         representation=representation(
+           degree='integer',
+           normalize='logical'),
+         prototype=prototype(
+           degree=2L,
+           normalize=TRUE))
 
 setClass("SparseFeatures", contains="DotFeatures")
 
@@ -74,7 +87,14 @@ setClass("CombinedKernel", contains="Kernel")
 setClass("DotKernel", contains="Kernel")
 setClass("GaussianKernel", contains="DotKernel")
 setClass("LinearKernel", contains="DotKernel")
-setClass("PolyKernel", contains="DotKernel")
+setClass("PolyKernel", contains="DotKernel",
+         representation=representation(
+           degree='integer',
+           inhomogeneous='logical'),
+         prototype=prototype(
+           degree=2L,
+           inhomogeneous=TRUE))
+
 setClass("SigmoidKernel", contains="DotKernel")
 
 setClass("StringKernel", contains="Kernel")
