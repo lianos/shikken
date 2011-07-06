@@ -38,8 +38,11 @@ setClass("StringFileFeatures", contains="StringFeatures")
 ## -- methods
 
 ##' Features constructor
-setGeneric("Features", function(x, type, ...) standardGeneric("Features"),
-           signature=c("x", "type"))
+setGeneric("Features", signature=c("x", "type"), 
+function(x, type, sparse=FALSE, ...) {
+  standardGeneric("Features")
+})
+
 setGeneric("preprocessor", function(x, ...) standardGeneric("preprocessor"))
 setGeneric("preprocessor<-", function(x, ..., value) {
   standardGeneric("preprocessor<-")

@@ -15,6 +15,7 @@
 
 #include <shogun/kernel/SparseKernel.h>
 
+#include "features.h"
 
 //////////////////////////////////////////////////////////////// Implementation
 

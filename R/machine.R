@@ -86,7 +86,7 @@ function(object, newdata=NULL, type="response", ...) {
   
   if (!is.null(newdata)) {
     if (!inherits(newdata, 'Features')) {
-      features <- Feautures(newdata, object@features)
+      features <- Features(newdata, object@kernel)
     }
     newdata <- features@sg.ptr
   }

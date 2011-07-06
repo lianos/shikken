@@ -89,7 +89,7 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
     n.threads <- as.integer(args$threads)
   }
   
-  kernel <- Kernel(x, kernel=kernel, params=kparams, scaled=scaled, ...)
+  kernel <- Kernel(x, kernel=kernel, scaled=scaled, ...)
   labels <- Labels(y, type)
   
   old.threads <- threads()

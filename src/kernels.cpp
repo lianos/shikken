@@ -4,16 +4,19 @@ using namespace shogun;
 
 RcppExport SEXP
 create_kernel_linear(SEXP rfeatures) {
+BEGIN_RCPP
     Rcpp::XPtr<CFeatures> features(rfeatures);
     
     CLinearKernel* kernel = new CLinearKernel();
     kernel->init(features, features);
     SG_REF(kernel);
     return SG2SEXP(kernel);
+END_RCPP
 }
 
 RcppExport SEXP
 create_kernel_gaussian(SEXP rfeatures, SEXP rwidth, SEXP rcache) {
+BEGIN_RCPP
     Rcpp::XPtr<CFeatures> features(rfeatures);
     double width = Rcpp::as<double>(rwidth);
     double cache_size = Rcpp::as<double>(rcache);
@@ -22,12 +25,14 @@ create_kernel_gaussian(SEXP rfeatures, SEXP rwidth, SEXP rcache) {
     kernel->init(features, features);
     SG_REF(kernel);
     return SG2SEXP(kernel);
+END_RCPP
 }
 
 RcppExport SEXP
 create_kernel_polynomial(SEXP rfeatures, SEXP rdegree, SEXP rinhomo,
                          SEXP rcache) {
-    Rcpp::XPtr<CFeatures> features(rfeatures);
+BEGIN_RCPP
+    Rcpp::XPtr<CPolyFeatures> features(rfeatures);
     double degree = Rcpp::as<double>(rdegree);
     bool inhomogeneous = Rcpp::as<bool>(rinhomo);
     double cache_size = Rcpp::as<double>(rcache);
@@ -36,10 +41,12 @@ create_kernel_polynomial(SEXP rfeatures, SEXP rdegree, SEXP rinhomo,
     kernel->init(features, features);
     SG_REF(kernel);
     return SG2SEXP(kernel);
+END_RCPP
 }
 
 RcppExport SEXP
 create_kernel_sigmoid(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache) {
+BEGIN_RCPP
     Rcpp::XPtr<CFeatures> features(rfeatures);
     double gamma = Rcpp::as<double>(rgamma);
     double coef0 = Rcpp::as<double>(rcoef0);
@@ -49,11 +56,14 @@ create_kernel_sigmoid(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache) {
     kernel->init(features, features);
     SG_REF(kernel);
     return SG2SEXP(kernel);
+END_RCPP
 }
 
 RcppExport SEXP
 create_kernel_custom(SEXP rkernel) {
-  Rcpp::XPtr<CKernel> features(rkernel);
-  return R_NilValue;
+BEGIN_RCPP
+    Rcpp::XPtr<CKernel> features(rkernel);
+    return R_NilValue;
+END_RCPP
 }
 

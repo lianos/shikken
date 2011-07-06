@@ -42,6 +42,11 @@ BEGIN_RCPP
     
     svm->set_epsilon(epsilon);
     SG_REF(svm);
+    
+    // Rcpp::XPtr<CSVM> out(svm, false);
+    // out.setDeleteFinalizer(&_shogun_ref_count_down);
+    // return out;
+    
     return SG2SEXP(svm);
 END_RCPP
 }
