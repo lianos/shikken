@@ -1,113 +1,104 @@
-kernelFeatureClass <- function(kernel) {
-  kernel <- matchKernelType(kernel)
-  fclass <- .kernel.map[[kernel]]$data$class
-  if (is.null(fclass)) {
-    stop("No kernel <-> feature map for ", kernel, " kernel.")
-  }
-}
-
-kernelFeatureType <- function(kernel) {
-  fclass <- kernelFeatureClass(kernel)
-  map <- names(.data.map)
-  names(map) <- sapply(.data.map, '[[', class)
-  type <- map[fclass]
-  if (is.na(type)) {
-    stop("Can't match kernel [", kernel, "] to data names() of .data.map")
-  }
-  type
-}
-
-setMethod("Features", c(x="ANY", type="Kernel"),
-function(x, type, sparse=FALSE, ...) {
-  Features(x, type@features, sparse=sparse, ...)
-})
-
-###############################################################################
-## TODO: Figure out if `type` is
-##   (i)  a kernel name,
-##  (ii)  a names() of .data.map; or
-##  (iii) name of a Feature class
-## 
-## For the following two functions
-##############################################################################
-
-##' Creates a Features object from \code{x} that's like \code{type}
-setMethod("Features", c(x="ANY", type="Features"),
-function(x, type, sparse=FALSE, ...) {
-  clazz <- class(type)[1]
-  if (missing(sparse)) {
-    sparse <- grep('sparse', clazz, ignore.case=TRUE)
-  }
-  
-  cclass <- gsub('sparse', '', clazz, ignore.case=TRUE)
-  idx <- which(cclass == known.features)
-  if (length(idx) != 1) {
-    stop("Can't map class of features we are trying to copy: ", class(type))
-  }
-  
-  
-  type <- switch(cclass, PolyFeatures='polynomial', 
-                 SimpleFeatures='linear', Features='linear',
-                 stop("Unknown features type: ", cclass))
-  Features(x, type, sparse=sparse, ...)
-})
-
-setMethod("Features", c(x="matrix", type="character"),
-function(x, type='linear', sparse=FALSE, ...) {
-  if (!is.numeric(x)) {
-    stop("only numeric features supported now")
-  }
-  
-  ## Shogun uses the transpose of what we expect in R
-  n.obs <- nrow(x)
-  n.dims <- ncol(x)
-  x <- t(x)
-  
-  type <- matchKernelType(type)
-  features.info <- .kernel.map[[type]]$data
-  if (is.null(features.info)) {
-    stop("features <-> kernel mapping hosed")
-  }
-  
-  clazz <- features.info$class
-  fn <- features.info$cfun
-  params <- extractParams(type, ..., .defaults=features.info$params)
-  
-  if (sparse) {
-    fn <- paste(fn, 'sparse', sep="_")
-    clazz <- paste("Sparse", clazz, sep="")
-  } else {
-    fn <- paste(fn, 'dense', sep="_")
-  }
-  
-  ## TODO: Make this switching-on-kernel-type more elegant
-  basefn <- features.info$cfun
-  if (basefn == 'features_create_poly') {
-    sg.ptr <- .Call(fn, x, n.obs, n.dims, params$degree, params$normalize)
-  } else if (basefn == 'features_create_simple') {
-    sg.ptr <- .Call(fn, x, n.obs, n.dims)
-  } else {
-    stop(basefn, " not implemented yet")
-  }
-  
-  new(clazz, sg.ptr=sg.ptr, n=n.obs)
-})
-
-###############################################################################
-## Don't use these
-# setAs("Features", "Features", function(from) from)
-# setAs("matrix", "Features", function(from) {
-#   ## todo -- check sparsity?
-#   if (is.numeric(from)) {
-#     as.sparse <- (sum(from == 0) / length(from)) < .6
-#   } else {
-#     as.sparse <- FALSE
-#   }
-# 
-#   createFeatures(from, sparse=as.sparse)
-# })
-
 setMethod("length", "Features", function(x) {
   ## .Call("features_length", x@sg.ptr, PACKAGE="shikken")
   x@n
 })
+
+supportedFeatures <- function() {
+  names(.feature.map)
+}
+
+matchFeatureType <- function(ftype) {
+  match.arg(ftype, supportedFeatures())
+}
+
+matchFeatureClassToType <- function(fclass) {
+  fclean <- gsub("Sparse", "", fclass, ignore.case=TRUE)
+  known.classes <- sapply(.feature.map, '[[', 'class')
+  idx <- which(fclean ==  known.classes)
+  if (length(idx) != 1L) {
+    stop("Can't match feature class ", fclass, " to feature type")
+  }
+  names(.feature.map)[idx]
+}
+
+## Make a new features object for a given Kernel class
+setMethod("Features", c(x="ANY", type="Kernel"),
+function(x, type, sparse=FALSE, ...) {
+  Features(x, features(type), sparse=sparse, ...)
+})
+
+##' Creates a Features object from \code{x} that's like \code{type}
+setMethod("Features", c(x="ANY", type="Features"),
+function(x, type, sparse=FALSE, ...) {
+  ftype <- matchFeatureClassToType(class(type)[1])
+  Features(x, ftype, sparse=sparse, ...)
+})
+
+## Type must be a valid feature.type -- not a kernel name. To generate a feature
+## object for a given kernel, use the Kernel(data, kernel) constructor and grab
+## its features(), or call Features(x, KernelObject)
+setMethod("Features", c(x="matrix", type="character"),
+function(x, type='simple', sparse=FALSE, ...) {
+  type <- matchFeatureType(type)
+  Rfn <- getFunction(paste('createFeatures', type, sep="."))
+  features <- Rfn(x, sparse=sparse, ...)
+  features
+})
+
+###############################################################################
+## Feature creation functions [not exported]
+## ----------------------------------------------------------------------------
+## Do not call these directly, let the Features ctor delegate to them via the
+## x:type combo.
+createFeatures.simple <- function(x, sparse=FALSE, ...) {
+  stopifnot(isNumericMatrix(x))
+  if (inherits(x, 'Matrix')) {
+    stop("Support for Matrix class (for sparse matrixes) not implemented yet.")
+  }
+  
+  n.obs <- nrow(x)
+  n.dims <- ncol(x)
+  x <- t(x)
+  
+  f.info <- .feature.map$simple
+  if (sparse) {
+    clazz <- f.info$class.sparse
+    cfun <- f.info$cfun.sparse
+  } else {
+    clazz <- f.info$class
+    cfun <- f.info$cfun
+  }
+  
+  sg.ptr <- .Call(cfun, x, n.obs, n.dims, PACKAGE="shikken")
+  new(clazz, sg.ptr=sg.ptr, n=n.obs)
+}
+
+createFeatures.polynomial <- function(x, sparse=FALSE, ...) {
+  stopifnot(isNumericMatrix(x))
+  
+  n.obs <- nrow(x)
+  n.dims <- ncol(x)
+  x <- t(x)
+  
+  f.info <- .feature.map$polynomial
+  params <- extractParams(x, ..., .defaults=f.info$params)
+  
+  if (sparse) {
+    clazz <- f.info$class.sparse
+    cfun <- f.info$cfun.sparse
+    sg.ptr <- .Call(cfun, x, n.obs, n.dims, params$degree, params$normalize,
+                    params$hash.bits, PACKAGE="shikken")
+  } else {
+    clazz <- f.info$class
+    cfun <- f.info$cfun
+    sg.ptr <- .Call(cfun, x, n.obs, n.dims, params$degree, params$normalize,
+                    PACKAGE="shikken")
+  }
+  
+  new(clazz, sg.ptr=sg.ptr, n=n.obs)
+}
+
+createFeatures.string <- function(x, sparse=FALSE, ...) {
+  
+}
+

@@ -45,6 +45,7 @@ exportClasses(
 
 exportMethods(
   Features,
+  features,
   
   Kernel,
   kernel,

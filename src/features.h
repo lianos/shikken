@@ -27,6 +27,14 @@
 #include <shogun/features/SparseFeatures.h>
 #include <shogun/features/SparsePolyFeatures.h>
 
+template <typename T>
+shogun::CSimpleFeatures<T>*
+_features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim);
+
+template <typename T>
+shogun::CSparseFeatures<T>*
+_features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim);
+
 ///////////////////////////////////////////////////////////////////// interface
 RcppExport SEXP
 features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim);
@@ -34,10 +42,10 @@ RcppExport SEXP
 features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim);
 
 RcppExport SEXP
-features_create_poly_dense(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP degree, SEXP normalize);
+features_create_poly_dense(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP rdegree, SEXP rnormalize);
 RcppExport SEXP
-features_create_poly_sparse(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP rdegree, SEXP rnormalize);
-
+features_create_poly_sparse(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP rdegree,
+                            SEXP rnormalize, SEXP rhash_bits);
 
 RcppExport SEXP features_length(SEXP rfeatures);
 

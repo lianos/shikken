@@ -1,30 +1,39 @@
 supportedKernels <- function() {
  ## c('gaussian', 'linear', 'polynomial', 'sigmoid', 'weighted-degree-string', 'custom')
  ## c('gaussian', 'linear', 'sigmoid', 'weighted-degree-string')
-  names(.kernel.class.map)
+  names(.kernel.map)
 }
 
 matchKernelType <- function(kernel) {
-  kernel <- match.arg(make.names(kernel), supportedKernels())
-  stopifnot(kernel %in% names(.kernel.map))
-  kernel
+  match.arg(make.names(kernel), supportedKernels())
 }
 
+matchKernelTypeToFeatureType <- function(kernel) {
+  kernel <- matchKernelType(kernel)
+  .kernel.map[[kernel]]$feature.type
+}
+ 
 kernelClassName <- function(x, ...) {
-  idx <- which(names(.kernel.class.map) == x)
-  if (length(x) != 1) {
-    stop("No class converion for kernel type: ", x)
-  }
-  .kernel.class.map[[idx]]$class
+  kernel <- matchKernelType(x)
+  .kernel.map[[kernel]]$class
+}
+
+## returns the name of the class of Features associated with this kernel
+kernelFeatureClass <- function(kernel, sparse=FALSE, ...) {
+  f.type <- matchKernelTypeToFeatureType(kernel)
+  f.type <- matchFeatureType(f.type)
+  f.info <- .feature.map[[f.type]]
+  if (sparse) f.info$class.sparse else f.info$class
 }
 
 setGeneric("Kernel", function(x, ...) standardGeneric("Kernel"))
 
 setMethod("Kernel", c(x="formula"),
-function(x, data=NULL, scaled=TRUE, ...) {
+function(x, data=NULL, kernel='linear', scaled=TRUE, ...) {
   if (is.null(data) || missing(data)) {
     stop("data parameter is required for formula interface")
   }
+  kernel <- matchKernelType(kernel)
   cl <- match.call()
   m <- match.call(expand.dots=FALSE)
   if (is.matrix(eval(m$data, parent.frame()))) {
@@ -49,7 +58,7 @@ function(x, data=NULL, scaled=TRUE, ...) {
                        which(!scaled)))
     scaled <- !attr(x, "assign") %in% remove
   }
-  Kernel(x, scaled=scaled, ...)
+  Kernel(x, kernel=kernel, scaled=scaled, ...)
 })
 
 setMethod("Kernel", c(x="vector"),
@@ -59,15 +68,16 @@ function(x, ...) {
 
 ## Pass kernel parameters through ...
 setMethod("Kernel", c(x="matrix"),
-function(x, kernel='linear', scaled=TRUE, subset,
-         na.action=na.omit, sparse=FALSE, cache.size=40, ...) {
+function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
+         sparse=FALSE, cache.size=40, ...) {
   kernel <- matchKernelType(kernel)
-  fclass <- kernelFeatureClass(kernel)
-  features <- Features(x, fclass, sparse=sparse, scaled=scaled, ...)
+  ftype <- matchKernelTypeToFeatureType(kernel)
+  features <- Features(x, ftype, sparse=sparse, scaled=scaled, ...)
   Kernel(features, kernel, scaled=scaled, subset=subset, na.action=na.action,
          cache.size=cache.size, sparse=sparse...)
 })
 
+##' Creates the appropriate kernel out of the given Feature object
 setMethod("Kernel", c(x="Features"),
 function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
          cache.size=40, sparse=sparse, ...) {
@@ -76,8 +86,8 @@ function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
   kernel <- matchKernelType(kernel)
   kernel.info <- .kernel.map[[kernel]]
   
-  features.class <- kernelFeatureClass(kernel) ## throws error if there's a problem
-  if (features.class != gsub("Sparse", "", class(x)[1])) {
+  expected.class <- kernelFeatureClass(kernel) ## throws error if there's a problem
+  if (expected.class != class(x)) {
     stop("The class of the Features object [", class(x)[1], "] does not match",
          " the expectation mapping: ", features.class)
   }
@@ -85,7 +95,6 @@ function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
   c.fn <- kernel.info$cfun
   params <- extractParams(x, ..., .defaults=kernel.info$params)
   
-  browser()
   if (kernel == 'gaussian') {
     kptr <- .Call(c.fn, x@sg.ptr, params$width, cache.size,
                   PACKAGE="shikken")
@@ -108,3 +117,17 @@ function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
   skernel
 })
 
+setMethod("features", c(x="Kernel"),
+function(x, ...) {
+  x@features
+})
+
+setMethod("degree", c(x="PolyKernel"),
+function(x, ...) {
+  
+})
+
+setMethod("inhomogeneous", c(x="PolyKernel"),
+function(x, ...) {
+  
+})

@@ -62,9 +62,11 @@ BEGIN_RCPP
     svm_engine_t engine = match_svm_engine(Rcpp::as<std::string>(rsvm_engine));
     
     if (engine == LIBSVM) {
-        DCAST((svm), CLibSVM, train);
+        CLibSVM* csvm = dynamic_cast<CLibSVM*>(svm);
+        csvm->train();
     } else if (engine == SVMLIGHT) {
-        DCAST((svm), CSVMLight, train);
+        CSVMLight* csvm = dynamic_cast<CSVMLight*>(svm);
+        csvm->train();
     } else {
         std::runtime_error("unknown svm_engine");
     }

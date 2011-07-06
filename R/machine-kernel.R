@@ -37,6 +37,11 @@ function(x, ...) {
   .Call("kmachine_bias", x@sg.ptr, PACKAGE="shikken")
 })
 
+setMethod("features", c(x="KernelMachine"),
+function(x, ...) {
+  features(kernel(x))
+})
+
 ##' Decision = trcrossprod(wVector(x, data), [new]data) + bias(x)
 wVector <- function(x, data) {
   stopifnot(inherits(x, 'KernelMachine'))

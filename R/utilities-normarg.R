@@ -49,6 +49,10 @@ isNumericOrNAs <- function(x)
     is.numeric(x) || (is.atomic(x) && is.vector(x) && all(is.na(x)))
 }
 
+isNumericMatrix <- function(x) {
+  (is.numeric(x) && is.matrix(x)) || inherits(x, 'Matrix')
+}
+
 ### NOT exported.
 ### isNotStrictlySorted() takes for granted that 'x' contains no NAs (behaviour
 ### is undefined if this is not the case). This allows isNotStrictlySorted() to

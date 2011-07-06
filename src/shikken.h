@@ -25,14 +25,13 @@ void r_print_warning(FILE* target, const char* str);
 void r_print_error(FILE* target, const char* str);
 void r_cancel_computations(bool &delayed, bool &immediately);
 
-
 /* Call a method by downcasting a (shogun) pointer SGPTR to more specifc 
 * type CLAZZ */
-#define DCAST(SGPTR, CLAZZ, METHOD, ...) \
-do { \
-    CLAZZ * CPTR = dynamic_cast<CLAZZ*>(SGPTR); \
-    CPTR->METHOD(## __VA_ARGS__); \
-} while(0)
+// #define DCAST_CALL(SGPTR, CLAZZ, METHOD, ...) \
+// do { \
+//     CLAZZ * CPTR = dynamic_cast<CLAZZ*>(SGPTR); \
+//     CPTR->METHOD(## __VA_ARGS__); \
+// } while(0)
 
 RcppExport SEXP shogun_ref_count_down(SEXP ptr);
 RcppExport SEXP shogun_ref_count_up(SEXP ptr);

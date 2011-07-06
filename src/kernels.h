@@ -55,4 +55,8 @@ create_kernel_sigmoid(SEXP rfeatures, SEXP rgamma, SEXP rcoef0, SEXP rcache);
 RcppExport SEXP
 create_kernel_custom(SEXP rkernel);
 
+
+RcppExprt SEXP poly_kernel_degree(SEXP rkernel);
+RcppExprt SEXP poly_kernel_inhomogeneous(SEXP rkernel);
+
 #endif

@@ -90,7 +90,9 @@ setGeneric("normalizer<-", function(x, ..., value) {
   standardGeneric("normalizer<-")
 })
 
-
+setGeneric("features", function(x, ...) standardGeneric("features"))
+setGeneric("degree", function(x, ...) standardGeneric("degree"))
+setGeneric("inhomogeneous", function(x, ...) standardGeneric("inhomogeneous"))
 
 ###############################################################################
 ## Learning Machines

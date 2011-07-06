@@ -7,14 +7,9 @@ RcppExport SEXP features_length(SEXP rfeatures) {
     
 }
 
-// shogun features are stored in column order, where each column denotes
-// a feature vector for an example
-// columns are linear in memory
-//
-// ->set_feature_matrix(matrix, n.dimensions, n.observations)
-RcppExport SEXP
-features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
-BEGIN_RCPP
+
+CSimpleFeatures<float64_t>*
+_features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
     Rcpp::NumericVector data(rdata);
     int nobs = Rcpp::as<int>(rnobs);
     int dim = Rcpp::as<int>(rdim);
@@ -33,7 +28,25 @@ BEGIN_RCPP
     // feaatures->ref();
     CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();
     features->set_feature_matrix(matrix, dim, nobs);
-    SG_REF(features);
+    SG_REF(features);    
+    return features;
+}
+
+CSparseFeatures<float64_t>*
+_features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim) {
+    throw std::runtime_error("Sparse simple features not implemented yet.");
+    return NULL;
+}
+
+// shogun features are stored in column order, where each column denotes
+// a feature vector for an example
+// columns are linear in memory
+//
+// ->set_feature_matrix(matrix, n.dimensions, n.observations)
+RcppExport SEXP
+features_create_simple_dense(SEXP rdata, SEXP rnobs, SEXP rdim) {
+BEGIN_RCPP
+    CSimpleFeatures<float64_t>* features = _features_create_simple_dense(rdata, rnobs, rdim);
     return SG2SEXP(features);
 END_RCPP
 }
@@ -41,42 +54,33 @@ END_RCPP
 RcppExport SEXP
 features_create_simple_sparse(SEXP rdata, SEXP rnobs, SEXP rdim) {
 BEGIN_RCPP
-    throw std::runtime_error("Sparse simple features not implemented yet.");
     return R_NilValue;
 END_RCPP
 }
 
-
 RcppExport SEXP
 features_create_poly_dense(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP rdegree, SEXP rnormalize) {
 BEGIN_RCPP
-    // these are built from a 'simple features' object -- code is duplicated
-    // because of the whole memory counting/SEXP wrapping thing in
-    // features_create_simple_dense
-    Rcpp::NumericVector data(rdata);
-    int nobs = Rcpp::as<int>(rnobs);
-    int dim = Rcpp::as<int>(rdim);
     int degree = Rcpp::as<int>(rdegree);
     bool normalize = Rcpp::as<bool>(rnormalize);
-    
-    float64_t* matrix = new float64_t[data.size()];
-    for (int32_t i = 0; i < data.size(); i++) {
-        matrix[i] = (float64_t) data[i];
-    }
-    
-    CSimpleFeatures<float64_t>* features = new CSimpleFeatures<float64_t>();
-    features->set_feature_matrix(matrix, dim, nobs);
-    CPolyFeatures* pfeatures = new CPolyFeatures(features, degree, normalize);
+    CSimpleFeatures<float64_t>* simple = _features_create_simple_dense(rdata, rnobs, rdim);
+    CPolyFeatures* pfeatures = new CPolyFeatures(simple, degree, normalize);
     SG_REF(pfeatures);
-    
     return SG2SEXP(pfeatures);
 END_RCPP
 }
 
 RcppExport SEXP
-features_create_poly_sparse(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP degree, SEXP normalize) {
+features_create_poly_sparse(SEXP rdata, SEXP rnobs, SEXP rdim, SEXP rdegree, SEXP rnormalize,
+                            SEXP rhash_bits) {
 BEGIN_RCPP
-    throw std::runtime_error("Sparse poly features not implemented yet.");
-    return R_NilValue;
+    int degree = Rcpp::as<int>(rdegree);
+    bool normalize = Rcpp::as<bool>(rnormalize);
+    int hash_bits = Rcpp::as<int>(rhash_bits);
+    CSparseFeatures<float64_t>* simple = _features_create_simple_sparse(rdata, rnobs, rdim);
+    CSparsePolyFeatures* pfeatures = new CSparsePolyFeatures(simple, degree, normalize, hash_bits);
+    SG_REF(pfeatures);
+    return SG2SEXP(pfeatures);
 END_RCPP
 }
+
