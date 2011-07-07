@@ -30,6 +30,8 @@ function(x, type, sparse=FALSE, ...) {
 ##' Creates a Features object from \code{x} that's like \code{type}
 setMethod("Features", c(x="ANY", type="Features"),
 function(x, type, sparse=FALSE, ...) {
+  ## TODO: Grab @params from incoming Features object and send to
+  ##       Features ctor.
   ftype <- matchFeatureClassToType(class(type)[1])
   Features(x, ftype, sparse=sparse, ...)
 })
@@ -101,7 +103,7 @@ createFeatures.polynomial <- function(x, sparse=FALSE, ...) {
 
 setMethod("degree", c(x="PolyFeatures"),
 function(x, ...) {
-  x@degree
+  x@params$degree
 })
 
 createFeatures.string <- function(x, sparse=FALSE, ...) {

@@ -26,8 +26,6 @@ kernelFeatureClass <- function(kernel, sparse=FALSE, ...) {
   if (sparse) f.info$class.sparse else f.info$class
 }
 
-setGeneric("Kernel", function(x, ...) standardGeneric("Kernel"))
-
 setMethod("Kernel", c(x="formula"),
 function(x, data=NULL, kernel='linear', scaled=TRUE, ...) {
   if (is.null(data) || missing(data)) {
@@ -68,18 +66,18 @@ function(x, ...) {
 
 ## Pass kernel parameters through ...
 setMethod("Kernel", c(x="matrix"),
-function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
+function(x, kernel='linear', scaled=TRUE, subset=NULL, na.action=na.omit,
          sparse=FALSE, cache.size=40, ...) {
   kernel <- matchKernelType(kernel)
   ftype <- matchKernelTypeToFeatureType(kernel)
   features <- Features(x, ftype, sparse=sparse, scaled=scaled, ...)
   Kernel(features, kernel, scaled=scaled, subset=subset, na.action=na.action,
-         cache.size=cache.size, sparse=sparse...)
+         cache.size=cache.size, sparse=sparse, ...)
 })
 
 ##' Creates the appropriate kernel out of the given Feature object
 setMethod("Kernel", c(x="Features"),
-function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
+function(x, kernel='linear', scaled=TRUE, subset=NULL, na.action=na.omit,
          cache.size=40, sparse=sparse, ...) {
   ## TODO: Wire kernel and features info requirements (pairings) better!
   stopifnot(isSingleNumber(cache.size))
@@ -92,30 +90,47 @@ function(x, kernel='linear', scaled=TRUE, subset, na.action=na.omit,
          " the expectation mapping: ", features.class)
   }
   
-  c.fn <- kernel.info$cfun
-  params <- extractParams(x, ..., .defaults=kernel.info$params)
-  
-  if (kernel == 'gaussian') {
-    kptr <- .Call(c.fn, x@sg.ptr, params$width, cache.size,
-                  PACKAGE="shikken")
-  } else if (kernel == 'linear') {
-    kptr <- .Call(c.fn, x@sg.ptr, PACKAGE="shikken")
-  } else if (kernel == 'polynomial') {
-    kptr <- .Call(c.fn, x@sg.ptr, params$degree, params$inhomogeneous,
-                  cache.size, PACKAGE="shikken")
-  } else if (kernel == 'sigmoid') {
-    kptr <- .Call(c.fn, x@sg.ptr, params$gamma, params$coef0, cache.size,
-                  PACKAGE="shikken")
-  } else if (kernel == 'weighted.degree.string') {
-    kptr <- .Call(c.fn, x@sg.ptr, params$weight, params$degree,
-                  PACKAGE="shikken")
-  } else if (kernel == 'custom') {
-    ## TODO
-  }
-
-  skernel <- new(kernel.info$class, sg.ptr=kptr, params=params, features=x)
-  skernel
+  ## Type checking done? Dispatch to non exported helper functions
+  Rfn <- getFunction(paste('createKernel', kernel, sep="."))
+  kernel <- Rfn(x, scaled=scaled, subset=subset, na.action=na.action,
+                cache.size=cache.size, sparse=sparse, ...)
+  kernel
 })
+
+createKernel.linear <- function(features, cache.size=40, ...) {
+  kernel.info <- .kernel.map$linear
+  sg.ptr <- .Call(kernel.info$cfun, features@sg.ptr, PACKAGE="shikken")
+  new(kernel.info$class, sg.ptr=sg.ptr, params=list(), features=features)
+}
+
+createKernel.gaussian <- function(features, cache.size=40, ...) {
+  kernel.info <- .kernel.map$gaussian
+  params <- extractParams(data=NULL, ..., .defaults=kernel.info$param)
+  sg.ptr <- .Call(kernel.info$cfun, features@sg.ptr, params$width, cache.size,
+                  PACKAGE="shikken")
+  new(kernel.info$class, sg.ptr=sg.ptr, params=params, features=features)
+}
+
+createKernel.sigmoid <- function(features, cache.size=40, ...) {
+  kernel.info <- .kernel.map$sigmoid
+  params <- extractParams(data=NULL, ..., .defaults=kernel.info$param)
+  sg.ptr <- .Call(kernel.info$cfun, features@sg.ptr, params$gamma,
+                  params$coef0, cache.size, PACKAGE="shikken")
+  new(kernel.info$class, sg.ptr=sg.ptr, params=params, features=features)
+}
+
+createKernel.polynomial <- function(features, cache.size=40, ...) {
+  kernel.info <- .kernel.map$polynomial
+  params <- extractParams(data=NULL, ..., .defaults=kernel.info$param)
+  sg.ptr <- .Call(kernel.info$cfun, features@sg.ptr, features@degree,
+                  params$inhomogeneous, cache.size, PACKAGE="shikken")
+  new(kernel.info$class, sg.ptr=sg.ptr, params=params, features=features)
+}
+
+createKernel.weighted.degree.string <- function(features, cache.size=40, ...) {
+  kernel.info <- .kernel.map$weighted.degree.string
+  stop("No string kernels implemented")
+}
 
 setMethod("features", c(x="Kernel"),
 function(x, ...) {

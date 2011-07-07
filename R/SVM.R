@@ -106,9 +106,9 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   svm <- new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
              engine=svm.engine, num.threads=n.threads)
              
-  svm@var.cache[['trained']] <- FALSE
-  svm@var.cache[['epsilon']] <- epsilon
-  svm@var.cache[['C']] <- C
+  svm@cache[['trained']] <- FALSE
+  svm@cache[['epsilon']] <- epsilon
+  svm@cache[['C']] <- C
   
   if (do.train) {
     train(svm)
@@ -133,7 +133,7 @@ function(x, ...) {
   if (!trained(x)) {
     .Call(train.fn(x), x@sg.ptr, matchSvmEngine(x@engine), PACKAGE="shikken")
   }
-  x@var.cache[['trained']] <- TRUE
+  x@cache[['trained']] <- TRUE
   invisible(x)
 })
 

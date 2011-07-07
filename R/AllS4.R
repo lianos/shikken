@@ -1,4 +1,10 @@
-setClass("ShikkenObject", contains="VIRTUAL")
+setClass("ShikkenObject", contains="VIRTUAL",
+         representation=representation(cache="environment"))
+
+setMethod("initialize", "ShikkenObject",
+function(.Object, ..., cache=new.env()) {
+  callNextMethod(.Object, cache=cache, ...)
+})
 
 setClass("Labels", contains="ShikkenObject",
          representation=representation(
@@ -19,27 +25,16 @@ setClass("Preprocessor", contains="ShikkenObject",
 setClass("Features", contains="ShikkenObject",
          representation=representation(
            sg.ptr="externalptr",
-           n="integer"#, preprocessor="Preprocessor"))
-           ))
+           n="integer",
+           params="list" #, preprocessor
+))
 
 setClass("DotFeatures", contains="Features")
 setClass("SimpleFeatures", contains="DotFeatures")
 
-setClass("PolyFeatures", contains="DotFeatures",
-         representation=representation(
-           degree='integer',
-           normalize='logical'),
-         prototype=prototype(
-           degree=2L,
-           normalize=TRUE))
+setClass("PolyFeatures", contains="DotFeatures")
 
-setClass("SparsePolyFeatures", contains="DotFeatures",
-         representation=representation(
-           degree='integer',
-           normalize='logical'),
-         prototype=prototype(
-           degree=2L,
-           normalize=TRUE))
+setClass("SparsePolyFeatures", contains="DotFeatures")
 
 setClass("SparseFeatures", contains="DotFeatures")
 
@@ -101,6 +96,7 @@ setClass("StringKernel", contains="Kernel")
 setClass("WeightedDegreeStringKernel", contains="StringKernel")
 
 ## -- methods
+setGeneric("Kernel", function(x, ...) standardGeneric("Kernel"))
 
 setGeneric("normalizer", function(x, normalizer, ...) {
   standardGeneric("normalizer")
@@ -120,14 +116,11 @@ setClass("Machine", contains="ShikkenObject",
          representation=representation(
            sg.ptr="externalptr",
            num.threads="integer",
-           type='character',
-           var.cache='environment'))
+           type='character'))
 
 setMethod("initialize", "Machine",
-function(.Object, ..., num.threads=integer(), type=character(),
-         var.cache=new.env()) {
-  callNextMethod(.Object, num.threads=num.threads, type=type,
-                 var.cache=var.cache, ...)
+function(.Object, ..., num.threads=integer(), type=character()) {
+  callNextMethod(.Object, num.threads=num.threads, type=type, ...)
 })
 
 setClass("LinearMachine", contains="Machine",

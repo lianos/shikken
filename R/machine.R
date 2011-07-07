@@ -32,7 +32,7 @@ isRegressionMachine <- function(x, ...) {
 
 setMethod("trained", c(x="Machine"),
 function(x, ...) {
-  x@var.cache[['trained']]
+  x@cache[['trained']]
 })
 
 setReplaceMethod("trained", "Machine", function(x, value) {
@@ -41,7 +41,7 @@ setReplaceMethod("trained", "Machine", function(x, value) {
     stop("You cannot declare a machine as being `trained`, ",
          "run `train(x, ...)")
   }
-  x@var.cache[['trained']] <- FALSE
+  x@cache[['trained']] <- FALSE
   x
 })
 

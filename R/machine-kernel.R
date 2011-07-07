@@ -9,7 +9,7 @@ setReplaceMethod("kernel", "KernelMachine", function(x, value) {
   stopifnot(inherits(value, 'Kernel'))
   .Call("kmachine_set_kernel", x@sg.ptr, value@sg.ptr)
   x@kernel <- kernel
-  x@var.cache[['trained']] <- FALSE
+  x@cache[['trained']] <- FALSE
   x
 })
 
