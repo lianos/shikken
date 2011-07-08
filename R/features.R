@@ -33,7 +33,7 @@ function(x, type, sparse=FALSE, ...) {
   ## TODO: Grab @params from incoming Features object and send to
   ##       Features ctor.
   ftype <- matchFeatureClassToType(class(type)[1])
-  Features(x, ftype, sparse=sparse, ...)
+  Features(x, ftype, sparse=sparse, params=params(type), ...)
 })
 
 ## Type must be a valid feature.type -- not a kernel name. To generate a feature
@@ -100,6 +100,11 @@ createFeatures.polynomial <- function(x, sparse=FALSE, ...) {
   new(clazz, sg.ptr=sg.ptr, n=n.obs, degree=params$degree,
       normalize=params$normalize)
 }
+
+setMethod("params", c(x="Features"),
+function(x, ...) {
+  x@params
+})
 
 setMethod("degree", c(x="PolyFeatures"),
 function(x, ...) {

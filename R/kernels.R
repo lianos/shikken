@@ -137,6 +137,11 @@ function(x, ...) {
   x@features
 })
 
+setMethod("params", c(x="Kernel"),
+function(x, ...) {
+  x@params
+})
+
 setMethod("degree", c(x="PolyKernel"),
 function(x, ...) {
   x@params$degree
