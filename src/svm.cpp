@@ -58,6 +58,7 @@ END_RCPP
 //       to enable use of `train.fn` function dispatch from R.
 RcppExport SEXP svm_train(SEXP rsvm, SEXP rsvm_engine) {
 BEGIN_RCPP
+//    S4 svm = S4(rsvm);
     CSVM *svm = static_cast<CSVM*>(R_ExternalPtrAddr(rsvm));
     svm_engine_t engine = match_svm_engine(Rcpp::as<std::string>(rsvm_engine));
     
