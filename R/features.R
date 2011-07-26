@@ -97,8 +97,7 @@ createFeatures.polynomial <- function(x, sparse=FALSE, ...) {
                     PACKAGE="shikken")
   }
   
-  new(clazz, sg.ptr=sg.ptr, n=n.obs, degree=params$degree,
-      normalize=params$normalize)
+  new(clazz, sg.ptr=sg.ptr, n=n.obs, params=params)
 }
 
 setMethod("params", c(x="Features"),
