@@ -1,7 +1,5 @@
 #include "shikken.h"
 
-using namespace shogun;
-
 void r_print_message(FILE* target, const char* str)
 {
     if (target == stdout) {
@@ -35,6 +33,7 @@ void r_cancel_computations(bool &delayed, bool &immediately)
 }
 
 /* ------------------------- Shogun Object Handling ------------------------ */
+using namespace shogun;
 
 /**
  * Entry point from R to decrement Shogun object reference count, eg.

@@ -7,7 +7,7 @@
 ##       0 based, eg. 0, 1, 2, ..., C
 
 Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
-  if (y, "Labels") {
+  if (inherits(y, "Labels")) {
     return(y)
   }
   ## There are a lot of innefficiencies here -- `unique` is called many

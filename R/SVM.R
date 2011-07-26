@@ -9,6 +9,16 @@ matchSvmEngine <- function(engine, as.int=FALSE) {
   engine
 }
 
+setValidity("SVM", function(object) {
+  errs <- character()
+  engine.ok <- tryCatch(matchSvmEngine(object@engine), error=function(e) NULL)
+  if (is.null(engine.ok)) {
+    errs <- paste(errs, "Unknown SVM engine/solver: ", object@engine)
+  }
+  
+  if (length(errs) == 0L) TRUE else errs
+})
+
 setGeneric("SVM", function(x, ...) standardGeneric("SVM"))
 setMethod("SVM", c(x="formula"),
 function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
@@ -131,7 +141,7 @@ function(x, ...) {
 setMethod("train", c(x="SVM"),
 function(x, ...) {
   if (!trained(x)) {
-    .Call(train.fn(x), x@sg.ptr, matchSvmEngine(x@engine), PACKAGE="shikken")
+    .Call(train.fn(x), x, PACKAGE="shikken")
   }
   x@cache[['trained']] <- TRUE
   invisible(x)

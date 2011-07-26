@@ -12,7 +12,7 @@ setClass("Labels", contains="ShikkenObject",
            factor.map='numeric'))
 
 setGeneric("threads", function(x, ...) standardGeneric("threads"))
-
+setGeneric("params", function(x, ...) standardGeneric("params"))
 ################################################################################
 ## Preprocessors
 ## These objects act on the feature space massage/normalize

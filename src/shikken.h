@@ -15,6 +15,9 @@
 #include <shogun/lib/common.h>
 #include <shogun/base/init.h>
 
+#include "shikken/base/ShikkenObject.h"
+#include "shikken/base/ShikkenException.h"
+
 #include <Rcpp.h>
 
 
