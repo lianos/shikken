@@ -36,9 +36,9 @@ function(x, type, sparse=FALSE, ...) {
   Features(x, ftype, sparse=sparse, params=params(type), ...)
 })
 
-## Type must be a valid feature.type -- not a kernel name. To generate a feature
-## object for a given kernel, use the Kernel(data, kernel) constructor and grab
-## its features(), or call Features(x, KernelObject)
+## Type must be a valid feature.type -- not a kernel name. To generate a 
+## feature object for a given kernel, use the Kernel(data, kernel) constructor
+##  and grab its features(), or call Features(x, KernelObject)
 setMethod("Features", c(x="matrix", type="character"),
 function(x, type='simple', sparse=FALSE, ...) {
   type <- matchFeatureType(type)
