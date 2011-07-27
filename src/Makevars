@@ -21,7 +21,7 @@
 PKG_LIBS +=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) \
   $(BLAS_LIBS) $(FLIBS)
 
-PKG_CXXFLAGS += -I.
+PKG_CXXFLAGS += -I../inst/include
 
 .PHONY : .depend clean
 
@@ -34,7 +34,11 @@ all: .depend $(SHLIB)
 ## Variables and targets taken/inspired from shogun's configure stuff
 
 SHIKKEN_HEADERS  = $(shell find . -name "*.h")
+SHIKKEN_HEADERS  += $(shell find ../inst/include/shikken -name "*.h")
+
 SHIKKEN_SRCFILES = $(shell find . -name "*.c" -o -name "*.cpp")
+SHIKKEN_SRCFILES += $(shell find ../inst/include/shikken -name "*.c" -o -name "*.cpp")
+
 SRCFILES = $(SHIKKEN_SRCFILES)
 DEFINES =
 

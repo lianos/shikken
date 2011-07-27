@@ -18,7 +18,7 @@
 
 // 1-for-1 match with R/SVM.R
 // enum svm_engine_t {LIBSVM=1, SVMLIGHT};
-shikken::svm_engine_t match_svm_engine(std::string engine);
+// shikken::svm_engine_t match_svm_engine(std::string engine);
 
 RcppExport SEXP
 svm_init(SEXP rkernel, SEXP rlabels, SEXP rc, SEXP reps, SEXP rsvm_engine);
