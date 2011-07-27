@@ -16,17 +16,7 @@ enum svm_engine_t { LIBSVM=1, SVMLIGHT };
 class SVM : public KernelMachine {
 public:
     
-    static svm_engine_t match_svm_engine(std::string engine) {
-        svm_engine_t type;
-        if (engine.compare("libsvm") == 0) {
-            type = LIBSVM;
-        } else if (engine.compare("svmlight") == 0) {
-            type = SVMLIGHT;
-        } else {
-            throw ShikkenException("unknown svm engine");
-        }
-        return type;
-    }
+    static svm_engine_t match_svm_engine(std::string engine);
     
     SVM(SEXP rsvm);
     virtual ~SVM();
