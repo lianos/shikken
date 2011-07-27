@@ -98,8 +98,7 @@ function(object, newdata=NULL, type="response", ...) {
   on.exit(threads(old.threads))
   
   ## Returns the decision values
-  preds <- .Call(predict.fn(object), object@sg.ptr, newdata, PACKAGE="shikken")
-  
+  preds <- .Call(predict.fn(object), object, newdata, PACKAGE="shikken")
   if (type == "response" && isClassificationMachine(object)) {
     preds <- sign(preds)
   }

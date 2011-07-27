@@ -12,38 +12,51 @@ BEGIN_RCPP
 END_RCPP
 }
 
+// RcppExport SEXP kmachine_predict(SEXP rkmachine, SEXP rfeatures) {
+// BEGIN_RCPP
+//     Rcpp::XPtr<CKernelMachine> kmachine(rkmachine);
+//     CLabels* preds;
+//     std::vector<float64_t> out;
+//     int npreds;
+//     
+//     if (rfeatures == R_NilValue) {
+//         // Rprintf("Predicting on training labels\n");
+//         preds = kmachine->apply();
+//     } else {
+//         // Rprintf("Predicting on new data\n");
+//         Rcpp::XPtr<CFeatures> features(rfeatures);
+//         preds = kmachine->apply(features);
+//     }
+//     
+//     ///////////////////////////////////////////////
+//     // This version does not suport subsets
+//     // -------------------------------------------
+//     // float64_t *slabels;
+//     // int32_t slen;
+//     // slabels = preds->get_labels(slen);
+//     // for (int i = 0; i < slen; i++) {
+//     //     out.push_back(slabels[i]);
+//     // }
+//     
+//     npreds = preds->get_num_labels();
+//     for (int i = 0; i < npreds; i++) {
+//         out.push_back(preds->get_label(i));
+//     }
+//     
+//     return Rcpp::wrap(out);
+// END_RCPP
+// }
+
 RcppExport SEXP kmachine_predict(SEXP rkmachine, SEXP rfeatures) {
 BEGIN_RCPP
-    Rcpp::XPtr<CKernelMachine> kmachine(rkmachine);
-    CLabels* preds;
-    std::vector<float64_t> out;
-    int npreds;
-    
+    shikken::KernelMachine km(rkmachine);
+    SEXP out;
     if (rfeatures == R_NilValue) {
-        // Rprintf("Predicting on training labels\n");
-        preds = kmachine->apply();
+        out = km.predict();
     } else {
-        // Rprintf("Predicting on new data\n");
-        Rcpp::XPtr<CFeatures> features(rfeatures);
-        preds = kmachine->apply(features);
+        out = km.predict_on(rfeatures);
     }
-    
-    ///////////////////////////////////////////////
-    // This version does not suport subsets
-    // -------------------------------------------
-    // float64_t *slabels;
-    // int32_t slen;
-    // slabels = preds->get_labels(slen);
-    // for (int i = 0; i < slen; i++) {
-    //     out.push_back(slabels[i]);
-    // }
-    
-    npreds = preds->get_num_labels();
-    for (int i = 0; i < npreds; i++) {
-        out.push_back(preds->get_label(i));
-    }
-    
-    return Rcpp::wrap(out);
+    return out;
 END_RCPP
 }
 

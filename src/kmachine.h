@@ -8,7 +8,7 @@
 #include "kernels.h"
 
 #include <shogun/machine/KernelMachine.h>
-
+#include "shikken/machine/SKernelMachine.h"
 
 RcppExport SEXP kmachine_set_kernel(SEXP rkmachine, SEXP rkernel);
 RcppExport SEXP kmachine_predict(SEXP rkmachine, SEXP rfeatures);
