@@ -1,5 +1,4 @@
 #include "shikken/machine/SSVM.h"
-#include "Rcpp.h"
 
 using namespace shikken;
 

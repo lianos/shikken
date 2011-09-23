@@ -26,7 +26,7 @@
 
 #include <shogun/machine/KernelMachine.h>
 
-#include "shikken/base/ShikkenObject.h"
+#include "shikken/base/common.h"
 
 
 namespace shikken {
@@ -35,7 +35,7 @@ class KernelMachine : public ShikkenObject {
 public:
     
     /** Used in place of as<shikken::KernelMachine> */
-    KernelMachine(SEXP rkmachine);
+    explicit KernelMachine(SEXP rkmachine);
     virtual ~KernelMachine();
     
     virtual void train();

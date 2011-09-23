@@ -11,7 +11,7 @@ class ShikkenObject {
     
 public:
     ShikkenObject();
-    ShikkenObject(SEXP robj);
+    explicit ShikkenObject(SEXP robj);
     
     virtual ~ShikkenObject();
     

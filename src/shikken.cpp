@@ -34,26 +34,26 @@ void r_cancel_computations(bool &delayed, bool &immediately)
 
 /* ------------------------- Shogun Object Handling ------------------------ */
 using namespace shogun;
-
+#include "shikken/base/memory.h"
 /**
  * Entry point from R to decrement Shogun object reference count, eg.
  * 
- *   dipose <- function(x) .Call("shogun_ref_count_down", externalptr)
+ *   dispose <- function(x) .Call("shogun_ref_count_down", externalptr)
  *   ...//Rprintf
  *   reg.finalizer(some.shogun.ptr, disposeShogunPointer)
  * 
  * This shouldn't be used, as we are currently favoring registering 
  * object finalization from the C-side.
  */ 
-RcppExport SEXP shogun_ref_count_down(SEXP ptr) {
+SEXP shogun_ref_count_down(SEXP ptr) {
     // get refcount?
     Rcpp::XPtr<CSGObject> sptr(ptr);
     int ref_count = sptr->ref_count() - 1;
-    _shogun_ref_count_down(ptr);
+    shogun_ref_count_down_(ptr);
     return Rcpp::wrap(ref_count);
 }
 
-RcppExport SEXP shogun_ref_count_up(SEXP ptr) {
+SEXP shogun_ref_count_up(SEXP ptr) {
     Rcpp::XPtr<CSGObject> sptr(ptr);
     if (sptr) {
         sptr->ref();
@@ -61,7 +61,7 @@ RcppExport SEXP shogun_ref_count_up(SEXP ptr) {
     return Rcpp::wrap(sptr->ref_count());
 }
 
-RcppExport SEXP shogun_ref_count(SEXP ptr) {
+SEXP shogun_ref_count(SEXP ptr) {
     Rcpp::XPtr<CSGObject> sptr(ptr);
     return Rcpp::wrap(sptr->ref_count());
 }

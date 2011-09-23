@@ -33,14 +33,19 @@ all: .depend $(SHLIB)
 ###############################################################################
 ## Variables and targets taken/inspired from shogun's configure stuff
 
-SHIKKEN_HEADERS  = $(shell find . -name "*.h")
-SHIKKEN_HEADERS  += $(shell find ../inst/include/shikken -name "*.h")
+SHIKKEN_HEADERS  = $(shell find ../inst/include/shikken -name "*.h")
+SHIKKEN_HEADERS  += $(shell find . -name "*.h")
 
-SHIKKEN_SRCFILES = $(shell find . -name "*.c" -o -name "*.cpp")
-SHIKKEN_SRCFILES += $(shell find ../inst/include/shikken -name "*.c" -o -name "*.cpp")
+SHIKKEN_SRCFILES = $(shell find ../inst/include/shikken -name "*.c" -o -name "*.cpp")
+SHIKKEN_SRCFILES += $(shell find . -name "*.c" -o -name "*.cpp")
 
 SRCFILES = $(SHIKKEN_SRCFILES)
+
+ifdef NO_DEBUG
 DEFINES =
+else
+DEFINES = -DSHIKKEN_DEBUG
+endif
 
 -include config.site
 

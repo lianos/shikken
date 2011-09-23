@@ -5,21 +5,8 @@
 #define DARWIN 1
 #endif
 
-#include <RcppCommon.h>
 
-#include "wrappers.h"
-#include "memory.h"
-
-#include <shogun/base/SGObject.h>
-#include <shogun/lib/Mathematics.h>
-#include <shogun/lib/common.h>
-#include <shogun/base/init.h>
-
-#include "shikken/base/ShikkenObject.h"
-#include "shikken/base/ShikkenException.h"
-
-#include <Rcpp.h>
-
+#include "shikken/base/common.h"
 
 #define SHOGUN_VERSION "0.11-dev"
 
@@ -36,11 +23,11 @@ void r_cancel_computations(bool &delayed, bool &immediately);
 //     CPTR->METHOD(## __VA_ARGS__); \
 // } while(0)
 
+RcppExport SEXP shogun_threads(SEXP n);
+
 RcppExport SEXP shogun_ref_count_down(SEXP ptr);
 RcppExport SEXP shogun_ref_count_up(SEXP ptr);
 RcppExport SEXP shogun_ref_count(SEXP ptr);
-
-RcppExport SEXP shogun_threads(SEXP n);
 
 RcppExport SEXP shogun_version();
 RcppExport SEXP init_shikken();
