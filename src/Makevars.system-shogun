@@ -2,7 +2,7 @@
 SHOGUN_HEADERS  =
 SHOGUN_SRCFILES =
 
-SHOGUN_HEADER_DIR=$(SYS_SHOGUN_PREFIX)/include/shogun
+## SHOGUN_HEADER_DIR=$(SYS_SHOGUN_PREFIX)/include/shogun
 ## do the headers exits?
 ifneq (exists, $(shell [ -d $(SHOGUN_HEADER_DIR) ] && echo exists))
 $(error System shogun headers not found in $(SHOGUN_HEADER_DIR) )
@@ -28,7 +28,7 @@ PKG_CXXFLAGS += -I/usr/include/libxml2
 endif
 
 ## Add the paths/lib to appropriate places
-PKG_CXXFLAGS += -I$(SYS_SHOGUN_PREFIX)/include
+## PKG_CXXFLAGS += -I$(SYS_SHOGUN_PREFIX)/include
 PKG_LIBS += -L$(SYS_SHOGUN_PREFIX) -lshogun
 
 .depend:

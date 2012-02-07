@@ -12,7 +12,10 @@
 ## Remove compiled C/C++ stuffs
 for o in `find src -name "*.o"`; do rm $o; done
 for o in `find inst/include -name "*.o"`; do rm $o; done
-rm -rf src-*
-rm src/*.so
 
-rm src/.depend
+
+## &> /dev/null ==> silences errors
+rm src/*.o &> /dev/null
+rm src/*.so &> /dev/null
+rm -rf src-* &> /dev/null
+rm src/.depend &> /dev/null

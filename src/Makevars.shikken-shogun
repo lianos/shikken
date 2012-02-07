@@ -1,9 +1,10 @@
 $(warning Compiling shikken shogun ...)
-PKG_CXXFLAGS += -I../inst/include/libshogun -I../inst/include/libshogun/shogun
-PGK_LIBS += -lm -pthread
 
-SHOGUN_HEADERS  = $(shell find ../inst/include -name "*.h")
-SHOGUN_SRCFILES = $(shell find ../inst/include -name "*.c" -o -name "*.cpp" )
+#PKG_CXXFLAGS += -I../inst/include/shogun-local
+PKG_LIBS += -lm -pthread
+
+SHOGUN_HEADERS  = $(shell find ../inst/include/shogun-local/shogun -name "*.h")
+SHOGUN_SRCFILES = $(shell find ../inst/include/shogun-local/shogun -name "*.c" -o -name "*.cpp" )
 
 SRCFILES := $(SHOGUN_SRCFILES) $(SRCFILES)
 ###############################################################################
@@ -54,3 +55,4 @@ endif
 	find ../inst/include/shogun -name "*.c" -o -name "*.cpp" -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >.depend
 	find . -name "*.c" -o -name "*.cpp" -exec $(CXX) -MM $(DEFINES) $(PKG_CXXFLAGS) {} -MT {}.o \; >>.depend
 
+-include .depend

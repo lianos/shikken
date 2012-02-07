@@ -31,3 +31,8 @@ snake2camel <- function(x) {
     val
   }, x, strsplit(x, ''))
 }
+
+dir.exists <- function(path){
+  path <- as.character(path)
+  !is.na(file.info(path)$isdir) && file.info(path)$isdir
+}
