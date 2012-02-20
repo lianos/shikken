@@ -15,7 +15,7 @@ setValidity("SVM", function(object) {
   if (is.null(engine.ok)) {
     errs <- paste(errs, "Unknown SVM engine/solver: ", object@engine)
   }
-  
+
   if (length(errs) == 0L) TRUE else errs
 })
 
@@ -60,7 +60,7 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
   ret
 })
 
-setMethod("SVM", c(x="vector"),
+setMethod("SVM", c(x="numeric"),
 function(x, ...) {
   SVM(as.matrix(x), ...)
 })
@@ -73,13 +73,19 @@ function(x, y=NULL, kernel="spectrum", ...) {
 setMethod("SVM", c(x="character"),
 function(x, y=NULL, kernel="spectrum", ...) {
   initStringKernel(as.matrix(x), kernel=kernel, ...)
-  initSVM(...)
+  initSVM(y, ...)
 })
 
-## TODO: Multiple kernel learning when x is a list
+setMethod("SVM", c(x="matrix"),
+function(x, y=NULL, ...) {
+  initNumericKernel(x, kernel=kernel, ...)
+  initSVM(y, ...)
+})
+
+## TODO: Wire up Multiple kernel learning when calling SVM with is.list(x)
 setMethod("SVM", c(x="list"),
 function(x, ...) {
-  
+  stop("Multiple Kernel Learning not yet implemented")
 })
 
 setMethod("SVM", c(x="matrix"),
@@ -91,15 +97,15 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required.")
   }
-  
+
   if (nrow(x) != length(y)) {
     stop("Number of observations does not equal number of labels")
   }
-  
+
   initSvm(y, type=type, svm.engine=svm.engine, C=C, C.neg=C.neg,
           nu=nu, epsilon=epsilon, class.weights=class.weights,
           cache=cache, threads=threads)
-  
+
   initKernel(x, kernel, 'train', preproc=preproc, normalizer=normalizer, ...,
              scaled=scaled)
   ## ...
@@ -108,55 +114,60 @@ function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
   } else {
     sg('train_regression')
   }
-  
+
     train.cmd <- 'train_classifer'
   } else if (type == )
   train.cmd <- sw
   if (type == "2-class") {
-    
+
   }
   sg('train_classifier')
-  
+
   kernel <- Kernel(x, kernel=kernel, scaled=scaled, ...)
   labels <- Labels(y, type)
-  
-  
+
+
   sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon,
                   svm.engine)
-  
+
   if (is.null(sg.ptr)) {
     stop("error occured while initializing svm")
   }
-  
+
   svm <- new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
              engine=svm.engine, num.threads=n.threads)
-             
+
   svm@cache[['trained']] <- FALSE
   svm@cache[['epsilon']] <- epsilon
   svm@cache[['C']] <- C
-  
+
   if (do.train) {
     train(svm)
   }
-  
+
   svm
 })
 
 initSvm <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
                     cache=40, threads=1L, ...) {
-  if (is.null(type)) {
+  if (missing(y) || is.null(y)) {
+    stop("Labels (y) is required")
+  }
+  y <- Lables(y, type, ...)
+  if (!is.null(type)) {
+
     type <- guessLearningTypeFromLabels(y)
   }
   type <- match.arg(type, supportedMachineTypes())
-  
+
   svm.engine <- matchSvmEngine(svm.engine)
-  
+
   C <- as.numeric(C)
   if (!isSingleNumber(C)) {
     stop("Illegal value for C")
   }
-  
+
   C.neg <- as.numeric(C.neg)
   if (!isSingleNumber(C.neg)) {
     stop("Illegal value for C.neg")
@@ -166,13 +177,13 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
   if (!isSingleNumber(epsilon)) {
     stop("Illegal value for epsilon")
   }
-  
+
   threads <- as.integer(threads)
   if (!isSingleInteger(epsilon)) {
     stop("N threads must be a single integer")
   }
   threads(threads)
-  
+
 }
 
 setMethod("SVM", c(x="Features"),

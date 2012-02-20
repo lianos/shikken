@@ -1,4 +1,4 @@
-guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
+guessMachineTypeFromLabels <- function(labels, nlevels=NULL) {
   if (inherits(labels, "Labels")) {
     ltype <- switch(class(labels),
                     OneClassLabels="1-class",
@@ -7,7 +7,7 @@ guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
                     "regression")
     return(ltype)
   }
-  
+
   if (is.null(nlevels)) {
     nlevels <- length(unique(labels))
   }
@@ -15,17 +15,18 @@ guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
   if (nlevels == 0) {
     stop("At least one level is required in your labels/factor.")
   } else if (nlevels == 1) {
-    learning.type <- '1-class'
+    machine.type <- '1-class'
   } else if (nlevels == 2) {
-    learning.type <- '2-class'
+    machine.type <- '2-class'
   } else {
     if (is.factor(labels)) {
-      learning.type <- 'multi-class'
+      machine.type <- 'multi-class'
     } else {
-      learning.type <- 'regression'
+      machine.type <- 'regression'
     }
   }
-  learning.type
+
+  match(machine.type, supportedMachineTypes())
 }
 
 
@@ -37,7 +38,7 @@ guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
 ## TODO: Add support for num_classes -- in this scenario, labels are
 ##       0 based, eg. 0, 1, 2, ..., C
 
-Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
+Labels <- function(y, machine.type=NULL, factor.map=NULL, ...) {
   if (inherits(y, "Labels")) {
     return(y)
   }
@@ -46,46 +47,39 @@ Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
   ## the factor.map, etc. This could use some optimization, but it all this
   ## takes less than a second to run for 100k labels, so ... I'm not inclined
   ## to do so.
-  learning.type <- matchLearningType(y, learning.type)
-  is.classification <- length(grep('class', learning.type)) > 0L
+  m.type <- guessMachineTypeFromLabels(y)
+  if (is.character(machine.type) && machine.type != m.type) {
+    stop("Requested machine.type and label types do not gel")
+  }
+  machine.type <- m.type
 
-  if (is.classification) {
+  if (isClassificationMachine(machine.type)) {
     ## This part handles mult-class classifiation fine.
     if (is.factor(y)) {
       if (is.null(factor.map)) {
-        y <- .createFactorMap(y, learning.type=learning.type)
-        xref <- match(unique(y), y)
-        factor.map <- y[xref]
+        labels <- .factors2labels(y, learning.type=learning.type)
+        factor.map <- unique(names(labels))
+        xref <- match(label.names, names(labels))
+        names(factor.map) <- as.character(labels[xref])
       }
     } else {
       factor.map <- numeric()
     }
-  }
 
-  ## In future, we will support > 2-class classification, but ignore for now
-  if (is.classification) {
-    if (learning.type == '2-class') {
-      is.illegal <- length(setdiff(c(-1, 1), unique(y))) > 0
-      if (is.illegal) {
-        stop("2-class labels can only be -1 and 1")
-      }
-    } else {
-      stop("only 2-class classification supported for now")
-    }
-  } else if (learning.type == 'regression') {
-    stop("regression not supported yet")
+    clazz <- switch(machine.type,
+                    "1-class"="OneClassLabels",
+                    "2-class"="TwoClassLabels",
+                    "multi-class"="MultiClassLabels")
+    ans <- new(clazz, y=unname(y), factor.map=factor.map)
   } else {
-    stop("illegal value for learning.type")
+    ans <- new("Labels", y=y)
   }
 
-  stopifnot(is.numeric(y))
-  stopifnot(is.numeric(factor.map))
-
-  ptr <- .Call("labels_create", y, PACKAGE="shikken")
-  new('Labels', sg.ptr=ptr, factor.map=factor.map)
+  validObject(ans)
+  ans
 }
 
-.createFactorMap <- function(y, learning.type, nlevels=length(unique(y))) {
+.factors2labels <- function(y, learning.type, nlevels=length(unique(y))) {
   ## This handles multi-class classification just fine.
   stopifnot(is.factor(y))
   yn <- as.numeric(y)
@@ -102,15 +96,15 @@ Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
 
 
 setMethod("length", "Labels", function(x) {
-  length(x@labels)
+  length(x@y)
 })
 
 setAs("Labels", "numeric", function(from) {
-  x@labels
+  x@y
 })
 
 setAs("Labels", "vector", function(from) {
-  x@labels
+  x@y
 })
 
 setAs("ClassLabels", "factor", function(from) {
@@ -118,8 +112,7 @@ setAs("ClassLabels", "factor", function(from) {
     stop("No factor map for these labels")
   }
   out <- as(from, "numeric")
-  chars <- names(from@factor.map)[match(from, from@factor.map)]
-  as.factor(chars)
+  factor(factor.map[as.character(out))])
 })
 
 setAs("ClassLabels", "vector", function(from) {

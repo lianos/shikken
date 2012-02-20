@@ -3,31 +3,30 @@ supportedMachineTypes <- function() {
   c('1-class', '2-class', 'multi-class', 'regression')
 }
 
-matchLearningType <- function(labels, learning.type) {
-  if (missing(learning.type) || is.null(learning.type)) {
-    if (missing(labels) || is.null(labels)) {
-      stop("Labels required to guess learning type")
-    }
-    learning.type <- guessLearningTypeFromLabels(labels)
-  }
-  
-  learning.type <- match.arg(learning.type, supportedMachineTypes())
-  
-  if (learning.type == 'classification') {
-    learning.type <- '2-class'
-  }
-  
-  learning.type
-}
-
 isClassificationMachine <- function(x, ...) {
-  stopifnot(inherits(x, 'Machine'))
+  if (inherits(x, 'Machine')) {
+    x <- x@type
+  }
+  if (inherits(x, 'Labels')) {
+    x <- tolower(class(x)[1L])
+  }
+  if (!is.character(x)) {
+    stop("x needs to be a Machine or character")
+  }
   length(grep('class', x@type) > 0L)
 }
 
 isRegressionMachine <- function(x, ...) {
-  stopifnot(inherits(x, 'Machine'))
-  length(grep('regress', x@type) > 0L)
+  if (inherits(x, 'Labels')) {
+    return(!isClassificationMachine(x))
+  }
+  if (inherits(x, 'Machine')) {
+    x <- x@type
+  }
+  if (!is.character(x)) {
+    stop("x needs to be a Machine or character")
+  }
+  length(grep('regress', x) > 0L)
 }
 
 setMethod("trained", c(x="Machine"),

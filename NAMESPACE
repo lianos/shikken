@@ -17,65 +17,66 @@ exportClasses(
   ## Machines
   Machine,
   KernelMachine,
-  DistanceMachine,
+  ## DistanceMachine,
   SVM,
 
+  Labels
   ## Kernels
-  Kernel,
-  CustomKernel,
-  StringKernel,
-  CombinedKernel,
-  DotKernel,
-  GaussianKernel,
-  LinearKernel,
-  PolyKernel,
-  
+  ## Kernel,
+  ## CustomKernel,
+  ## StringKernel,
+  ## CombinedKernel,
+  ## DotKernel,
+  ## GaussianKernel,
+  ## LinearKernel,
+  ## PolyKernel,
+
   ## Normalizers,
-  Normalizer,
-  
+  ## Normalizer,
+
   ## Features
-  Features,
-  DotFeatures,
-  SimpleFeatures,
-  PolyFeatures,
-  SparsePolyFeatures,
-  SparseFeatures,
-  CombinedFeatures,
-  StringFeatures,
-  StringFileFeatures
+  ## Features,
+  ## DotFeatures,
+  ## SimpleFeatures,
+  ## PolyFeatures,
+  ## SparsePolyFeatures,
+  ## SparseFeatures,
+  ## CombinedFeatures,
+  ## StringFeatures,
+  ## StringFileFeatures
 )
 
 exportMethods(
-  Features,
-  features,
-  
-  Kernel,
-  kernel,
-  "kernel<-",
-  
-  normalizer,
-  "normalizer<-",
-  
-  train,
-  trained,
-  "trained<-",
-  
-  bias,
-  coef,
-  fitted,
+  ## Features,
+  ## features,
+
+  ## Kernel,
+  ## kernel,
+  ## "kernel<-",
+
+  ## normalizer,
+  ## "normalizer<-",
+
+  ## train,
+  ## trained,
+  ## "trained<-",
+
+  ## bias,
+  ## coef,
+  ## fitted,
   predict,
-  
+
   SVM,
   supportVectors,
   alphas,
   objective,
-  
+
   threads,
   "threads<-",
-  
+
   # show,
   # plot,
-  
+
   ##
   # as.factor,
   as.numeric,
@@ -84,10 +85,8 @@ exportMethods(
 )
 
 export(
-  shogunVersion,
-  
   Labels,
-  
+
   isClassificationMachine,
   isRegressionMachine
 )
