@@ -1,28 +1,25 @@
-guessMachineTypeFromLabels <- function(labels, nlevels=NULL) {
+guessMachineTypeFromLabels <- function(labels) {
   if (inherits(labels, "Labels")) {
-    ltype <- switch(class(labels),
-                    OneClassLabels="1-class",
-                    TwoClassLabels="2-class",
-                    MultiClassLabels="mult-class",
-                    "regression")
-    return(ltype)
-  }
-
-  if (is.null(nlevels)) {
-    nlevels <- length(unique(labels))
-  }
-
-  if (nlevels == 0) {
-    stop("At least one level is required in your labels/factor.")
-  } else if (nlevels == 1) {
-    machine.type <- '1-class'
-  } else if (nlevels == 2) {
-    machine.type <- '2-class'
+    machine.type <- switch(class(labels),
+                           OneClassLabels="1-class",
+                           TwoClassLabels="2-class",
+                           MultiClassLabels="mult-class",
+                           Labels="regression",
+                           stop("Unknown Label class type"))
   } else {
-    if (is.factor(labels)) {
-      machine.type <- 'multi-class'
+    nlevels <- length(unique(labels))
+    if (nlevels == 0) {
+      stop("At least one level is required in your labels/factor.")
+    } else if (nlevels == 1) {
+      machine.type <- '1-class'
+    } else if (nlevels == 2) {
+      machine.type <- '2-class'
     } else {
-      machine.type <- 'regression'
+      if (is.factor(labels)) {
+        machine.type <- 'multi-class'
+      } else {
+        machine.type <- 'regression'
+      }
     }
   }
 

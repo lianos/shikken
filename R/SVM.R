@@ -1,6 +1,7 @@
 matchSvmEngine <- function(engine, as.int=FALSE) {
   ## These 'engines' strings should match match 1-for-1/exact (case and all)
   ## with the engines-mathcing code in svm.cpp::match_svm_engine
+
   engines <- c('libsvm', 'svmlight')
   engine <- match.arg(engine, engines)
   if (as.int) {
@@ -73,13 +74,33 @@ function(x, y=NULL, kernel="spectrum", ...) {
 setMethod("SVM", c(x="character"),
 function(x, y=NULL, kernel="spectrum", ...) {
   initStringKernel(as.matrix(x), kernel=kernel, ...)
-  initSVM(y, ...)
+  params <- initSVM(y, ...)
+  train(params$type)
+
+  alpha <- numeric()
+  sv.index <- integer()
+
+  ans <- with(params, {
+    new("SVM", engine=engine, C=C, C.neg=C.neg, alpha=alpha,
+        nSV=length(alpha), SVindex=sv.index)
+  })
+  ans
 })
 
 setMethod("SVM", c(x="matrix"),
 function(x, y=NULL, ...) {
   initNumericKernel(x, kernel=kernel, ...)
-  initSVM(y, ...)
+  params <- initSVM(y, ...)
+  train(params$type)
+
+  alpha <- numeric()
+  sv.index <- integer()
+
+  ans <- with(params, {
+    new("SVM", engine=engine, C=C, C.neg=C.neg, alpha=alpha,
+        nSV=length(alpha), SVindex=sv.index)
+  })
+  ans
 })
 
 ## TODO: Wire up Multiple kernel learning when calling SVM with is.list(x)
@@ -88,80 +109,32 @@ function(x, ...) {
   stop("Multiple Kernel Learning not yet implemented")
 })
 
-setMethod("SVM", c(x="matrix"),
-function(x, y=NULL, kernel="linear", kparams="automatic", type=NULL,
-         svm.engine=c('libsvm', 'svmlight'), scaled=TRUE, C=1, C.neg=C,
-         nu=0.2, epsilon=0.1, class.weights=NULL, cache=40, threads=1L,
-         preproc=NULL, normalizer=NULL, ..., subset, na.action=na.omit,
-         do.train=TRUE) {
-  if (missing(y) || is.null(y)) {
-    stop("Labels (y) is required.")
-  }
-
-  if (nrow(x) != length(y)) {
-    stop("Number of observations does not equal number of labels")
-  }
-
-  initSvm(y, type=type, svm.engine=svm.engine, C=C, C.neg=C.neg,
-          nu=nu, epsilon=epsilon, class.weights=class.weights,
-          cache=cache, threads=threads)
-
-  initKernel(x, kernel, 'train', preproc=preproc, normalizer=normalizer, ...,
-             scaled=scaled)
-  ## ...
-  if (length(grep("class", type)) {
-    sg('train_classifier')
-  } else {
-    sg('train_regression')
-  }
-
-    train.cmd <- 'train_classifer'
-  } else if (type == )
-  train.cmd <- sw
-  if (type == "2-class") {
-
-  }
-  sg('train_classifier')
-
-  kernel <- Kernel(x, kernel=kernel, scaled=scaled, ...)
-  labels <- Labels(y, type)
-
-
-  sg.ptr <- .Call("svm_init", kernel@sg.ptr, labels@sg.ptr, C, epsilon,
-                  svm.engine)
-
-  if (is.null(sg.ptr)) {
-    stop("error occured while initializing svm")
-  }
-
-  svm <- new("SVM", sg.ptr=sg.ptr, kernel=kernel, labels=labels, type=type,
-             engine=svm.engine, num.threads=n.threads)
-
-  svm@cache[['trained']] <- FALSE
-  svm@cache[['epsilon']] <- epsilon
-  svm@cache[['C']] <- C
-
-  if (do.train) {
-    train(svm)
-  }
-
-  svm
-})
-
 initSvm <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
-                    cache=40, threads=1L, ...) {
+                    cache=40, threads=1L, use.bias=TRUE, ...) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required")
   }
-  y <- Lables(y, type, ...)
-  if (!is.null(type)) {
 
-    type <- guessLearningTypeFromLabels(y)
+  y <- Labels(y, type, ...)
+  gtype <- guessMachineTypeFromLabels(y)
+  if (is.character(type)) {
+    if (gtype != type) {
+      stop("Specfied machine type doesn't match labels")
+    }
+  } else {
+    type <- gtype
   }
-  type <- match.arg(type, supportedMachineTypes())
 
   svm.engine <- matchSvmEngine(svm.engine)
+
+  ## SVMLIGHT can only to 2-class classification here?
+  if (svm.engine == "svmlight") {
+    if (isClassificationMachine(type) && !is(y, 'TwoClassLabels')) {
+      stop("Using SVMLight for classification only accepts 2-class labels ",
+           "try libsvm")
+    }
+  }
 
   C <- as.numeric(C)
   if (!isSingleNumber(C)) {
@@ -178,51 +151,77 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
     stop("Illegal value for epsilon")
   }
 
+  if (!missing(nu) && !is(y, 'OneClassLabels')) {
+    warning("Only C-svm supported for > 1-clas learning")
+  }
+  nu <- as.numeric(nu)
+  if (!isSingleNumber(nu)) {
+    stop("Illegal value for nu")
+  }
+
   threads <- as.integer(threads)
   if (!isSingleInteger(epsilon)) {
     stop("N threads must be a single integer")
   }
   threads(threads)
 
+  ## cache is really an integer, but passed along as numeric
+  cache <- as.numeric(as.integer(cache))
+  if (!isSingleNumber(cache)) {
+    stop("Illegal value for cache")
+  }
+
+  use.bias <- as.logical(use.bias)[1L]
+  if (!isTRUEorFALSE(use.bias)) {
+    stop("Illegal value for use.bias, logical(1) required")
+  }
+
+  ## ---------------------------------------------------------------------------
+  ## Do the sg initialization
+  sg('set_labels', 'TRAIN', y@y)
+
+  if (isClassificationMachine(type)) {
+    if (class(y) == "OneClassLabels") {
+      sg('svm_nu', nu)
+      sg.machine <- 'LIBSVM_ONECLASS'
+    } else if (class(y) == "TwoClassLabels") {
+      sg('c', c(C, C.neg))
+      sg.machine <- toupper(engine)
+    } else if (class(y) == "MultiClassLabels") {
+      sg('c', C)
+      sg.machine <- 'LIBSVM_MULTICLASS'
+    } else {
+      stop("Can't reconcile value for sg('new_classifier', ...)")
+    }
+
+    sg('new_classifier', sg.machine)
+    sg('svm_epsilon', epsion)
+    sg('svm_use_bias', use.bias)
+  } else {
+    sg.machine <- switch(engine,
+                        libsvm="LIBSVR",
+                        svmlight="SVRLIGHT",
+                        stop("Can't reconcile vale for sg('new_regression', ...)"))
+    sg('new_regression', sg.machine)
+    sg('c', C)
+    sg('svr_tube_epsilon', epsilon)
+  }
+
+  list(labels=y, type=type, engine=svm.engine, C=C, C.neg=C.neg,
+       epsilon=epsilon, nu=nu, cache=cache, sg.machine=machine)
 }
 
-setMethod("SVM", c(x="Features"),
-function(x, ...) {
-  kernel <- Features(x, ...)
-  SVM(kernel, ...)
-})
 
-setMethod("SVM", c(x="Kernel"),
+setMethod("train", c(x="character"),
 function(x, ...) {
-
-})
-
-setMethod("train", c(x="SVM"),
-function(x, ...) {
-  if (!trained(x)) {
-    .Call(train.fn(x), x, PACKAGE="shikken")
+  x <- match(x, supportedMachineTypes())
+  if (isClassificationMachine(x)) {
+    sg('train_classifier')
+  } else if (isRegressionMachine(x)) {
+    sg('train_regression')
+  } else {
+    stop("don't know how to train machine type: ", x)
   }
-  x@cache[['trained']] <- TRUE
-  invisible(x)
+  invisible(NULL)
 })
 
-setMethod("objective", c(x="SVM"),
-function(x, ...) {
-  .Call("svm_objective", x@sg.ptr, PACKAGE="shikken")
-})
-
-###############################################################################
-## Delegating to C
-setMethod("train.fn", c(x="SVM"),
-function(x, ...) {
-  "svm_train"
-})
-
-setMethod("predict.fn", c(x="SVM"),
-function(x, ...) {
-  ## by and large, we use the predict (apply) method from KernelMachine,
-  ## but let's check for special cases
-  fn <- switch(x@engine, scattersvm='scattersvm_predict',
-               'kmachine_predict')
-  fn
-})

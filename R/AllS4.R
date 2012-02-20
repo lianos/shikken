@@ -88,12 +88,14 @@ setClass("KernelMachine", contains="Machine",
 
 setClass("SVM", contains="KernelMachine",
          representation=representation(
+           engine="character",
            C="numeric",
            C.neg="numeric",
            nSV="integer",
            alpha="numeric",
            SVindex="integer"),
          prototype=prototype(
+           engine=character(),
            C=1,
            C.neg=1,
            alpha=numeric(),
@@ -130,5 +132,5 @@ setGeneric("objective", function(x, ...) standardGeneric("objective"))
 
 ## Delegating to C
 ##' Returns the name of the C++ functions to use for different tasks
-setGeneric("train.fn", function(x, ...) standardGeneric("train.fn"))
-setGeneric("predict.fn", function(x, ...) standardGeneric("predict.fn"))
+## setGeneric("train.fn", function(x, ...) standardGeneric("train.fn"))
+## setGeneric("predict.fn", function(x, ...) standardGeneric("predict.fn"))
