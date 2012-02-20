@@ -1,11 +1,11 @@
 ## The information here is used to specify which classes of objects are
 ## associated with their sister class, eg: what class of Kernel of features is
 ## used for a given class of Kernsl, etc.
-## 
+##
 ## The names() of these lists are the things that we pass around as identifies
 ## in shikken
-## 
-## $validate.input is a function to apply to a "raw" piece of data that 
+##
+## $validate.input is a function to apply to a "raw" piece of data that
 ## indicates whether it is appropriate for this Feature type
 .feature.map <- list(
   simple=list(
@@ -76,9 +76,11 @@
   ),
   spectrum=list(
     class="SpectrumKernel",
-    static=""
+    static="COMMSTRING",
     cfun='create_kernel_spectrum',
-    params=list(length=4L, alphabet="DNA"),
+    params=list(length=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
+      normaliztion="FULL"),
+    preproc="SORTWORDSTRING",
     feature.type='string')
 )
 

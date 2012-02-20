@@ -73,8 +73,9 @@ function(x, y=NULL, kernel="spectrum", ...) {
 
 setMethod("SVM", c(x="character"),
 function(x, y=NULL, kernel="spectrum", ...) {
-  initStringKernel(as.matrix(x), kernel=kernel, ...)
   params <- initSVM(y, ...)
+  initStringKernel(as.matrix(x), kernel=kernel, params$cache, ...)
+
   train(params$type)
 
   alpha <- numeric()
@@ -88,9 +89,10 @@ function(x, y=NULL, kernel="spectrum", ...) {
 })
 
 setMethod("SVM", c(x="matrix"),
-function(x, y=NULL, ...) {
-  initNumericKernel(x, kernel=kernel, ...)
+function(x, y=NULL, kernel="linear", ...) {
   params <- initSVM(y, ...)
+  initNumericKernel(x, kernel=kernel, params$cache, ...)
+
   train(params$type)
 
   alpha <- numeric()
