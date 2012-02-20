@@ -50,7 +50,7 @@ through the various src/Makevars[.*] files during the R CMD INSTALL process.
    So, download and uncompress the shogun-toolbox, then:
    
        $ cd /path/to/your/shogun-toolbox/src
-       $ ./configure --interfaces=libshogun
+       $ ./configure --interfaces=
        $ make -j4 && make install
    
    If you didn't set a --prefix directive during your ./configure step,
