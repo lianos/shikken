@@ -1,3 +1,0 @@
-gaussianKernelModular <- function() {
-  
-}

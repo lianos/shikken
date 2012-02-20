@@ -51,21 +51,3 @@ shikkenEnv <- function(...) {
   invisible(config)
 }
 
-initShikken <- function(force=FALSE) {
-  is.initialized <- shikkenEnv('is.initialized')
-  is.initialized <- !(is.null(is.initialized) || !is.initialized)
-  if (!is.initialized) {
-    cat("Initializing shogun ...\n")
-    .Call("init_shikken", PACKAGE="shikken")
-    shikkenEnv(is.initialized=TRUE)
-  } else if (is.initialized && force) {
-    cat("Forcing a re-initialization is probably a bad idea ...?\n")
-    .Call("init_shikken", PACKAGE="shikken")
-  }
-  invisible(NULL)
-}
-
-exitShikken <- function() {
-  .Call("exit_shikken", PACKAGE="shikken")
-  shikkenEnv(is.initialized=FALSE)
-}

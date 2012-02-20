@@ -39,28 +39,46 @@
 .kernel.map <- list(
   gaussian=list(
     class='GaussianKernel',
+    static='GAUSSIAN',
     cfun='create_kernel_gaussian',
     params=list(width=0.5),
     feature.type='simple'),
   linear=list(
     class='LinearKernel',
+    static='LINEAR',
     cfun='create_kernel_linear',
     params=list(),
     feature.type='simple'),
   sigmoid=list(
     class='SigmoidKernel',
+    static='SIGMOID',
     cfun='create_kernel_sigmoid',
     params=list(gamma=1, coef0=1),
     feature.type='simple'),
   polynomial=list(
     class='PolyKernel',
+    static="POLY",
     cfun='create_kernel_polynomial',
     params=list(degree=2L, inhomogeneous=TRUE),
     feature.type='polynomial'),
-  weighted.degree.string=list(
-    class="WeightedDegreeStringKernel",
+  weighted.degree=list(
+    class="WeightedDegreeKernel",
+    static="WEIGHTEDDEGREE",
     cfun='create_kernel_weighted_degree_string',
-    params=list(weights=1, degree=2L, alphabet="DNA"),
+    params=list(degree=4L, weights=1, alphabet="DNA"),
+    feature.type='string'),
+  weighted.degree.shifts=list(
+    class="WeightedDegreeKernelWithShifts",
+    static="WEIGHTEDDEGREEPOS",
+    params=list(degree=4L, weights=1L, shift=5L),
+    cfun="create_kernel_weighted_degree_string_shifts",
+    feature.type='string'
+  ),
+  spectrum=list(
+    class="SpectrumKernel",
+    static=""
+    cfun='create_kernel_spectrum',
+    params=list(length=4L, alphabet="DNA"),
     feature.type='string')
 )
 

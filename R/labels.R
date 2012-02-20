@@ -1,3 +1,34 @@
+guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
+  if (inherits(labels, "Labels")) {
+    ltype <- switch(class(labels),
+                    OneClassLabels="1-class",
+                    TwoClassLabels="2-class",
+                    MultiClassLabels="mult-class",
+                    "regression")
+    return(ltype)
+  }
+  
+  if (is.null(nlevels)) {
+    nlevels <- length(unique(labels))
+  }
+
+  if (nlevels == 0) {
+    stop("At least one level is required in your labels/factor.")
+  } else if (nlevels == 1) {
+    learning.type <- '1-class'
+  } else if (nlevels == 2) {
+    learning.type <- '2-class'
+  } else {
+    if (is.factor(labels)) {
+      learning.type <- 'multi-class'
+    } else {
+      learning.type <- 'regression'
+    }
+  }
+  learning.type
+}
+
+
 ## TODO: Test memory allocation using Labels -- they're simple
 # y <- lapply(1:10000, function(i) {
 #   Labels(sample(c(-1,1), 2000, replace=TRUE))
@@ -69,42 +100,30 @@ Labels <- function(y, learning.type=NULL, factor.map=NULL, ...) {
   yn
 }
 
-guessLearningTypeFromLabels <- function(labels, nlevels=NULL) {
-  if (is.null(nlevels)) {
-    nlevels <- length(unique(labels))
-  }
-
-  if (nlevels == 0) {
-    stop("At least one level is required in your labels/factor.")
-  } else if (nlevels == 1) {
-    learning.type <- '1-class'
-  } else if (nlevels == 2) {
-    learning.type <- '2-class'
-  } else {
-    if (is.factor(labels)) {
-      learning.type <- 'multi-class'
-    } else {
-      learning.type <- 'regression'
-    }
-  }
-  learning.type
-}
 
 setMethod("length", "Labels", function(x) {
-  .Call("labels_length", x@sg.ptr, PACKAGE="shikken")
+  length(x@labels)
 })
 
 setAs("Labels", "numeric", function(from) {
-  .Call("labels_get", from@sg.ptr, PACKAGE="shikken")
+  x@labels
 })
 
 setAs("Labels", "vector", function(from) {
-  out <- as(from, "numeric")
-  if (length(from@factor.map) > 0) {
-    chars <- names(from@factor.map)[match(from, from@factor.map)]
-    out <- as.factor(chars)
+  x@labels
+})
+
+setAs("ClassLabels", "factor", function(from) {
+  if (length(from@factor.map) == 0) {
+    stop("No factor map for these labels")
   }
-  out
+  out <- as(from, "numeric")
+  chars <- names(from@factor.map)[match(from, from@factor.map)]
+  as.factor(chars)
+})
+
+setAs("ClassLabels", "vector", function(from) {
+  as(from, "numeric")
 })
 
 setMethod("as.numeric", c(x="Labels"), function(x) as(x, 'numeric'))
@@ -113,3 +132,4 @@ setMethod("as.integer", c(x="Labels"), function(x) {
   as.integer(as(x, 'numeric'))
 })
 
+setMethod("as.factor", c(x="ClassLabels"), function(x) as(x, 'factor'))

@@ -1,6 +1,6 @@
 supportedMachineTypes <- function() {
   # c('classification', '2-class', '1-class', 'multi-class', 'regression')
-  c('classification', '2-class', 'regression')
+  c('1-class', '2-class', 'multi-class', 'regression')
 }
 
 matchLearningType <- function(labels, learning.type) {

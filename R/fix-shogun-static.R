@@ -31,19 +31,20 @@ fix.shogun.static.install <- function() {
     }
   }
   
-  cat("... fixing package.rds\n")
-  ## The `package.rds` file as compiled is hosed, need to add
-  ## a 'built' string to the `$DESCRIPTION` character vector, otherwise
-  ## installing new packages is b0rked, eg:
-  ## 
-  ##   R> install.packages('Matrix')
-  ##   Error in .readPkgDesc(lib, fields) : 
-  ##     number of items to replace is not a multiple of replacement length
-  rds.path <- system.file('Meta', 'package.rds', package="sg")
-  if (!file.exists(rds.path)) {
-    stop("package.rds file not found:\n  ", rds.path)
-  }
-  x <- readRDS(rds.path)
-  x$DESCRIPTION['Built'] <- paste(R.version$major, R.version$minor, sep=".")
-  saveRDS(x, rds.path)
+  ## Fixed in recent git
+  # cat("... fixing package.rds\n")
+  # ## The `package.rds` file as compiled is hosed, need to add
+  # ## a 'built' string to the `$DESCRIPTION` character vector, otherwise
+  # ## installing new packages is b0rked, eg:
+  # ## 
+  # ##   R> install.packages('Matrix')
+  # ##   Error in .readPkgDesc(lib, fields) : 
+  # ##     number of items to replace is not a multiple of replacement length
+  # rds.path <- system.file('Meta', 'package.rds', package="sg")
+  # if (!file.exists(rds.path)) {
+  #   stop("package.rds file not found:\n  ", rds.path)
+  # }
+  # x <- readRDS(rds.path)
+  # x$DESCRIPTION['Built'] <- paste(R.version$major, R.version$minor, sep=".")
+  # saveRDS(x, rds.path)
 }

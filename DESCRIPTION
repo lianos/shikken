@@ -1,32 +1,24 @@
 Package: shikken
-Title: An S4 interface to the shogun-toolbox, a large-scale machine learning library.
+Title: An S4 interface to the Shogun machine learning toolbox.
 Version: 0.11.0-1
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
 Description: An R (S4) interface to the shogun toolbox -- a machine learning
   library with a focus on large scale kernel methods.
   .
-  This library provides an alternative to the r and r_modular interfaces
-  already provided by shogun to access its features in R. This package provides
-  a more (R) idiomatic interface to the shogun-toolbox functionality that makes
-  its use more accessible to (i) the R journeyman; and/or (ii) someone who
-  is not well versed in the particulars of shogun's API already.
-  .
-  Note that if there is no precompiled version of this library available for
-  your platform, it is likely because the automated build system is not
-  able to build the version of the shogun-toolbox that is included with this
-  package. If you download the source package, there are detailed instructions
-  on how to build shikken and the shogun-toolbox on your system located in
-  the inst/INSTALL file.
+  This library currently only provides a more R-idiomatic wrapper to shogun's
+  r_static interface. This will eventually either switch to the r_modular
+  interface for improved functionality, or will be a direct wrapper to the
+  libshogun library.
   .
   These libraries are licensed under the GPLv3 with the exception of
   some files from svmlight, which are copyright Torsten Joachimns and are
   licensed separately. Please see the LICENSE.SVMlight file for further
   information.
 License: GPL (>= 3)
-Depends: R (>= 2.13.0), Rcpp (>= 0.9.4), caret (>= 4.91)
-Imports: Rcpp, caret, methods
-Suggests: testthat (>= 0.5), kernlab (>= 0.9), shogun
+Depends: R (>= 2.15.0), Rcpp (>= 0.9.10), sg (>= 1.2.0), caret (>= 4.91)
+Imports: Rcpp, caret, sg, methods, Biostrings, kernlab (>= 0.9.14)
+Suggests: testthat (>= 0.5), 
 LinkingTo: Rcpp
 URL: http://lianos.github.com/shikken/,
      http://www.shogun-toolbox.org/

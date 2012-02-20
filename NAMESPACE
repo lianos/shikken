@@ -1,6 +1,8 @@
-useDynLib(shikken)
+#useDynLib(shikken)
 
+import(sg)
 import(methods)
+import(Biostrings)
 
 importFrom(stats,
   coef,
