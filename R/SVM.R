@@ -68,30 +68,22 @@ function(x, ...) {
 
 setMethod("SVM", c(x="XStringSet"),
 function(x, y=NULL, kernel="spectrum", ...) {
-  SVM(as.character(x), y=y, kernel=kernel, ...)
+  SVM(as.matrix(as.character(x)), y=y, kernel=kernel, ...)
 })
 
 setMethod("SVM", c(x="character"),
-function(x, y=NULL, kernel="spectrum", ...) {
-  params <- initSVM(y, ...)
-  initStringKernel(as.matrix(x), kernel=kernel, params$cache, ...)
-
-  train(params$type)
-
-  alpha <- numeric()
-  sv.index <- integer()
-
-  ans <- with(params, {
-    new("SVM", engine=engine, C=C, C.neg=C.neg, alpha=alpha,
-        nSV=length(alpha), SVindex=sv.index)
-  })
-  ans
+function(x, y=NULL, kernel="spectrum", x.isfile=FALSE, ...) {
+  if (x.isfile) {
+    stop("TODO: Support file feature input")
+  }
+  SVM(as.matrix(x), y=y, kernel=kernel, ...)
 })
 
 setMethod("SVM", c(x="matrix"),
 function(x, y=NULL, kernel="linear", ...) {
   params <- initSVM(y, ...)
-  initNumericKernel(x, kernel=kernel, params$cache, ...)
+  kparams <- initKernel(x, kernel=kernel, svm.params=svm.params,
+                        target='train', ...)
 
   train(params$type)
 
@@ -100,7 +92,7 @@ function(x, y=NULL, kernel="linear", ...) {
 
   ans <- with(params, {
     new("SVM", engine=engine, C=C, C.neg=C.neg, alpha=alpha,
-        nSV=length(alpha), SVindex=sv.index)
+        nSV=length(alpha), SVindex=sv.index, kparams=kparams)
   })
   ans
 })
@@ -180,6 +172,8 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
 
   ## ---------------------------------------------------------------------------
   ## Do the sg initialization
+  sg('clean_features', 'TRAIN')
+  sg('clean_features', 'TEST')
   sg('set_labels', 'TRAIN', y@y)
 
   if (isClassificationMachine(type)) {

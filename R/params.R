@@ -1,30 +1,30 @@
 ##' Assign values for variables found in ... that are defined in .defaults.
-##' 
+##'
 ##' A set of parameters that have been "daisy chained" in a call up some
 ##' function hierarchy might also be burried in a `params` argument, which
 ##' is a list. This could happen, for instance, when constructing a Features
 ##' object from some raw data that is meant to mimic an already-constructed
 ##' Features object, ie. think of building a Features object for the `newdata`
 ##' matrix in this scenario:
-##' 
+##'
 ##'   R> predict(svm, newdata)
-##' 
+##'
 ##' In these cases, if there are any values in ..., they will still override
 ##' the values in params, but params will override the .default values.
-##' 
+##'
 ##' If no variable is found in ..., then the one from .defaults is taken.
 ##' `key` is the key into .defaults to get variables for.
 ##'
 ##' This is used so far in getting defaults for kernel and feature object
 ##' construction.
-##' 
-##' Default values are provided for each kernel parameter. The parameters 
+##'
+##' Default values are provided for each kernel parameter. The parameters
 ##' returned from this function are gauranteed to be of the correct type so
 ##' they can be confidently passed to the C routines
 ##'
 ##' @param kernel \code{character} The name of the kernel.
-##' @param data The data matrix. This could be used to extract default values for
-##' some kernel parameters, if we can get smart about engineering those.
+##' @param data The data matrix. This could be used to extract default values
+##' for some kernel parameters, if we can get smart about engineering those.
 ##' @param ... parameter name=value pairs are searched in these variables that
 ##' will be used to override the paremeters of the same name for the kernel.
 ##'
@@ -33,14 +33,14 @@ extractParams <- function(data=NULL, ..., .defaults) {
   default.params <- .defaults
   stopifnot(is.list(default.params))
   args <- list(...)
-  
+
   ## See if there is an `args$params` list and override the default values
   ## with any value found there that has the same name
   if (is.list(args$params)) {
     params <- c(list(data=NULL, .defaults=.defaults), args$params)
     default.params <- do.call(extractParams, params)
   }
-  
+
   new.params <- default.params
 
   for (name in names(default.params)) {
@@ -76,7 +76,7 @@ coerceType <- function(new.param, default.param) {
       new.param <- as(new.param, target.class)
     }
   }
-  
+
   ## Any other coersions to put here?
   if (class(new.param) != class(default.param)) {
     stop("Can't coerce given parameter type ", new.class, "to expected type ",
@@ -87,7 +87,7 @@ coerceType <- function(new.param, default.param) {
 
 ### =========================================================================
 ### Utility functions for checking/fixing user-supplied arguments
-### 
+###
 ### This functions were taken from the IRanges package
 ### -------------------------------------------------------------------------
 
@@ -146,11 +146,11 @@ isNumericMatrix <- function(x) {
 ### be MUCH faster than is.unsorted() in some situations:
 ###   > x <- c(99L, 1:1000000)
 ###   > system.time(for (i in 1:1000) isNotStrictlySorted(x))
-###    user  system elapsed 
-###   0.004   0.000   0.003 
+###    user  system elapsed
+###   0.004   0.000   0.003
 ###   > system.time(for (i in 1:1000) is.unsorted(x, strictly=TRUE))
-###    user  system elapsed 
-###   6.925   1.756   8.690 
+###    user  system elapsed
+###   6.925   1.756   8.690
 ### So let's keep it for now! Until someone has enough time and energy to
 ### convince the R core team to fix is.unsorted()...
 ### Note that is.unsorted() does not only have a performance problem:
@@ -242,7 +242,7 @@ recycleNumericArg <- function(arg, argname, length.out)
 ### usecase which is the calculation of "circular coverage vectors", that is,
 ### we use fold() on the "linear coverage vector" to turn it into a "circular
 ### coverage vector" of length 'circle.length' where 'circle.length' is the
-### length of the circular sequence.  
+### length of the circular sequence.
 fold <- function(x, circle.length, from=1)
 {
     if (typeof(x) != "S4" && !is.numeric(x) && !is.complex(x))
@@ -308,7 +308,7 @@ normargSingleEndOrNA <- function(end)
 {
     if (!isSingleNumberOrNA(end))
         stop("'end' must be a single integer or NA")
-    if (!is.integer(end)) 
+    if (!is.integer(end))
         end <- as.integer(end)
     end
 }

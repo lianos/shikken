@@ -8,63 +8,88 @@ matchKernelType <- function(kernel) {
   match.arg(make.names(kernel), supportedKernels())
 }
 
-initStringKernel <- function(x, kernel="spectrum", cache=40, ...) {
+matchKernelTarget <- function(target) {
+  target <- match.arg(tolower(target), c('train', 'test'))
+  toupper(target)
+}
+
+initKernel <- function(x, kernel, svm.params, target=c('train', 'test'),
+                       preproc=NULL, normalizer=normalizer,
+                       do.clean=TRUE, ..., scaled=TRUE) {
+  if (do.clean) {
+    sg('clean_features', 'TRAIN')
+    sg('clean_features', 'TEST')
+    sg('clean_kernel')
+  }
+
+  target <- match.arg(target)
+  kernel <- matchKernelType(kernel)
+  cache <- as.numeric(cache)[1L]
+  if (!isSingleNumber(cache)) {
+    stop("Illegal value for cache")
+  }
+
+  k.info <- .kernel.map[[kernel]]
+  if (is.null(k.info)) {
+    stop("Could not find correct map for the normalized kernel name, "
+         "this should never happen.")
+  }
+
+  initFunc <- getFunction(paste('.init', k.info$class, sep=""))
+  initFunc(x, k.info=k.info, cache=cache, ...)
+}
+
+coerceStringInput <- function(x, k.info, ...) {
   if (inherits(x, 'XStringSet')) {
-    x <- as.matrix(as.character(x))
+    x <- as.character(x)
   }
   if (is.character(x)) {
-    x <- as.matrix(x)
+    if (length(x) == 1L && file.exists(x)) {
+      stop("TODO: Support file based input,character")
+    } else {
+      x <- as.matrix(x)
+    }
   }
-
-  kernel <- matchKernelType(kernel)
-  initFunc <- .kernel.map[[kernel]]$class
-  initFunc <- getFunction(paste('init', initFunc, sep=""))
-  initFunc(x, cache=cache, ...)
+  if (!is.matrix(x) && !is.character(x[1L])) {
+    stop("String Input is expected to be a character matrix")
+  }
+  if (ncol(x) != 1L) {
+    stop("Character input must be a single column matrix")
+  }
+  x
 }
 
-initSpectrumKernel <- function(x, cache=40, ...) {
-  stopifnot(is.matrix(x) && is.character(x[1L]))
-  kmap <- .kernel.map$spectrum
+coerceNumericInput <- function(x, k.info, ...) {
+  if (is.character(x)) {
+    if (length(x) == 1L && file.exists(x)) {
+      stop("Support file based input, Numeric")
+    }
+  }
+
+}
+
+################################################################################
+## String Kernels
+.initSpectrumKernel <- function(x, k.info, svm.params, target, mkl=FALSE, ...) {
+  x <- coerceStringInput(x, k.info, ...)
   params <- extractParams(..., .default=kmap$params)
+  add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
   sg('add_preproc', kmap$preproc)
-  sg('set_kernel', 'COMMSTRING', 'WORD', cache, params$use.sign,
+  sg(add.kernel, 'COMMSTRING', 'WORD', cache, params$use.sign,
      params$normalization)
 
-  sg('set_features', 'TRAIN', x, 'DNA')
-  sg('convert', 'TRAIN', 'STRING', 'CHAR', 'STRING', 'WORD',
+  sg('set_features', target, x, 'DNA')
+  sg('convert', target, 'STRING', 'CHAR', 'STRING', 'WORD',
      params$length, params$length - 1, params$gap, params$reverse)
-  sg('attach_preproc', 'TRAIN')
+  sg('attach_preproc', target)
 }
 
 
-setGeneric("initKernel", signature=c("x"),
-function(x, kernel, target=c('train', 'test'), preproc=NULL,
-         normalizer=NULL, ... scaled=TRUE) {
-  standardGeneric("initKernel")
-})
-
-initKernel <- function(x, kernel, target=c('train', 'test'),
-                       preproc=NULL, normalizer=normalizer, ...,
-                       scaled=TRUE) {
-
-  if (is.character(x[1L])) {
-    initStringKernel(x, kernel, target, preproc, normalizer, ..., scaled)
-  } else (is.numeric(x[1L])) {
-    initNumericKernel(x, kernel, target, preproc, normalizer, ..., scaled)
-  }
-
-  sg('clean_features', 'TRAIN')
-  sg('clean_features', 'TEST')
-  sg('clean_kernel')
+################################################################################Q
+## Numeric kernels
+initNumericKernel <- function(x, kernel="linear", cache=40, ...) {
 
 }
 
-initStringKernel <- function(x, kernel, target, preproc, normalizer, ...,
-                             scaled) {
-
-}
-
-initNumericKernel <- function(x, kernel, target, preproc, normalizer, ...,
-                              scaled) {
-
-}
+################################################################################
+## Multiple Kernel Learning

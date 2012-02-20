@@ -84,3 +84,7 @@
     feature.type='string')
 )
 
+.kernel.map <- lapply(names(.kernel.map), function(name) {
+  c(.kernel.map[[name]], list(key=name))
+})
+names(.kernel.map) <- sapply(.kernel.map, '[[', 'key')
