@@ -18,7 +18,7 @@ exportClasses(
   Machine,
   KernelMachine,
   ## DistanceMachine,
-  SVM,
+  SupportVectorMachine,
 
   Labels
   ## Kernels
@@ -71,9 +71,6 @@ exportMethods(
   alphas,
   objective,
 
-  threads,
-  "threads<-",
-
   # show,
   # plot,
 
@@ -86,7 +83,7 @@ exportMethods(
 
 export(
   Labels,
-
+  shThreads,
   isClassificationMachine,
   isRegressionMachine
 )

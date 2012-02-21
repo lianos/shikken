@@ -95,12 +95,11 @@ function(x, y=NULL, kernel="linear", ...) {
   bias <- svm[[1L]]
   alpha <- svm[[2L]][,1L]
   sv.index <- as.integer(svm[[2L]][,2L] + 1L)
-
-  ans <- new("SupportVectorMachine",
-             engine=params$engine, type=params$type, C=params$C,
-             C.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
-             SVindex=sv.index, params=params, kparams=kparams)
-  ans
+  
+  new("SupportVectorMachine",
+      engine=params$engine, type=params$type, cost=params$C,
+      cost.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
+      SVindex=sv.index, params=params, kparams=kparams)
 })
 
 ## TODO: Wire up Multiple kernel learning when calling SVM with is.list(x)
