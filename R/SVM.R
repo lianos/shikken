@@ -10,7 +10,7 @@ matchSvmEngine <- function(engine, as.int=FALSE) {
   engine
 }
 
-setValidity("SVM", function(object) {
+setValidity("SupportVectorMachine", function(object) {
   errs <- character()
   engine.ok <- tryCatch(matchSvmEngine(object@engine), error=function(e) NULL)
   if (is.null(engine.ok)) {
@@ -82,18 +82,24 @@ function(x, y=NULL, kernel="spectrum", x.isfile=FALSE, ...) {
 setMethod("SVM", c(x="matrix"),
 function(x, y=NULL, kernel="linear", ...) {
   params <- initSVM(y, ...)
-  kparams <- initKernel(x, kernel=kernel, svm.params=svm.params,
-                        target='train', ...)
+  kparams <- initKernel(x, kernel=kernel, svm.params=params,
+                        target='train', do.clean=TRUE, ...)
 
-  train(params$type)
+  trainSVM(params)
 
-  alpha <- numeric()
-  sv.index <- integer()
+  svm <- sgg('get_svm')
+  if (params$type == 'multi-class') {
+    stop("Multiclass classification not fully implemented")
+  }
 
-  ans <- with(params, {
-    new("SVM", engine=engine, C=C, C.neg=C.neg, alpha=alpha,
-        nSV=length(alpha), SVindex=sv.index, kparams=kparams)
-  })
+  bias <- svm[[1L]]
+  alpha <- svm[[2L]][,1L]
+  sv.index <- as.integer(svm[[2L]][,2L] + 1L)
+
+  ans <- new("SupportVectorMachine",
+             engine=params$engine, type=params$type, C=params$C,
+             C.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
+             SVindex=sv.index, params=params, kparams=kparams)
   ans
 })
 
@@ -103,7 +109,7 @@ function(x, ...) {
   stop("Multiple Kernel Learning not yet implemented")
 })
 
-initSvm <- function(y, type=NULL, svm.engine='libsvm',
+initSVM <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
                     cache=40, threads=1L, use.bias=TRUE, ...) {
   if (missing(y) || is.null(y)) {
@@ -130,18 +136,18 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
     }
   }
 
-  C <- as.numeric(C)
-  if (!isSingleNumber(C)) {
+  C <- as.double(C)
+  if (!isSingleDouble(C)) {
     stop("Illegal value for C")
   }
 
-  C.neg <- as.numeric(C.neg)
-  if (!isSingleNumber(C.neg)) {
+  C.neg <- as.double(C.neg)
+  if (!isSingleDouble(C.neg)) {
     stop("Illegal value for C.neg")
   }
 
   epsilon <- as.numeric(epsilon)
-  if (!isSingleNumber(epsilon)) {
+  if (!isSingleDouble(epsilon)) {
     stop("Illegal value for epsilon")
   }
 
@@ -149,19 +155,19 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
     warning("Only C-svm supported for > 1-clas learning")
   }
   nu <- as.numeric(nu)
-  if (!isSingleNumber(nu)) {
+  if (!isSingleDouble(nu)) {
     stop("Illegal value for nu")
   }
 
   threads <- as.integer(threads)
-  if (!isSingleInteger(epsilon)) {
+  if (!isSingleInteger(threads)) {
     stop("N threads must be a single integer")
   }
-  threads(threads)
+  shThreads(threads)
 
   ## cache is really an integer, but passed along as numeric
   cache <- as.numeric(as.integer(cache))
-  if (!isSingleNumber(cache)) {
+  if (!isSingleDouble(cache)) {
     stop("Illegal value for cache")
   }
 
@@ -172,52 +178,50 @@ initSvm <- function(y, type=NULL, svm.engine='libsvm',
 
   ## ---------------------------------------------------------------------------
   ## Do the sg initialization
-  sg('clean_features', 'TRAIN')
-  sg('clean_features', 'TEST')
-  sg('set_labels', 'TRAIN', y@y)
+  sgg('clean_features', 'TRAIN')
+  sgg('clean_features', 'TEST')
+  sgg('set_labels', 'TRAIN', y@y)
 
   if (isClassificationMachine(type)) {
     if (class(y) == "OneClassLabels") {
-      sg('svm_nu', nu)
+      sgg('svm_nu', nu)
       sg.machine <- 'LIBSVM_ONECLASS'
     } else if (class(y) == "TwoClassLabels") {
-      sg('c', c(C, C.neg))
-      sg.machine <- toupper(engine)
+      sgg('c', C, C.neg)
+      sg.machine <- toupper(svm.engine)
     } else if (class(y) == "MultiClassLabels") {
-      sg('c', C)
+      sgg('c', C)
       sg.machine <- 'LIBSVM_MULTICLASS'
     } else {
-      stop("Can't reconcile value for sg('new_classifier', ...)")
+      stop("Can't reconcile value for sgg('new_classifier', ...)")
     }
 
-    sg('new_classifier', sg.machine)
-    sg('svm_epsilon', epsion)
-    sg('svm_use_bias', use.bias)
+    sgg('new_classifier', sg.machine)
+    sgg('svm_epsilon', epsilon)
+    sgg('svm_use_bias', use.bias)
   } else {
     sg.machine <- switch(engine,
                         libsvm="LIBSVR",
                         svmlight="SVRLIGHT",
-                        stop("Can't reconcile vale for sg('new_regression', ...)"))
-    sg('new_regression', sg.machine)
-    sg('c', C)
-    sg('svr_tube_epsilon', epsilon)
+                        stop("Can't reconcile vale for sgg('new_regression', ...)"))
+    sgg('new_regression', sg.machine)
+    sgg('c', C)
+    sgg('svr_tube_epsilon', epsilon)
   }
 
   list(labels=y, type=type, engine=svm.engine, C=C, C.neg=C.neg,
-       epsilon=epsilon, nu=nu, cache=cache, sg.machine=machine)
+       epsilon=epsilon, nu=nu, cache=cache, sg.machine=sg.machine)
 }
 
-
-setMethod("train", c(x="character"),
-function(x, ...) {
-  x <- match(x, supportedMachineTypes())
+trainSVM <- function(svm.params) {
+  x <- match.arg(svm.params$type, supportedMachineTypes())
   if (isClassificationMachine(x)) {
-    sg('train_classifier')
+    sgg('train_classifier')
   } else if (isRegressionMachine(x)) {
-    sg('train_regression')
+    sgg('train_regression')
   } else {
     stop("don't know how to train machine type: ", x)
   }
   invisible(NULL)
-})
+}
 

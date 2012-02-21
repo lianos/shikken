@@ -23,7 +23,7 @@ guessMachineTypeFromLabels <- function(labels) {
     }
   }
 
-  match(machine.type, supportedMachineTypes())
+  match.arg(machine.type, supportedMachineTypes())
 }
 
 
@@ -34,7 +34,6 @@ guessMachineTypeFromLabels <- function(labels) {
 ## rm()
 ## TODO: Add support for num_classes -- in this scenario, labels are
 ##       0 based, eg. 0, 1, 2, ..., C
-
 Labels <- function(y, machine.type=NULL, factor.map=NULL, ...) {
   if (inherits(y, "Labels")) {
     return(y)
@@ -67,9 +66,9 @@ Labels <- function(y, machine.type=NULL, factor.map=NULL, ...) {
                     "1-class"="OneClassLabels",
                     "2-class"="TwoClassLabels",
                     "multi-class"="MultiClassLabels")
-    ans <- new(clazz, y=unname(y), factor.map=factor.map)
+    ans <- new(clazz, y=as.double(unname(y)), factor.map=factor.map)
   } else {
-    ans <- new("Labels", y=y)
+    ans <- new("Labels", y=as.double(y))
   }
 
   validObject(ans)
@@ -108,8 +107,8 @@ setAs("ClassLabels", "factor", function(from) {
   if (length(from@factor.map) == 0) {
     stop("No factor map for these labels")
   }
-  out <- as(from, "numeric")
-  factor(factor.map[as.character(out))])
+  out <- as(kernfrom, "numeric")
+  factor(factor.map[as.character(out)])
 })
 
 setAs("ClassLabels", "vector", function(from) {

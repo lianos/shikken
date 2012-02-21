@@ -17,22 +17,17 @@ detectCores <- function(all.tests = FALSE) {
   NA
 }
 
-
-## Threads information is stored in the global `Parallel * sg_parallel` object
-setMethod("threads", c(x="missing"),
-function(x, ...) {
-  ## .Call("shogun_threads", NULL, PACKAGE="shikken")
-  NULL
-})
-
-setMethod("threads", c(x="numeric"),
-function(x, force=FALSE, ...) {
-  x <- as.integer(x)
+shThreads <- function(x, force=FALSE) {
+  if (missing(x)) {
+    ## TODO: Query shogun for then number of threads to use.
+    return(NULL)
+  }
+  if (!is.numeric(x)) {
+    stop("numeric parameter required for threads")
+  }
+  x <- as.integer(x)[1L]
   stopifnot(isSingleInteger(x))
-  
-  if (force) {
-    sg('threads', x)
-  } else {
+  if (!force) {
     if (.Platform$OS.type == 'windows') {
       message("shogun on windows does not support mult-threaded functionality")
       x <- NA
@@ -40,17 +35,16 @@ function(x, force=FALSE, ...) {
       ncores <- detectCores()
       if (is.na(ncores)) {
         message("problem detecting number of cores ... multithreading not supported")
-        return(invisible(ncores))
+        x <- NA_integer_
       }
       if (ncores < x) {
         message("n.threads > number of detected cores, setting threads to n.cores")
         x <- ncores
       }
-      ## x <- .Call("shogun_threads", x, PACKAGE="shikken")
-      
     }
   }
-  
+  if (!is.na(x)) {
+    sgg('threads', x)
+  }
   invisible(x)
-})
-
+}

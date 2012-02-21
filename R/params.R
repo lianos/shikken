@@ -101,6 +101,9 @@ isTRUEorFALSE <- function(x)
     is.logical(x) && length(x) == 1L && !is.na(x)
 }
 
+isSingleDouble <- function(x) {
+  is.double(x) && length(x) == 1L && !is.na(x)
+}
 isSingleInteger <- function(x)
 {
     is.integer(x) && length(x) == 1L && !is.na(x)

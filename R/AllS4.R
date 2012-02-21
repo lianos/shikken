@@ -15,8 +15,14 @@ setClass("Labels", contains="ShikkenObject",
          representation=representation(
            y='numeric'),
          prototype=prototype(
-           y=numeriic()))
-
+           y=numeric()))
+setValidity("Labels", function(object) {
+  errs <- c()
+  if (!is.real(object@y)) {
+    errs <- "only `real` types supported as labels"
+  }
+  if (length(errs)) errs else TRUE
+})
 ##' Stores class labels, if a factor is used for classification
 ##'
 ##' @extends Class \code{Labels}.
@@ -86,7 +92,7 @@ setValidity("TwoClassLabels", function(object) {
 ##' @extends Class \code{ClassLabels}
 ##' @export
 setClass("MultiClassLabels", contains="ClassLabels")
-setValidity("TwoClassLabels", function(object) {
+setValidity("MultiClassLabels", function(object) {
   errs <- character()
   if (length(object@y) == 0) {
     errs <- '0 length Labels'
@@ -126,7 +132,7 @@ setClass("KernelMachine", contains="Machine",
          representation=representation(
            preproc='list',
            normalize='list',
-           kparams='list')
+           kparams='list'),
          prototype=prototype(
            preproc=list(),
            normalize=list(),
@@ -141,7 +147,7 @@ setClass("KernelMachine", contains="Machine",
 ##' @slot nSV The number of support vectors
 ##' @slot alpha The weight over the support vectors
 ##' @slot SVindex The index of the support vectors from the input data
-setClass("SVM", contains="KernelMachine",
+setClass("SupportVectorMachine", contains="KernelMachine",
          representation=representation(
            engine="character",
            C="numeric",

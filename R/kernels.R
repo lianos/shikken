@@ -15,28 +15,31 @@ matchKernelTarget <- function(target) {
 
 initKernel <- function(x, kernel, svm.params, target=c('train', 'test'),
                        preproc=NULL, normalizer=normalizer,
-                       do.clean=TRUE, ..., scaled=TRUE) {
+                       do.clean=FALSE, ..., scaled=TRUE) {
+  target <- toupper(match.arg(target))
+
   if (do.clean) {
-    sg('clean_features', 'TRAIN')
-    sg('clean_features', 'TEST')
-    sg('clean_kernel')
+    sgg('clean_features', 'TRAIN')
+    sgg('clean_features', 'TEST')
+    sgg('clean_kernel')
   }
 
-  target <- match.arg(target)
   kernel <- matchKernelType(kernel)
-  cache <- as.numeric(cache)[1L]
-  if (!isSingleNumber(cache)) {
+  cache <- as.numeric(svm.params$cache)[1L]
+  if (!isSingleDouble(cache)) {
     stop("Illegal value for cache")
   }
 
   k.info <- .kernel.map[[kernel]]
   if (is.null(k.info)) {
-    stop("Could not find correct map for the normalized kernel name, "
+    stop("Could not find correct map for the normalized kernel name, ",
          "this should never happen.")
   }
 
   initFunc <- getFunction(paste('.init', k.info$class, sep=""))
-  initFunc(x, k.info=k.info, cache=cache, ...)
+  result <- initFunc(x, k.info=k.info, target=target, cache=cache, ...)
+  result$key <- kernel
+  result
 }
 
 coerceStringInput <- function(x, k.info, ...) {
@@ -70,18 +73,19 @@ coerceNumericInput <- function(x, k.info, ...) {
 
 ################################################################################
 ## String Kernels
-.initSpectrumKernel <- function(x, k.info, svm.params, target, mkl=FALSE, ...) {
+.initSpectrumKernel <- function(x, k.info, target, cache=40, mkl=FALSE, ...) {
   x <- coerceStringInput(x, k.info, ...)
-  params <- extractParams(..., .default=kmap$params)
+  params <- extractParams(..., .defaults=k.info$params)
   add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
-  sg('add_preproc', kmap$preproc)
-  sg(add.kernel, 'COMMSTRING', 'WORD', cache, params$use.sign,
+  sgg('add_preproc', k.info$preproc)
+  sgg(add.kernel, 'COMMSTRING', 'WORD', cache, params$use.sign,
      params$normalization)
 
-  sg('set_features', target, x, 'DNA')
-  sg('convert', target, 'STRING', 'CHAR', 'STRING', 'WORD',
+  sgg('set_features', target, x, 'DNA')
+  sgg('convert', target, 'STRING', 'CHAR', 'STRING', 'WORD',
      params$length, params$length - 1, params$gap, params$reverse)
-  sg('attach_preproc', target)
+  sgg('attach_preproc', target)
+  params
 }
 
 

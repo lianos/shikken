@@ -79,7 +79,7 @@
     static="COMMSTRING",
     cfun='create_kernel_spectrum',
     params=list(length=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
-      normaliztion="FULL"),
+      normalization="FULL"),
     preproc="SORTWORDSTRING",
     feature.type='string')
 )
