@@ -35,13 +35,24 @@ initKernel <- function(x, kernel, svm.params, target=c('train', 'test'),
     stop("Could not find correct map for the normalized kernel name, ",
          "this should never happen.")
   }
-
-  initFunc <- getFunction(paste('.init', k.info$class, sep=""))
+  
+  f.name <- paste('.init', k.info$class, sep="")
+  initFunc <- tryCatch({
+    getFunction(f.name)
+  }, error=function(e) NULL)
+  
+  if (is.null(initFunc)) {
+    stop("Kernel function (", f.name, ") for ", kernel, " ",
+         "not implemented yet.")
+  }
+  
   result <- initFunc(x, k.info=k.info, target=target, cache=cache, ...)
   result$key <- kernel
   result
 }
 
+################################################################################
+## String Kernels
 coerceStringInput <- function(x, k.info, ...) {
   if (inherits(x, 'XStringSet')) {
     x <- as.character(x)
@@ -62,6 +73,47 @@ coerceStringInput <- function(x, k.info, ...) {
   x
 }
 
+
+.initSpectrumKernel <- function(x, k.info, target, cache=40, mkl=FALSE, ...) {
+  x <- coerceStringInput(x, k.info, ...)
+  params <- extractParams(..., .defaults=k.info$params)
+  add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
+  sgg('add_preproc', k.info$preproc)
+  sgg(add.kernel, 'COMMSTRING', 'WORD', cache, params$use.sign,
+      params$normalization)
+
+  sgg('set_features', target, x, 'DNA')
+  sgg('convert', target, 'STRING', 'CHAR', 'STRING', 'WORD',
+     params$degree, params$degree - 1, params$gap, params$reverse)
+  sgg('attach_preproc', target)
+  
+  params$x.dim <- c(nrow(x), params$length^4)
+  params
+}
+
+.initWeightedDegreeKernel <- function(x, k.info, target, cache=40, mkl=FALSE,
+                                      ...) {
+  x <- coerceStringInput(x, k.info, ...)
+  params <- extractParams(..., .defaults=k.info$params)
+  
+  add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
+  sgg(add.kernel, 'WEIGHTEDDEGREE', 'CHAR', cache, params$degree)
+
+  sgg('set_features', target, x, 'DNA')
+  
+  ## No sgg('convert', ...?)
+  params$x.dim <- c(nrow(x), 0)
+  params
+}
+
+.initWeightedDegreeKernelWithShifts <- function(x, k.info, target, cache=40,
+                                                mkl=FALSE, ...) {
+
+}
+
+
+################################################################################Q
+## Numeric kernels
 coerceNumericInput <- function(x, k.info, ...) {
   if (is.character(x)) {
     if (length(x) == 1L && file.exists(x)) {
@@ -71,26 +123,6 @@ coerceNumericInput <- function(x, k.info, ...) {
 
 }
 
-################################################################################
-## String Kernels
-.initSpectrumKernel <- function(x, k.info, target, cache=40, mkl=FALSE, ...) {
-  x <- coerceStringInput(x, k.info, ...)
-  params <- extractParams(..., .defaults=k.info$params)
-  add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
-  sgg('add_preproc', k.info$preproc)
-  sgg(add.kernel, 'COMMSTRING', 'WORD', cache, params$use.sign,
-     params$normalization)
-
-  sgg('set_features', target, x, 'DNA')
-  sgg('convert', target, 'STRING', 'CHAR', 'STRING', 'WORD',
-     params$length, params$length - 1, params$gap, params$reverse)
-  sgg('attach_preproc', target)
-  params
-}
-
-
-################################################################################Q
-## Numeric kernels
 initNumericKernel <- function(x, kernel="linear", cache=40, ...) {
 
 }

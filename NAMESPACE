@@ -4,6 +4,11 @@ import(sg)
 import(methods)
 import(Biostrings)
 
+importFrom(kernlab,
+  alpha,
+  SVindex,
+  nSV)
+
 importFrom(stats,
   coef,
   fitted,
@@ -18,7 +23,7 @@ exportClasses(
   Machine,
   KernelMachine,
   ## DistanceMachine,
-  SupportVectorMachine,
+  SVM,
 
   Labels
   ## Kernels
@@ -68,9 +73,12 @@ exportMethods(
 
   SVM,
   supportVectors,
-  alphas,
   objective,
-
+  nSV,
+  SVindex,
+  alpha,
+  coef,
+  
   # show,
   # plot,
 
@@ -82,6 +90,11 @@ exportMethods(
 )
 
 export(
+  nSV,
+  SVindex,
+  alpha,
+  coef,
+  
   Labels,
   shThreads,
   isClassificationMachine,

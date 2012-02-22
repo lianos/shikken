@@ -61,6 +61,9 @@
     cfun='create_kernel_polynomial',
     params=list(degree=2L, inhomogeneous=TRUE),
     feature.type='polynomial'),
+##
+## String Kernels
+##
   weighted.degree=list(
     class="WeightedDegreeKernel",
     static="WEIGHTEDDEGREE",
@@ -78,6 +81,14 @@
     class="SpectrumKernel",
     static="COMMSTRING",
     cfun='create_kernel_spectrum',
+    params=list(degree=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
+      normalization="FULL"),
+    preproc="SORTWORDSTRING",
+    feature.type='string'),
+  weighted.spectrum=list(
+    class="WeightedSpectrumKernel",
+    static="WEIGHTEDCOMMSTRING",
+    cfun='create_kernel_weighted_spectrum',
     params=list(length=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
       normalization="FULL"),
     preproc="SORTWORDSTRING",

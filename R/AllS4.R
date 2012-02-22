@@ -147,47 +147,31 @@ setClass("KernelMachine", contains="Machine",
 ##' @slot nSV The number of support vectors
 ##' @slot alpha The weight over the support vectors
 ##' @slot SVindex The index of the support vectors from the input data
-setClass("SupportVectorMachine", contains="KernelMachine",
+setClass("SVM", contains="KernelMachine",
          representation=representation(
+           x.dim="numeric",
            engine="character",
-           cost="numeric",
-           cost.neg="numeric",
+           C="numeric",
+           C.neg="numeric",
            nSV="integer",
+           SVindex="integer",
            alpha="numeric",
-           SVindex="integer"),
+           objective="numeric"),
          prototype=prototype(
+           x.dim=numeric(),
            engine=character(),
-           cost=1,
-           cost.neg=1,
-           alpha=numeric(),
+           C=1,
+           C.neg=1,
            nSV=integer(),
-           SVindex=integer()))
-
-##' Extract weights (aka "beta"s to stats folk) from learning machine.
-setGeneric("weights", function(x, ...) standardGeneric("weights"))
-
-setGeneric("weights<-", function(x, ..., value) standardGeneric("weights<-"))
-
-## setGeneric("normalizer", function(x, normalizer, ...) {
-##   standardGeneric("normalizer")
-## })
-
-## setGeneric("normalizer<-", function(x, ..., value) {
-##   standardGeneric("normalizer<-")
-## })
-
-## setGeneric("features", function(x, ...) standardGeneric("features"))
-## setGeneric("degree", function(x, ...) standardGeneric("degree"))
-## setGeneric("inhomogeneous", function(x, ...) standardGeneric("inhomogeneous"))
+           SVindex=integer(),
+           alpha=numeric(),
+           objective=numeric()))
 
 ##' Extract the bias term from the learning machine
 setGeneric("bias", function(x, ...) standardGeneric("bias"))
 
-##' Extracts the alphas from SVM
-setGeneric("alphas", function(x, ...) standardGeneric("alphas"))
-
 ##' Extracts the supportVectors from SVM
-setGeneric("supportVectors", function(x, as.index=FALSE, ...) {
+setGeneric("supportVectors", function(x, dat, as.index=FALSE, ...) {
   standardGeneric("supportVectors")
 })
 

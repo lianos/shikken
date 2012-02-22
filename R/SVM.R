@@ -10,7 +10,7 @@ matchSvmEngine <- function(engine, as.int=FALSE) {
   engine
 }
 
-setValidity("SupportVectorMachine", function(object) {
+setValidity("SVM", function(object) {
   errs <- character()
   engine.ok <- tryCatch(matchSvmEngine(object@engine), error=function(e) NULL)
   if (is.null(engine.ok)) {
@@ -96,9 +96,9 @@ function(x, y=NULL, kernel="linear", ...) {
   alpha <- svm[[2L]][,1L]
   sv.index <- as.integer(svm[[2L]][,2L] + 1L)
   
-  new("SupportVectorMachine",
-      engine=params$engine, type=params$type, cost=params$C,
-      cost.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
+  new(Class="SVM",
+      engine=params$engine, type=params$type, C=params$C,
+      C.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
       SVindex=sv.index, params=params, kparams=kparams)
 })
 
@@ -108,6 +108,35 @@ function(x, ...) {
   stop("Multiple Kernel Learning not yet implemented")
 })
 
+setMethod("show", c(object="SVM"),
+function(object) {
+  cat("shikken SVM with", object@kparams$key, "kernel\n")
+  cat(" ", object@nSV, " support vectors\n\n")
+  cat(" SVM parameters:\n")
+  for (name in names(object@params)) {
+    if (!name %in% c('cache', 'labels')) {
+      val <- object@params[[name]]
+      if (is.numeric(val)) {
+        cat(sprintf("    %s: %.2f\n", name, val))
+      } else {
+        cat(sprintf("    %s: %s\n", name, val))
+      }
+    }
+  }
+  
+  cat("\n  Kernel parameters:\n")
+  for(name in names(object@kparams)) {
+    if (!name %in% c('key', 'x.dim')) {
+      val <- object@kparams[[name]]
+      if (is.numeric(val)) {
+        cat(sprintf("    %s: %.2f\n", name, val))
+      } else {
+        cat(sprintf("    %s: %s\n", name, val))
+      }
+    }
+  }
+  cat("\n")
+})
 initSVM <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
                     cache=40, threads=1L, use.bias=TRUE, ...) {
@@ -224,3 +253,73 @@ trainSVM <- function(svm.params) {
   invisible(NULL)
 }
 
+###############################################################################
+## Utility functions
+setMethod("predict", "SVM",
+function(object, newdata, type="response", ...) {
+  if (missing(newdata)) {
+    stop("shikken machines need `newdata` to predict on")
+  }
+  type <- match.arg(type, c("response", "decision", "probabilities"))
+  if (type == "probabilities") {
+    stop("probabilities not yet supported")
+  }
+  
+  if (!is.null(newdata)) {
+    initKernel(newdata, kernel=object@kparams$key, svm.params=object@params,
+               target='test', do.clean=FALSE)
+  }
+  
+  ## Returns the decision values
+  preds <- sgg('classify')
+  
+  if (type == "response" && isClassificationMachine(object)) {
+    fmap <- object@params$labels@factor.map
+    if (length(fmap)) {
+      preds <- factor(fmap[as.character(preds)], levels=fmap)
+    } else if (object@type == '2-class') {
+      preds <- sign(preds)
+    }
+  }
+  
+  preds
+})
+
+setMethod("coef", "SVM", function(object, ...) {
+  alpha(object)
+})
+
+setMethod("objective", c(x="SVM"),
+function(x, ...) {
+  x@objective
+})
+
+setMethod("alpha", c(object="SVM"),
+function(object) {
+  object@alpha
+})
+
+setGeneric("supportVectors", function(x, dat, as.index=FALSE, ...) {
+  standardGeneric("supportVectors")
+})
+
+setMethod("supportVectors", c(x="SVM"),
+function(x, dat, as.index, ...) {
+  if (missing(dat) && !as.index) {
+    stop("Can't retrieve support vectors w/o `dat`")
+  }
+  if (as.index) {
+    return(SVindex(x))
+  }
+  dat[SVindex(x),]
+})
+
+setMethod("SVindex", c(object="SVM"),
+function(object) {
+  object@SVindex
+})
+
+setMethod("nSV", c(object="SVM"),
+function(object) {
+  object@nSV
+})
