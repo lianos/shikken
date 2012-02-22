@@ -41,7 +41,7 @@
     class='GaussianKernel',
     static='GAUSSIAN',
     cfun='create_kernel_gaussian',
-    params=list(width=0.5),
+    params=list(width=2),
     feature.type='simple'),
   linear=list(
     class='LinearKernel',
@@ -59,7 +59,7 @@
     class='PolyKernel',
     static="POLY",
     cfun='create_kernel_polynomial',
-    params=list(degree=2L, inhomogeneous=TRUE),
+    params=list(degree=2L, inhomogeneous=TRUE, normalization=TRUE),
     feature.type='polynomial'),
 ##
 ## String Kernels
@@ -68,12 +68,12 @@
     class="WeightedDegreeKernel",
     static="WEIGHTEDDEGREE",
     cfun='create_kernel_weighted_degree_string',
-    params=list(degree=4L, weights=1, alphabet="DNA"),
+    params=list(degree=4L, max.mismatch=0L, step=1, alphabet="DNA"),
     feature.type='string'),
   weighted.degree.shifts=list(
     class="WeightedDegreeKernelWithShifts",
     static="WEIGHTEDDEGREEPOS",
-    params=list(degree=4L, weights=1L, shift=5L),
+    params=list(degree=4L, max.mismatch=0L, length=0L, center=0L, step=1),
     cfun="create_kernel_weighted_degree_string_shifts",
     feature.type='string'
   ),
@@ -89,7 +89,7 @@
     class="WeightedSpectrumKernel",
     static="WEIGHTEDCOMMSTRING",
     cfun='create_kernel_weighted_spectrum',
-    params=list(length=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
+    params=list(degree=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
       normalization="FULL"),
     preproc="SORTWORDSTRING",
     feature.type='string')
