@@ -18,7 +18,7 @@ Description: An R (S4) interface to the shogun toolbox -- a machine learning
 License: GPL (>= 3)
 Depends: R (>= 2.15.0), Rcpp (>= 0.9.10), sg (>= 1.2.0), caret (>= 4.91)
 Imports: Rcpp, caret, sg, methods, Biostrings, kernlab (>= 0.9.14)
-Suggests: testthat (>= 0.5), 
+Suggests: testthat (>= 0.5), ROCR
 LinkingTo: Rcpp
 URL: http://lianos.github.com/shikken/,
      http://www.shogun-toolbox.org/

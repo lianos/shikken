@@ -70,6 +70,7 @@ exportMethods(
   ## coef,
   ## fitted,
   predict,
+  bias,
 
   SVM,
   supportVectors,

@@ -62,8 +62,8 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
 })
 
 setMethod("SVM", c(x="numeric"),
-function(x, ...) {
-  SVM(as.matrix(x), ...)
+function(x, y=NULL, ...) {
+  SVM(as.matrix(x), y=y, ...)
 })
 
 setMethod("SVM", c(x="XStringSet"),
@@ -80,29 +80,29 @@ function(x, y=NULL, kernel="spectrum", x.isfile=FALSE, ...) {
 })
 
 setMethod("SVM", c(x="matrix"),
-function(x, y=NULL, kernel="linear", ...) {
+function(x, y=NULL, kernel="linear", do.train=TRUE, ...) {
+  if (is.null(y)) {
+    stop("y is required")
+  }
+  if (nrow(x) != length(y)) {
+    stop("Number of observations doesn't equal number of labels")
+  }
+
   params <- initSVM(y, ...)
   kparams <- initKernel(x, kernel=kernel, svm.params=params,
                         target='train', do.clean=TRUE, ...)
 
-  trainSVM(params)
-
-  svm <- sgg('get_svm')
-  if (params$type == 'multi-class') {
-    stop("Multiclass classification not fully implemented")
+  if (do.train) {
+    svm <- trainSVM(params, kparams)
+  } else {
+    svm <- new(Class="SVM", params=params, kparams=kparams)
   }
 
-  bias <- svm[[1L]]
-  alpha <- svm[[2L]][,1L]
-  sv.index <- as.integer(svm[[2L]][,2L] + 1L)
-  
-  new(Class="SVM",
-      engine=params$engine, type=params$type, C=params$C,
-      C.neg=params$C.neg, alpha=alpha, nSV=length(alpha),
-      SVindex=sv.index, params=params, kparams=kparams)
+  svm
 })
 
 ## TODO: Wire up Multiple kernel learning when calling SVM with is.list(x)
+##       Look at mkl_classify_christmas_star to see how it's done
 setMethod("SVM", c(x="list"),
 function(x, ...) {
   stop("Multiple Kernel Learning not yet implemented")
@@ -123,11 +123,11 @@ function(object) {
       }
     }
   }
-  
+
   cat("\n  Kernel parameters:\n")
-  for(name in names(object@kparams)) {
+  for(name in names(object@kparams$params)) {
     if (!name %in% c('key', 'x.dim')) {
-      val <- object@kparams[[name]]
+      val <- object@kparams$params[[name]]
       if (is.numeric(val)) {
         cat(sprintf("    %s: %.2f\n", name, val))
       } else {
@@ -137,9 +137,14 @@ function(object) {
   }
   cat("\n")
 })
+
+##' This initializes a new SVM instance.
+##' 
+##' Everything that has been stored in the static shogun machine will be
+##' blown out
 initSVM <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
-                    cache=40, threads=1L, use.bias=TRUE, ...) {
+                    threads=1L, use.bias=TRUE, ...) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required")
   }
@@ -193,12 +198,6 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
   }
   shThreads(threads)
 
-  ## cache is really an integer, but passed along as numeric
-  cache <- as.numeric(as.integer(cache))
-  if (!isSingleDouble(cache)) {
-    stop("Illegal value for cache")
-  }
-
   use.bias <- as.logical(use.bias)[1L]
   if (!isTRUEorFALSE(use.bias)) {
     stop("Illegal value for use.bias, logical(1) required")
@@ -208,6 +207,7 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
   ## Do the sg initialization
   sgg('clean_features', 'TRAIN')
   sgg('clean_features', 'TEST')
+  sgg('clean_kernel')
   sgg('set_labels', 'TRAIN', y@y)
 
   if (isClassificationMachine(type)) {
@@ -215,7 +215,11 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
       sgg('svm_nu', nu)
       sg.machine <- 'LIBSVM_ONECLASS'
     } else if (class(y) == "TwoClassLabels") {
-      sgg('c', C, C.neg)
+      if (missing(C.neg)) {
+        sgg('c', C)
+      } else {
+        sgg('c', C, C.neg)
+      }
       sg.machine <- toupper(svm.engine)
     } else if (class(y) == "MultiClassLabels") {
       sgg('c', C)
@@ -238,10 +242,10 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
   }
 
   list(labels=y, type=type, engine=svm.engine, C=C, C.neg=C.neg,
-       epsilon=epsilon, nu=nu, cache=cache, sg.machine=sg.machine)
+       epsilon=epsilon, nu=nu, sg.machine=sg.machine)
 }
 
-trainSVM <- function(svm.params) {
+trainSVM <- function(svm.params, kparams) {
   x <- match.arg(svm.params$type, supportedMachineTypes())
   if (isClassificationMachine(x)) {
     sgg('train_classifier')
@@ -250,7 +254,22 @@ trainSVM <- function(svm.params) {
   } else {
     stop("don't know how to train machine type: ", x)
   }
-  invisible(NULL)
+
+  svm <- sgg('get_svm')
+  if (svm.params$type == 'multi-class') {
+    stop("Multiclass classification not fully implemented")
+  }
+
+  bias <- svm[[1L]][1L]
+  alpha <- svm[[2L]][,1L]
+  sv.index <- as.integer(svm[[2L]][,2L] + 1L)
+  objective <- sgg('get_svm_objective')
+
+  new(Class="SVM",
+      engine=svm.params$engine, type=svm.params$type, bias=bias,
+      C=svm.params$C, C.neg=svm.params$C.neg, alpha=alpha, nSV=length(alpha),
+      SVindex=sv.index, objective=objective, params=svm.params,
+      kparams=kparams)
 }
 
 ###############################################################################
@@ -264,15 +283,15 @@ function(object, newdata, type="response", ...) {
   if (type == "probabilities") {
     stop("probabilities not yet supported")
   }
-  
+
   if (!is.null(newdata)) {
     initKernel(newdata, kernel=object@kparams$key, svm.params=object@params,
                target='test', do.clean=FALSE)
   }
-  
+
   ## Returns the decision values
   preds <- sgg('classify')
-  
+
   if (type == "response" && isClassificationMachine(object)) {
     fmap <- object@params$labels@factor.map
     if (length(fmap)) {
@@ -281,7 +300,7 @@ function(object, newdata, type="response", ...) {
       preds <- sign(preds)
     }
   }
-  
+
   preds
 })
 
@@ -292,6 +311,11 @@ setMethod("coef", "SVM", function(object, ...) {
 setMethod("objective", c(x="SVM"),
 function(x, ...) {
   x@objective
+})
+
+setMethod("bias", c(x="SVM"),
+function(x, ...) {
+  x@bias
 })
 
 setMethod("alpha", c(object="SVM"),

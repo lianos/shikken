@@ -36,30 +36,32 @@
 ## cfun  : The base name of the c function that is used to make this kernel
 ## params : The parameters (with their defaults) for this kernel
 ## feature.type : the key into the .feature.map object for this type of kernel
+## 
+## Defaults taken from SGInterface.cpp
 .kernel.map <- list(
   gaussian=list(
     class='GaussianKernel',
     static='GAUSSIAN',
     cfun='create_kernel_gaussian',
-    params=list(width=2),
+    params=list(width=1),
     feature.type='simple'),
   linear=list(
     class='LinearKernel',
     static='LINEAR',
     cfun='create_kernel_linear',
-    params=list(),
+    params=list(scale=-1),
     feature.type='simple'),
   sigmoid=list(
     class='SigmoidKernel',
     static='SIGMOID',
     cfun='create_kernel_sigmoid',
-    params=list(gamma=1, coef0=1),
+    params=list(gamma=0.01, coef0=0),
     feature.type='simple'),
   polynomial=list(
     class='PolyKernel',
     static="POLY",
     cfun='create_kernel_polynomial',
-    params=list(degree=2L, inhomogeneous=TRUE, normalization=TRUE),
+    params=list(degree=2L, inhomogeneous=FALSE, normalization=TRUE),
     feature.type='polynomial'),
 ##
 ## String Kernels
@@ -68,8 +70,11 @@
     class="WeightedDegreeKernel",
     static="WEIGHTEDDEGREE",
     cfun='create_kernel_weighted_degree_string',
-    params=list(degree=4L, max.mismatch=0L, step=1, alphabet="DNA"),
-    feature.type='string'),
+    params=list(degree=3L, max.mismatch=0L, normalization=TRUE,
+                step=1, block.computation=TRUE,
+                single.degree=-1),
+    feature.type='string',
+    alphabet="DNA"),
   weighted.degree.shifts=list(
     class="WeightedDegreeKernelWithShifts",
     static="WEIGHTEDDEGREEPOS",
@@ -81,10 +86,13 @@
     class="SpectrumKernel",
     static="COMMSTRING",
     cfun='create_kernel_spectrum',
-    params=list(degree=4L, alphabet="DNA", use.sign=FALSE, gap=0, reverse='n',
-      normalization="FULL"),
-    preproc="SORTWORDSTRING",
-    feature.type='string'),
+    params=list(use.sign=FALSE,normalization="FULL"),
+    preproc=list(type='SORTWORDSTRING'),
+    convert=list(from.class="STRING", from.type="CHAR",
+                 to.class="STRING", to.type="WORD",
+                 degree=4, from.degree=3, gap=0, reverse='n'),
+    feature.type='string',
+    alphabet="DNA"),
   weighted.spectrum=list(
     class="WeightedSpectrumKernel",
     static="WEIGHTEDCOMMSTRING",
