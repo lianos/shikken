@@ -102,7 +102,7 @@ setValidity("MultiClassLabels", function(object) {
     if (n < 2L) {
       errs <- sprintf("Illegal number of labels (%d) for MultClassLabel", n)
     }
-    if (!all(u.labels %in% seq_along(u.labels) - 1)) {
+    if (!all(u.labels %in% 0:(n-1))) {
       errs <- c("MultiClassLabels start from 0 and must be whole numbers", errs)
     }
   }

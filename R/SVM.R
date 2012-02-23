@@ -110,7 +110,7 @@ function(x, ...) {
 
 setMethod("show", c(object="SVM"),
 function(object) {
-  cat("shikken SVM with", object@kparams$key, "kernel\n")
+  cat(object@type, "SVM with", object@kparams$key, "kernel\n")
   cat(" ", object@nSV, " support vectors\n\n")
   cat(" SVM parameters:\n")
   for (name in names(object@params)) {
@@ -139,7 +139,7 @@ function(object) {
 })
 
 ##' This initializes a new SVM instance.
-##' 
+##'
 ##' Everything that has been stored in the static shogun machine will be
 ##' blown out
 initSVM <- function(y, type=NULL, svm.engine='libsvm',
@@ -293,11 +293,13 @@ function(object, newdata, type="response", ...) {
   preds <- sgg('classify')
 
   if (type == "response" && isClassificationMachine(object)) {
+    if  (object@type == '2-class') {
+      preds <- sign(preds)
+    }
     fmap <- object@params$labels@factor.map
     if (length(fmap)) {
-      preds <- factor(fmap[as.character(preds)], levels=fmap)
-    } else if (object@type == '2-class') {
-      preds <- sign(preds)
+      xref <- match(preds, fmap)
+      preds <- factor(names(fmap)[xref], levels=names(fmap))
     }
   }
 

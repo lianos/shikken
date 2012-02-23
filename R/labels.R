@@ -34,7 +34,7 @@ guessMachineTypeFromLabels <- function(labels) {
 ## rm()
 ## TODO: Add support for num_classes -- in this scenario, labels are
 ##       0 based, eg. 0, 1, 2, ..., C
-Labels <- function(y, machine.type=NULL, factor.map=NULL, ...) {
+Labels <- function(y, machine.type=NULL, ...) {
   if (inherits(y, "Labels")) {
     return(y)
   }
@@ -47,47 +47,76 @@ Labels <- function(y, machine.type=NULL, factor.map=NULL, ...) {
   if (is.character(machine.type) && machine.type != m.type) {
     stop("Requested machine.type and label types do not gel")
   }
+
   machine.type <- m.type
+  factor.map <- double()
 
   if (isClassificationMachine(machine.type)) {
     ## This part handles mult-class classifiation fine.
     if (is.factor(y)) {
-      if (is.null(factor.map)) {
-        labels <- .factors2labels(y, learning.type=learning.type)
-        factor.map <- unique(names(labels))
-        xref <- match(label.names, names(labels))
-        names(factor.map) <- as.character(labels[xref])
-      }
+      label.map <- .process.label.map(y, learning.type=machine.type)
+      y <- label.map$y
+      factor.map <- label.map$label.map
     } else {
-      factor.map <- numeric()
+      y <- unname(as.double(y))
+      factor.map <- double()
     }
 
     clazz <- switch(machine.type,
                     "1-class"="OneClassLabels",
                     "2-class"="TwoClassLabels",
-                    "multi-class"="MultiClassLabels")
+                    "multi-class"="MultiClassLabels",
+                    "regression"="Labels",
+                    stop("Tripped on unknown machine type during the 0-hour"))
+
     ans <- new(clazz, y=as.double(unname(y)), factor.map=factor.map)
-  } else {
+  } else if (isRegressionMachine(machine.type)) {
+    y <- unname(as.double(y))
     ans <- new("Labels", y=as.double(y))
+  } else {
+    stop("Unsupported learning machine")
   }
 
   validObject(ans)
   ans
 }
 
-.factors2labels <- function(y, learning.type, nlevels=length(unique(y))) {
+setAs("ClassLabels", "factor", function(from) {
+  if (length(from@factor.map) == 0L) {
+    stop("Can't convert ClassLabels to factor w/o factor.map")
+  }
+  xref <- match(from@y, from@factor.map)
+  factor(names(from@factor.map)[xref], levels=names(from@factor.map))
+})
+
+
+##' Returns a numeric vector of the labels found in factor y.
+##'
+##' The names are the labels from the factor.
+.process.label.map <- function(y, learning.type) {
   ## This handles multi-class classification just fine.
   stopifnot(is.factor(y))
-  yn <- as.numeric(y)
-  names(yn) <- levels(y)[yn]
+  unique.labels <- unique(y)
+  nlevels <- length(unique.labels)
+  xref.labels <- match(unique.labels, y)
+  yd <- as.double(y)
+
   if (learning.type == '2-class') {
     stopifnot(nlevels == 2)
-    yn[yn == 2] <- -1
+    yd[yd == 2] <- -1
   } else if (learning.type == 'multi-class'){
     ## mutli-class, labels start at 0, 1, ..., C
-    yn <- yn - 1L
+    stopifnot(nlevels > 2)
+    yd <- yd - 1
   }
-  yn
+
+  factor.map <- double(length(xref.labels))
+  for (i in seq(nlevels)) {
+    factor.map[i] <- yd[xref.labels[i]]
+  }
+  names(factor.map) <- unique.labels
+
+  list(y=unname(yd), label.map=factor.map)
 }
 
 

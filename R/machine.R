@@ -15,7 +15,7 @@ isClassificationMachine <- function(x, ...) {
   if (!is.character(x)) {
     stop("x needs to be a Machine or character")
   }
-  length(grep('class', x) > 0L)
+  length(grep('class', x)) > 0L
 }
 
 isRegressionMachine <- function(x, ...) {
@@ -28,6 +28,6 @@ isRegressionMachine <- function(x, ...) {
   if (!is.character(x)) {
     stop("x needs to be a Machine or character")
   }
-  length(grep('regress', x) > 0L)
+  length(grep('regress', x)) > 0L
 }
 
