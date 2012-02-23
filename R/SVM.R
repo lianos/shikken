@@ -23,6 +23,8 @@ setValidity("SVM", function(object) {
 setGeneric("SVM", function(x, ...) standardGeneric("SVM"))
 setMethod("SVM", c(x="formula"),
 function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
+  warning("You will have to manually manipulate things you want to predict "
+          "on into a matrix")
   cl <- match.call()
   m <- match.call(expand.dots=FALSE)
   if (is.matrix(eval(m$data, parent.frame()))) {

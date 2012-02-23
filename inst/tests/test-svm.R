@@ -129,11 +129,12 @@ if (FALSE) {
   trainlab <- c(rep(-1,num),rep(1,num))
 
   xx <- trySVM(C, traindat, trainlab, 'SIGMOID', 'REAL', 50)
-  yy <- shSVM(C, traindat, trainlab, 'sigmoid')
+  yy <- shSVM(C, traindat, trainlab, 'sigmoid', wireframe=TRUE)
 
   ## newplot()
   trySVM(C, traindat, trainlab, 'LINEAR', 'REAL', 100)
-  yy <- shSVM(C, traindat, trainlab, 'linear', 100)
+  yy <- shSVM(C, traindat, trainlab, 'linear', 100,
+              wireframe=TRUE)
   ## newplot()
 
   trySVM(C, traindat, trainlab, 'GAUSSIAN', 'REAL', 40)
