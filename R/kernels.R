@@ -111,9 +111,9 @@ coerceStringInput <- function(x, k.info, ...) {
 
   ## convert .... from_class, from_type, to_class, to_type
   sgg('convert', target,
-      k.info$convert$from.class, k.info$convert$to.class,
+      k.info$convert$from.class, k.info$convert$from.type,
       k.info$convert$to.class, k.info$convert$to.type,
-      k.info$covert$degree, k.info$convert$from.degree - 1,
+      k.info$convert$degree, k.info$convert$from.degree,
       k.info$convert$gap, k.info$convert$reverse)
   sgg('attach_preproc', target)
 
