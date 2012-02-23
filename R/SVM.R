@@ -159,15 +159,15 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
     type <- gtype
   }
 
-  svm.engine <- matchSvmEngine(svm.engine)
+  ## svm.engine <- matchSvmEngine(svm.engine)
 
   ## SVMLIGHT can only to 2-class classification here?
-  if (svm.engine == "svmlight") {
-    if (isClassificationMachine(type) && !is(y, 'TwoClassLabels')) {
-      stop("Using SVMLight for classification only accepts 2-class labels ",
-           "try libsvm")
-    }
-  }
+  ## if (svm.engine == "svmlight") {
+  ##   if (isClassificationMachine(type) && !is(y, 'TwoClassLabels')) {
+  ##     stop("Using SVMLight for classification only accepts 2-class labels ",
+  ##          "try libsvm")
+  ##   }
+  ## }
 
   C <- as.double(C)
   if (!isSingleDouble(C)) {
@@ -255,15 +255,19 @@ trainSVM <- function(svm.params, kparams) {
     stop("don't know how to train machine type: ", x)
   }
 
-  svm <- sgg('get_svm')
   if (svm.params$type == 'multi-class') {
-    stop("Multiclass classification not fully implemented")
+    warning("No objective, alphas, or support vector info provided from multi-class SVM")
+    bias <- double()
+    alpha <- double()
+    sv.index <- integer()
+    objective <- double()
+  } else {
+    svm <- sgg('get_svm')
+    bias <- svm[[1L]][1L]
+    alpha <- svm[[2L]][,1L]
+    sv.index <- as.integer(svm[[2L]][,2L] + 1L)
+    objective <- sgg('get_svm_objective')
   }
-
-  bias <- svm[[1L]][1L]
-  alpha <- svm[[2L]][,1L]
-  sv.index <- as.integer(svm[[2L]][,2L] + 1L)
-  objective <- sgg('get_svm_objective')
 
   new(Class="SVM",
       engine=svm.params$engine, type=svm.params$type, bias=bias,

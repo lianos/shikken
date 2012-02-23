@@ -3,7 +3,7 @@ guessMachineTypeFromLabels <- function(labels) {
     machine.type <- switch(class(labels),
                            OneClassLabels="1-class",
                            TwoClassLabels="2-class",
-                           MultiClassLabels="mult-class",
+                           MultiClassLabels="multi-class",
                            Labels="regression",
                            stop("Unknown Label class type"))
   } else {
