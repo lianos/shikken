@@ -90,7 +90,7 @@
     preproc=list(type='SORTWORDSTRING'),
     convert=list(from.class="STRING", from.type="CHAR",
                  to.class="STRING", to.type="WORD",
-                 degree=4, from.degree=3, gap=0, reverse='n'),
+                 degree=4, from.degree=-1, gap=0, reverse='n'),
     feature.type='string',
     alphabet="DNA"),
   weighted.spectrum=list(

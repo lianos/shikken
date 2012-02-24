@@ -98,26 +98,33 @@ coerceStringInput <- function(x, k.info, ...) {
 
 .initSpectrumKernel <- function(x, k.info, target, cache=40, mkl=FALSE, ...) {
   x <- coerceStringInput(x, k.info, ...)
-  params <- extractParams(..., .defaults=k.info$params)
   add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
+
+  params <- extractParams(..., .defaults=k.info$params)
   
+  conv.params <- extractParams(..., .defaults=k.info$convert)
+  if (convert$from.degree == -1) {
+    convert$from.degree <- convert$degree - 1
+  }
+
   sgg('add_preproc', k.info$preproc$type)
   if (target == "TRAIN") {
     sgg(add.kernel, k.info$static, 'WORD', cache, params$use.sign,
         params$normalization)
   }
-  
+
   sgg('set_features', target, x, k.info$alphabet)
 
   ## convert .... from_class, from_type, to_class, to_type
   sgg('convert', target,
-      k.info$convert$from.class, k.info$convert$from.type,
-      k.info$convert$to.class, k.info$convert$to.type,
-      k.info$convert$degree, k.info$convert$from.degree,
-      k.info$convert$gap, k.info$convert$reverse)
+      convert$from.class, convert$from.type,
+      convert$to.class, convert$to.type,
+      convert$degree, convert$from.degree,
+      convert$gap, convert$reverse)
   sgg('attach_preproc', target)
 
   k.info$params <- params
+  k.info$convert <- convert
   k.info$x.dim <- c(nrow(x), params$length^4)
   k.info
 }
