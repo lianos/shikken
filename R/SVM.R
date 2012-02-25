@@ -89,8 +89,12 @@ function(x, y=NULL, kernel="linear", do.train=TRUE, ...) {
   if (nrow(x) != length(y)) {
     stop("Number of observations doesn't equal number of labels")
   }
-
-  params <- initSVM(y, ...)
+  
+  if (is.character(kernel)) {
+    kernel <- matchKernelType(kernel)
+  }
+  
+  params <- initSVM(x, y, kernel, ...)
   kparams <- initKernel(x, kernel=kernel, svm.params=params,
                         target='train', do.clean=TRUE, ...)
 
@@ -144,13 +148,17 @@ function(object) {
 ##'
 ##' Everything that has been stored in the static shogun machine will be
 ##' blown out
-initSVM <- function(y, type=NULL, svm.engine='libsvm',
+initSVM <- function(x, y, kernel, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
-                    threads=1L, use.bias=FALSE, ...) {
+                    threads=1L, use.bias=NULL, ...) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required")
   }
-
+  
+  if (is.character(kernel)) {
+    kernel <- matchKernelType(kernel)
+  }
+  
   y <- Labels(y, type, ...)
   gtype <- guessMachineTypeFromLabels(y)
   if (is.character(type)) {
@@ -160,16 +168,12 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
   } else {
     type <- gtype
   }
-
-  ## svm.engine <- matchSvmEngine(svm.engine)
-
-  ## SVMLIGHT can only to 2-class classification here?
-  ## if (svm.engine == "svmlight") {
-  ##   if (isClassificationMachine(type) && !is(y, 'TwoClassLabels')) {
-  ##     stop("Using SVMLight for classification only accepts 2-class labels ",
-  ##          "try libsvm")
-  ##   }
-  ## }
+  
+  if (is.null(use.bias)) {
+    use.bias <- isClassificationMachine(type) && kernel == 'linear'
+  }
+  
+  svm.engine <- matchSvmEngine(svm.engine)
 
   C <- as.double(C)
   if (!isSingleDouble(C)) {
@@ -232,7 +236,6 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
 
     sgg('new_classifier', sg.machine)
     sgg('svm_epsilon', epsilon)
-    sgg('svm_use_bias', use.bias)
   } else {
     sg.machine <- switch(engine,
                          libsvm="LIBSVR",
@@ -242,6 +245,8 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
     sgg('c', C)
     sgg('svr_tube_epsilon', epsilon)
   }
+
+  sgg('svm_use_bias', use.bias)
 
   list(labels=y, type=type, engine=svm.engine, C=C, C.neg=C.neg,
        use.bias=use.bias, epsilon=epsilon, nu=nu, sg.machine=sg.machine)

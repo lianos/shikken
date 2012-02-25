@@ -1,10 +1,14 @@
 sgg <- function(cmd, ...) {
   if (isTRUE(shikkenEnv()$trace.sg)) {
     arg1 <- tryCatch(..1, error=function(e) NULL)
-    if (!(isSingleNumber(arg1) || isSingleString(arg1))) {
+    arg2 <- tryCatch(..2, error=function(e) NULL)
+    if (!(isSingleNumber(arg1) || isSingleString(arg1) || isTRUEorFALSE(arg1))) {
       arg1 <- NULL
     }
-    cat("sg:", cmd, arg1, "\n")
+    if (!(isSingleNumber(arg2) || isSingleString(arg2) || isTRUEorFALSE(arg2))) {
+      arg2 <- NULL
+    }
+    cat("sg:", cmd, arg1, arg2, "\n")
   }
   
   sg(cmd, ...)
