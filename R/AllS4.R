@@ -15,7 +15,7 @@ setClass("Labels", contains="ShikkenObject",
          representation=representation(
            y='numeric'),
          prototype=prototype(
-           y=numeric()))
+           y=double()))
 setValidity("Labels", function(object) {
   errs <- c()
   if (!is.real(object@y)) {
@@ -35,7 +35,7 @@ setClass("ClassLabels", contains="Labels",
          representation=representation(
            factor.map='numeric'),
          prototype=prototype(
-           factor.map=numeric()))
+           factor.map=double()))
 
 ##' Stores the class labels for a one-class classification problem
 ##'
@@ -159,15 +159,15 @@ setClass("SVM", contains="KernelMachine",
            alpha="numeric",
            objective="numeric"),
          prototype=prototype(
-           x.dim=numeric(),
+           x.dim=double(),
            engine=character(),
-           bias=numeric(),
+           bias=double(),
            C=1,
            C.neg=1,
            nSV=integer(),
            SVindex=integer(),
-           alpha=numeric(),
-           objective=numeric()))
+           alpha=double(),
+           objective=double()))
 
 ##' Extract the bias term from the learning machine
 setGeneric("bias", function(x, ...) standardGeneric("bias"))

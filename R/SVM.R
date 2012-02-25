@@ -146,7 +146,7 @@ function(object) {
 ##' blown out
 initSVM <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
-                    threads=1L, use.bias=isClassificationMachine(type), ...) {
+                    threads=1L, use.bias=FALSE, ...) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required")
   }
@@ -235,16 +235,16 @@ initSVM <- function(y, type=NULL, svm.engine='libsvm',
     sgg('svm_use_bias', use.bias)
   } else {
     sg.machine <- switch(engine,
-                        libsvm="LIBSVR",
-                        svmlight="SVRLIGHT",
-                        stop("Can't reconcile vale for sgg('new_regression', ...)"))
+                         libsvm="LIBSVR",
+                         svmlight="SVRLIGHT",
+                         stop("Illegal engine for sgg('new_regression', ...)"))
     sgg('new_regression', sg.machine)
     sgg('c', C)
     sgg('svr_tube_epsilon', epsilon)
   }
 
   list(labels=y, type=type, engine=svm.engine, C=C, C.neg=C.neg,
-       epsilon=epsilon, nu=nu, sg.machine=sg.machine)
+       use.bias=use.bias, epsilon=epsilon, nu=nu, sg.machine=sg.machine)
 }
 
 trainSVM <- function(svm.params, kparams) {
@@ -258,16 +258,16 @@ trainSVM <- function(svm.params, kparams) {
   }
 
   if (svm.params$type == 'multi-class') {
-    warning("No objective, alphas, or support vector info provided from multi-class SVM")
+    warning("No objective, alphas, or SV info provided from multi-class SVM")
     bias <- double()
     alpha <- double()
     sv.index <- integer()
     objective <- double()
   } else {
     svm <- sgg('get_svm')
-    bias <- svm[[1L]][1L]
+    bias <- if (svm.params$use.bias) svm[[1L]][1L] else double()
     alpha <- svm[[2L]][,1L]
-    sv.index <- as.integer(svm[[2L]][,2L] + 1L)
+    sv.index <- as.integer(svm[[2L]][,2L]) + 1L
     objective <- sgg('get_svm_objective')
   }
 
@@ -342,10 +342,11 @@ function(x, dat, as.index, ...) {
   if (missing(dat) && !as.index) {
     stop("Can't retrieve support vectors w/o `dat`")
   }
-  if (as.index) {
-    return(SVindex(x))
+  ans <- SVindex(x)
+  if (!as.index) {
+    ans <- dat[ans,]
   }
-  dat[SVindex(x),]
+  ans
 })
 
 setMethod("SVindex", c(object="SVM"),
