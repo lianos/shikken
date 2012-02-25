@@ -50,7 +50,9 @@
     static='LINEAR',
     cfun='create_kernel_linear',
     params=list(scale=-1),
-    feature.type='simple'),
+    feature.type='simple',
+    ## kernel.normalizer=list(kernel.normalizer='SQRTDIAG')),
+    kernel.normalizer=list(kernel.normalizer='IDENTITY')),
   sigmoid=list(
     class='SigmoidKernel',
     static='SIGMOID',

@@ -22,7 +22,7 @@ setValidity("SVM", function(object) {
 
 setGeneric("SVM", function(x, ...) standardGeneric("SVM"))
 setMethod("SVM", c(x="formula"),
-function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
+function(x, data=NULL, ..., subset, na.action=na.omit, do.scale=TRUE) {
   warning("You will have to manually manipulate things you want to predict ",
           "on into a matrix")
   cl <- match.call()
@@ -33,7 +33,7 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
   m$... <- NULL
   m$formula <- m$x
   m$x <- NULL
-  m$scaled <- NULL
+  m$do.scale <- NULL
   m[[1]] <- as.name("model.frame")
   m <- eval(m, parent.frame())
   Terms <- attr(m, "terms")
@@ -42,16 +42,16 @@ function(x, data=NULL, ..., subset, na.action=na.omit, scaled=TRUE) {
   x <- model.matrix(Terms, m)
   y <- model.extract(m, response)
 
-  if (length(scaled) == 1) {
-    scaled <- rep(scaled, ncol(x))
+  if (length(do.scale) == 1) {
+    do.scale <- rep(do.scale, ncol(x))
   }
-  if (any(scaled)) {
+  if (any(do.scale)) {
     remove <- unique(c(which(labels(Terms) %in% names(attr(x, "contrasts"))),
-                       which(!scaled)))
+                       which(!do.scale)))
     scaled <- !attr(x, "assign") %in% remove
   }
 
-  ret <- SVM(x, y, scaled=scaled, ...)
+  ret <- SVM(x, y, do.scale=do.scale, ...)
   # kcall(ret) <- cl
   # attr(Terms,"intercept") <- 0 ## no intercept
   # terms(ret) <- Terms
@@ -146,7 +146,7 @@ function(object) {
 ##' blown out
 initSVM <- function(y, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
-                    threads=1L, use.bias=TRUE, ...) {
+                    threads=1L, use.bias=isClassificationMachine(type), ...) {
   if (missing(y) || is.null(y)) {
     stop("Labels (y) is required")
   }
@@ -281,7 +281,7 @@ trainSVM <- function(svm.params, kparams) {
 ###############################################################################
 ## Utility functions
 setMethod("predict", "SVM",
-function(object, newdata, type="response", ...) {
+function(object, newdata, type="response", decision.split=0, ...) {
   if (missing(newdata)) {
     stop("shikken machines need `newdata` to predict on")
   }
@@ -299,8 +299,10 @@ function(object, newdata, type="response", ...) {
   preds <- sgg('classify')
 
   if (type == "response" && isClassificationMachine(object)) {
-    if  (object@type == '2-class') {
-      preds <- sign(preds)
+    if (object@type == '2-class') {
+      neg.class <- preds < decision.split
+      preds[neg.class] <- -1
+      preds[!neg.class] <- 1
     }
     fmap <- object@params$labels@factor.map
     if (length(fmap)) {
@@ -313,7 +315,7 @@ function(object, newdata, type="response", ...) {
 })
 
 setMethod("coef", "SVM", function(object, ...) {
-  alpha(object)
+  object@alpha
 })
 
 setMethod("objective", c(x="SVM"),
@@ -328,7 +330,7 @@ function(x, ...) {
 
 setMethod("alpha", c(object="SVM"),
 function(object) {
-  object@alpha
+  abs(object@alpha)
 })
 
 setGeneric("supportVectors", function(x, dat, as.index=FALSE, ...) {

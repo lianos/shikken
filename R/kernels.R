@@ -13,6 +13,12 @@ matchKernelTarget <- function(target) {
   toupper(target)
 }
 
+## Taken from shogun/ui/GUIKernel.cpp
+supportedKernelNormalizers <- function() {
+  c('IDENTITY', 'AVGDIAG', 'RIDGE', 'SQRTDIAG', 'FIRSTELEMENT', 'VARIANCE',
+    'ZEROMEANCENTER') ## 'SCATTER'
+}
+
 initMklKernel <- function() {
   ## TODO: Use initMklKernel to dispatch to initKernel
 }
@@ -23,7 +29,7 @@ initCombinedKernel <- function() {
 
 initKernel <- function(x, kernel, svm.params, target=c('train', 'test'),
                        cache=40, preproc=NULL, normalizer=normalizer,
-                       is.mkl=FALSE, is.combined=FALSE, scaled=TRUE, ...) {
+                       is.mkl=FALSE, is.combined=FALSE, do.scale=TRUE, ...) {
   target <- toupper(match.arg(target))
   
   cache <- as.numeric(ceiling(cache))
@@ -67,6 +73,15 @@ initKernel <- function(x, kernel, svm.params, target=c('train', 'test'),
   initFunc(x, k.info=k.info, target=target, cache=cache, ...)
 }
 
+normalizeKernel <- function(normalizer) {
+  normalizer <- toupper(normalizer)
+  if (!normalizer %in% supportedKernelNormalizers()) {
+    stop("Requested kernel normalization is not supported: ", normalizer)
+  }
+  sgg('set_kernel_normalization', normalizer)
+  invisible(normalizer)
+}
+
 ################################################################################
 ## String Kernels
 ##
@@ -102,7 +117,7 @@ coerceStringInput <- function(x, k.info, ...) {
 
   params <- extractParams(..., .defaults=k.info$params)
   
-  conv.params <- extractParams(..., .defaults=k.info$convert)
+  convert <- extractParams(..., .defaults=k.info$convert)
   if (convert$from.degree == -1) {
     convert$from.degree <- convert$degree - 1
   }
@@ -240,10 +255,18 @@ coerceNumericInput <- function(x, k.info, ...) {
   if (target == 'TRAIN') {
     sgg(add.kernel, k.info$static, 'REAL', cache, params$scale)
   }
-  
-  sgg('set_features', target, t(x))
-  sgg('set_kernel_normalization', 'SQRTDIAG')
 
+  sgg('set_features', target, t(x))
+  
+  ## This is just for reference, refactor this to `initKernel` wrapper
+  ## function and run kernel normalizations after the kernel specific
+  ## .init* methods are run
+  if (target == 'TRAIN') {
+    kernel.normalizer <- extractParams(..., .defaults=k.info['kernel.normalizer'])
+    kernel.normalizer <- normalizeKernel(kernel.normalizer[[1]])
+    k.info$kernel.normalizer <- list(kernel.normalizer=kernel.normalizer)
+  }
+  
   k.info$params <- params
   k.info$x.dim <- rev(dim(x))
   k.info

@@ -1,5 +1,24 @@
 context("Comparison vs. kernlab")
+
 library(kernlab)
+library(Biostrings)
+
+data(promoters, package="shikken")
+
+test_that("Spectrum features in linear kernel are equivalent in kernlab vs. shikken", {
+  X <- oligonucleotideFrequency(promoters, width=4)
+  X <- X[, colSums(X) > 0]
+  y <- values(promoters)$class
+
+  sh <- SVM(X, y, kernel="linear", C=10)
+  kr <- ksvm(X, y, kernel="vanilla", C=10, scaled=TRUE, type='C-svc')
+
+  cat("shikken accuracy:", sum(predict(sh, X, "response") == y) / length(y), "\n")
+  cat("kernlab accuracy:", sum(predict(kr, X, "response") == y) / length(y), "\n")
+
+  shik.alpha <- alpha(sh)
+  kern.alpha <- alpha(kr)[[1]]
+})
 
 iris.2class <- local({
   set <- subset(iris, Species == 'setosa')
