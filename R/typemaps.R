@@ -63,7 +63,7 @@
     class='PolyKernel',
     static="POLY",
     cfun='create_kernel_polynomial',
-    params=list(degree=2L, inhomogeneous=FALSE, normalization=TRUE),
+    params=list(degree=2L, inhomogeneous=TRUE, normalization=TRUE),
     feature.type='polynomial'),
 ##
 ## String Kernels
