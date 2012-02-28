@@ -180,8 +180,8 @@ function(object) {
 initSVM <- function(x, y, kernel, type=NULL, svm.engine='libsvm',
                     C=1, C.neg=C, nu=0.2, epsilon=0.1, class.weights=NULL,
                     threads=1L, use.bias=NULL, ...) {
-  if (missing(y) || is.null(y)) {
-    stop("Labels (y) is required")
+  if (missing(y) || is.null(y) || any(is.na(y) || any(is.null(y)))) {
+    stop("Labels (y) is required and can't have missing labels")
   }
   
   if (is.character(kernel)) {
@@ -316,12 +316,22 @@ trainSVM <- function(svm.params, kparams) {
 ## Utility functions
 setMethod("predict", "SVM",
 function(object, newdata, type="response", decision.split=0, ...) {
-  if (missing(newdata)) {
+  if (missing(newdata) || is.null(newdata)) {
     stop("shikken machines need `newdata` to predict on")
   }
   type <- match.arg(type, c("response", "decision", "probabilities"))
   if (type == "probabilities") {
     stop("probabilities not yet supported")
+  }
+  
+  if (object@kparams$feature.type == 'string') {
+    bad.x <- findIllegalStringChars(newdata)
+    if (length(bad.x)) {
+      warning("There are sequences in newdata that have nucleotides outside of ",
+              "ACGT.\nTheir indices have been returned from this function call.\n",
+              "Please remove these examples from your dataset and try again.")
+      return(bad.x)
+    }
   }
 
   if (!is.null(newdata)) {

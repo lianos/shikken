@@ -72,7 +72,7 @@
     class="WeightedDegreeKernel",
     static="WEIGHTEDDEGREE",
     cfun='create_kernel_weighted_degree_string',
-    params=list(degree=3L, max.mismatch=0L, normalization=TRUE,
+    params=list(degree=3L, mismatch=0L, normalization=TRUE,
                 step=1, block.computation=TRUE,
                 single.degree=-1),
     feature.type='string',
@@ -80,7 +80,7 @@
   weighted.degree.shifts=list(
     class="WeightedDegreeKernelWithShifts",
     static="WEIGHTEDDEGREEPOS",
-    params=list(degree=4L, max.mismatch=0L, length=0L, center=0L, step=1),
+    params=list(degree=4L, mismatch=0L, length=0L, center=0L, step=1),
     cfun="create_kernel_weighted_degree_string_shifts",
     feature.type='string'
   ),

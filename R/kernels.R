@@ -180,9 +180,14 @@ coerceStringInput <- function(x, k.info, ...) {
   add.kernel <- if (mkl) 'add_kernel' else 'set_kernel'
   
   if (target == "TRAIN") {
+    # params=list(degree=3L, max.mismatch=0L, normalization=TRUE,
+    #             step=1, block.computation=TRUE,
+    #             single.degree=-1),
+    
     sgg(add.kernel, k.info$static, 'CHAR', cache, params$degree,
-        params$mismatch, params$normalization, params$step,
-        params$block.computation)
+        params$mismatch, params$normalization, params$step)
+        ## TODO: add block computation to weighted degree kernel
+        ## params$block.computation) <- should be scalar
   }
 
   sgg('set_features', target, x, 'DNA')
@@ -217,7 +222,7 @@ coerceStringInput <- function(x, k.info, ...) {
     ##   float64_t* weights=get_weights(order, max_mismatch);
     sgg(add.kernel, k.info$static, 'CHAR', cache,
         as.integer(params$degree),
-        as.integer(params$max.mismatch),
+        as.integer(params$mismatch),
         as.integer(params$length), ## position shifts   (shift)
         as.integer(params$center), ## number of shifts  (shift_len)
         as.real(params$step))
