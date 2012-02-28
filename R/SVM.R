@@ -70,6 +70,16 @@ function(x, y=NULL, ...) {
 
 setMethod("SVM", c(x="XStringSet"),
 function(x, y=NULL, kernel="spectrum", ...) {
+  ## Ensure that there are only ACGT in the alphabet
+  nt.distro <- alphabetFrequency(x)
+  illegal.cols <- !colnames(nt.distro) %in% c('A', 'C', 'G', 'T')
+  flag.me <- which(rowSums(nt.distro[, illegal.cols]) > 0)
+  if (length(flag.me)) {
+    warning("There are sequences in X that have nucleotides outside of ",
+            "ACGT. Their indices have been returned from this function call. ",
+            "Please remove these examples from your dataset and try again.")
+    return(flag.me)
+  }
   SVM(as.matrix(as.character(x)), y=y, kernel=kernel, ...)
 })
 
