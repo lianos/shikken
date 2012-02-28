@@ -124,10 +124,10 @@ coerceStringInput <- function(x, k.info, ...) {
 
   sgg('add_preproc', k.info$preproc$type)
   if (target == "TRAIN") {
-    # sgg(add.kernel, k.info$static, 'WORD', cache, params$use.sign,
-    #     params$normalization)
-    sgg(add.kernel, k.info$static, 'ULONG', cache, params$use.sign,
+    sgg(add.kernel, k.info$static, 'WORD', cache, params$use.sign,
         params$normalization)
+    # sgg(add.kernel, k.info$static, 'ULONG', cache, params$use.sign,
+    #     params$normalization)
   }
 
   sgg('set_features', target, x, k.info$alphabet)

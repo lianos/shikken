@@ -68,25 +68,44 @@ function(x, y=NULL, ...) {
   SVM(as.matrix(x), y=y, ...)
 })
 
+findIllegalStringChars <- function(x, kosher=c('A', 'C', 'G', 'T')) {
+  if (is.character(x)) {
+    x <- DNAStringSet(x)
+  }
+  stopifnot(inherits(x, 'XStringSet'))
+  nt.distro <- alphabetFrequency(x)
+  illegal.cols <- !colnames(nt.distro) %in% kosher
+  which(rowSums(nt.distro[, illegal.cols]) > 0)
+}
+
 setMethod("SVM", c(x="XStringSet"),
 function(x, y=NULL, kernel="spectrum", ...) {
+  stopifnot(inherits(x, 'DNAStringSet'))
+  bad.x <- findIllegalStringChars(x)
   ## Ensure that there are only ACGT in the alphabet
-  nt.distro <- alphabetFrequency(x)
-  illegal.cols <- !colnames(nt.distro) %in% c('A', 'C', 'G', 'T')
-  flag.me <- which(rowSums(nt.distro[, illegal.cols]) > 0)
-  if (length(flag.me)) {
+  if (length(bad.x)) {
     warning("There are sequences in X that have nucleotides outside of ",
-            "ACGT. Their indices have been returned from this function call. ",
+            "ACGT.\nTheir indices have been returned from this function call.\n",
             "Please remove these examples from your dataset and try again.")
-    return(flag.me)
+    return(bad.x)
   }
-  SVM(as.matrix(as.character(x)), y=y, kernel=kernel, ...)
+  SVM(as.matrix(as.character(x)), y=y, kernel=kernel, do.char.check=FALSE, ...)
 })
 
 setMethod("SVM", c(x="character"),
-function(x, y=NULL, kernel="spectrum", x.isfile=FALSE, ...) {
+function(x, y=NULL, kernel="spectrum", x.isfile=FALSE,
+         do.char.check=TRUE, ...) {
   if (x.isfile) {
     stop("TODO: Support file feature input")
+  }
+  if (do.char.check) {
+    bad.x <- findIllegalStringChars(x)
+    if (length(bad.x)) {
+      warning("There are sequences in X that have nucleotides outside of ",
+              "ACGT.\nTheir indices have been returned from this function call.\n",
+              "Please remove these examples from your dataset and try again.")
+      return(bad.x)
+    }
   }
   SVM(as.matrix(x), y=y, kernel=kernel, ...)
 })
