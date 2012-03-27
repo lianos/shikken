@@ -253,7 +253,7 @@ initSVM <- function(x, y, kernel, type=NULL, svm.engine='libsvm',
       if (missing(C.neg)) {
         sgg('c', C)
       } else {
-        sgg('c', C, C.neg)
+        sgg('c', C.neg, C)
       }
       sg.machine <- toupper(svm.engine)
     } else if (class(y) == "MultiClassLabels") {
